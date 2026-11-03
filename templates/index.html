@@ -101,6 +101,15 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .search{width:auto;min-width:180px}
 .pill.auto{color:var(--accent);border-color:var(--accent)}
 .pill.abierto{color:var(--warn);border-color:var(--warn)}
+/* mitre */
+.mitre{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px}
+.tac{border:1px solid var(--line);border-radius:6px;padding:8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--panel2)}
+.tac .n{font-family:var(--font-mono);font-size:1.15rem;font-variant-numeric:tabular-nums;line-height:1}
+.tac .t{font-size:.62rem;line-height:1.2;color:var(--muted);overflow-wrap:anywhere}
+.tac.l1{background:color-mix(in srgb,var(--info) 18%,var(--panel))}.tac.l2{background:color-mix(in srgb,var(--info) 38%,var(--panel))}.tac.l3{background:color-mix(in srgb,var(--info) 60%,var(--panel));color:#fff}.tac.l3 .t{color:#e8ecf4}
+.tech{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.8rem}
+.tech .id{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
+.tech .bar{grid-column:1/-1;height:5px}
 /* admin */
 .admin{margin-top:26px;border:1px solid var(--accent);border-radius:8px;background:var(--panel)}
 .admin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -169,6 +178,10 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
     <div class="panel"><h3>Por mes</h3><div id="chart-mes"></div></div>
     <div class="panel"><h3>Por tipo</h3><div class="tipos" id="chart-tipo"></div></div>
   </div>
+  <div class="two" style="margin-top:12px">
+    <div class="panel"><h3>Cobertura MITRE ATT&amp;CK por táctica <span class="note" id="mitre-note"></span></h3><div class="mitre" id="mitre-tac"></div></div>
+    <div class="panel"><h3>Técnicas más observadas</h3><div class="tipos" id="mitre-tech"></div></div>
+  </div>
   <div class="panel" style="margin-top:12px">
     <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle</h3>
       <div class="filters">
@@ -176,7 +189,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
         <select id="f-tipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
       </div>
     </div>
-    <div class="tablewrap"><table id="tbl-inc"><thead><tr><th>Fecha</th><th>Tipo</th><th>Incidente</th><th>Severidad</th><th>Ref.</th><th id="th-act" hidden></th></tr></thead><tbody></tbody></table></div>
+    <div class="tablewrap"><table id="tbl-inc"><thead><tr><th>Fecha</th><th>Tipo</th><th>Incidente</th><th>Severidad</th><th>ATT&amp;CK</th><th>Ref.</th><th id="th-act" hidden></th></tr></thead><tbody></tbody></table></div>
     <div class="empty" id="inc-empty" hidden>Sin incidentes para este filtro.</div>
   </div>
 </section>
@@ -241,6 +254,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Severidad<select id="i-sev"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></label>
       <label>Estado<select id="i-estado"><option>Resuelto</option><option>Abierto</option></select></label>
       <label>Referencia (p. ej. INF-SEC-2026-P07)<input id="i-ref"></label>
+      <label>Técnicas ATT&amp;CK (IDs separados por coma; vacío = las del tipo)<input id="i-mitre" placeholder="T1566.002, T1204.002"></label>
       <label class="full">Incidente<input id="i-titulo" required placeholder="Qué pasó, en una línea"></label>
       <label class="full">Notas<textarea id="i-desc"></textarea></label>
       <div class="acts"><span class="note" id="i-status"></span><button type="button" class="ghost" id="i-cancel">Limpiar</button><button type="submit" class="primary">Guardar incidente</button></div>
@@ -260,6 +274,11 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
         <div class="chips" id="c-tipos"></div>
         <div style="display:flex;gap:8px;margin-top:8px"><input id="c-newtipo" placeholder="Nuevo tipo"><button type="button" id="c-addtipo">Añadir</button></div>
       </div>
+      <div class="full">
+        <div class="eyebrow" style="margin-bottom:6px">Mapeo tipo de incidente → técnicas MITRE ATT&amp;CK (Enterprise)</div>
+        <div id="c-mitre" style="display:grid;gap:6px"></div>
+        <div class="note" style="margin-top:6px">IDs separados por coma. Se aplican a los incidentes que no tengan técnicas propias.</div>
+      </div>
       <div class="acts"><span class="note" id="c-status"></span><button type="submit" class="primary">Guardar ajustes</button></div>
     </form>
   </div>
@@ -272,9 +291,26 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 (function(){
 const $=s=>document.querySelector(s);
 const MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const TACTICAS=[["TA0043","Reconocimiento"],["TA0042","Desarrollo de recursos"],["TA0001","Acceso inicial"],["TA0002","Ejecución"],["TA0003","Persistencia"],["TA0004","Escalada de privilegios"],["TA0005","Evasión de defensas"],["TA0006","Acceso a credenciales"],["TA0007","Descubrimiento"],["TA0008","Movimiento lateral"],["TA0009","Recolección"],["TA0011","Mando y control"],["TA0010","Exfiltración"],["TA0040","Impacto"]];
+const TECH={
+ "T1598":{n:"Phishing for Information",t:["TA0043"]},"T1598.002":{n:"Spearphishing Attachment (info)",t:["TA0043"]},"T1598.003":{n:"Spearphishing Link (info)",t:["TA0043"]},
+ "T1589.001":{n:"Gather Victim Identity: Credentials",t:["TA0043"]},"T1586.002":{n:"Compromise Accounts: Email",t:["TA0042"]},"T1583.001":{n:"Acquire Infrastructure: Domains",t:["TA0042"]},
+ "T1566":{n:"Phishing",t:["TA0001"]},"T1566.001":{n:"Spearphishing Attachment",t:["TA0001"]},"T1566.002":{n:"Spearphishing Link",t:["TA0001"]},"T1566.003":{n:"Spearphishing via Service",t:["TA0001"]},
+ "T1078":{n:"Valid Accounts",t:["TA0001","TA0003","TA0004","TA0005"]},"T1190":{n:"Exploit Public-Facing Application",t:["TA0001"]},"T1195":{n:"Supply Chain Compromise",t:["TA0001"]},"T1133":{n:"External Remote Services",t:["TA0001","TA0003"]},
+ "T1204":{n:"User Execution",t:["TA0002"]},"T1204.001":{n:"User Execution: Malicious Link",t:["TA0002"]},"T1204.002":{n:"User Execution: Malicious File",t:["TA0002"]},
+ "T1656":{n:"Impersonation",t:["TA0005"]},"T1672":{n:"Email Spoofing",t:["TA0005"]},"T1036":{n:"Masquerading",t:["TA0005"]},
+ "T1110":{n:"Brute Force",t:["TA0006"]},"T1110.003":{n:"Password Spraying",t:["TA0006"]},"T1110.004":{n:"Credential Stuffing",t:["TA0006"]},"T1556":{n:"Modify Authentication Process",t:["TA0006","TA0005","TA0003"]},"T1528":{n:"Steal Application Access Token",t:["TA0006"]},
+ "T1114":{n:"Email Collection",t:["TA0009"]},"T1114.003":{n:"Email Forwarding Rule",t:["TA0009"]},"T1534":{n:"Internal Spearphishing",t:["TA0008"]},
+ "T1071.003":{n:"Application Layer Protocol: Mail",t:["TA0011"]},"T1105":{n:"Ingress Tool Transfer",t:["TA0011"]},
+ "T1567":{n:"Exfiltration Over Web Service",t:["TA0010"]},"T1048":{n:"Exfiltration Over Alternative Protocol",t:["TA0010"]},
+ "T1486":{n:"Data Encrypted for Impact",t:["TA0040"]},"T1498":{n:"Network Denial of Service",t:["TA0040"]},"T1499":{n:"Endpoint Denial of Service",t:["TA0040"]},"T1657":{n:"Financial Theft",t:["TA0040"]}
+};
+const DEF_MITRE={"Phishing":"T1566, T1598","BEC / Fraude":"T1566.002, T1656, T1657","Malware":"T1566.001, T1204.002","Acceso no autorizado":"T1078, T1110, T1589.001","Fuga de datos":"T1567, T1114","Vulnerabilidad":"T1190, T1195","Disponibilidad":"T1499, T1498","Correo (SPF/DKIM/DMARC)":"T1672, T1656","Otro":""};
 const DEF_TIPOS=["Phishing","BEC / Fraude","Malware","Acceso no autorizado","Fuga de datos","Vulnerabilidad","Disponibilidad","Correo (SPF/DKIM/DMARC)","Otro"];
 let isOwner=false;
-let cfg={departamento:"Departamento de IT · Seguridad de la Información",titulo:"Actividad del área",tipos:DEF_TIPOS};
+let cfg={departamento:"Departamento de IT · Seguridad de la Información",titulo:"Actividad del área",tipos:DEF_TIPOS,mitre:DEF_MITRE};
+const parseIds=s=>String(s||"").split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x));
+function mitreIds(i){if(i.mitre&&i.mitre.length)return i.mitre;const m=cfg.mitre||DEF_MITRE;return parseIds(m[i.tipo]??DEF_MITRE[i.tipo]??"")}
 let proyectos=[],incidentes=[],caus=[];
 let year=new Date().getFullYear(),fMes="",fTipo="",fcMes="",fcEst="",fcQ="";
 const eur=n=>new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
@@ -372,21 +408,33 @@ function renderIncidentes(){
   const ct=$("#chart-tipo");ct.innerHTML="";
   if(!arr.length)ct.innerHTML='<div class="empty">—</div>';
   arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--info)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=n+" · "+Math.round(n/incY.length*100)+" %";d.onclick=()=>{$("#f-tipo").value=t;fTipo=t;renderTabla()};d.style.cursor="pointer";ct.appendChild(d)});
+  renderMitre(incY);
   renderTabla();
+}
+function renderMitre(incY){
+  const tacCount={},techCount={};let conMapeo=0;
+  incY.forEach(i=>{const ids=mitreIds(i);if(ids.length)conMapeo++;const tacs=new Set();ids.forEach(t=>{techCount[t]=(techCount[t]||0)+1;((TECH[t]||TECH[t.split(".")[0]]||{t:[]}).t).forEach(x=>tacs.add(x))});tacs.forEach(x=>tacCount[x]=(tacCount[x]||0)+1)});
+  $("#mitre-note").textContent=incY.length?`· ${conMapeo} de ${incY.length} incidentes mapeados`:"";
+  const max=Math.max(1,...Object.values(tacCount));const g=$("#mitre-tac");g.innerHTML="";
+  TACTICAS.forEach(([id,nm])=>{const n=tacCount[id]||0;const lvl=!n?"":n/max>.66?"l3":n/max>.33?"l2":"l1";const d=document.createElement("div");d.className="tac "+lvl;d.innerHTML=`<span class="n"></span><span class="t"></span>`;d.children[0].textContent=n;d.children[1].textContent=nm;d.title=id+" · "+nm+": "+n+" incidente"+(n===1?"":"s");g.appendChild(d)});
+  const arr=Object.entries(techCount).sort((a,b)=>b[1]-a[1]).slice(0,8);const mx=Math.max(1,...arr.map(a=>a[1]));const ct=$("#mitre-tech");ct.innerHTML="";
+  if(!arr.length)ct.innerHTML='<div class="empty">Sin técnicas asignadas.</div>';
+  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tech";d.innerHTML=`<span class="id"></span><span></span><span class="n mono"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--accent)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=(TECH[t]||{}).n||"(sin nombre en el catálogo)";d.children[2].textContent=n;ct.appendChild(d)});
 }
 function renderTabla(){
   const tb=$("#tbl-inc tbody");tb.innerHTML="";$("#th-act").hidden=!isOwner;
   const rows=incidentes.filter(i=>(i.fecha||"").startsWith(year)&&(!fMes||+i.fecha.slice(5,7)===+fMes)&&(!fTipo||i.tipo===fTipo)).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
   $("#inc-empty").hidden=!!rows.length;
   rows.forEach(i=>{const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="acts" ${isOwner?"":"hidden"}></td>`;
+    tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="mono"></td><td class="acts" ${isOwner?"":"hidden"}></td>`;
+    tr.children[4].textContent=mitreIds(i).join(", ");tr.children[4].title=mitreIds(i).map(t=>t+" "+(TECH[t]?TECH[t].n:"")).join("\n");
     tr.children[0].textContent=fmtD(i.fecha)+(i.aprox?" ~":"");tr.children[1].textContent=i.tipo||"—";
     tr.children[2].textContent=i.titulo||"";if(i.descripcion){const sm=document.createElement("div");sm.className="note";sm.textContent=i.descripcion;tr.children[2].appendChild(sm)}
     const sev=i.severidad||"Media";const sevVar={Baja:'--muted',Media:'--info',Alta:'--warn','Crítica':'--bad'}[sev]||'--muted';tr.children[3].innerHTML=`<span class="pill" style="color:var(${sevVar})">${esc(sev)}</span>`;
-    tr.children[4].textContent=i.ref||"";
+    tr.children[5].textContent=i.ref||"";
     if(i.estado==="Abierto"){const sp=document.createElement("span");sp.className="pill abierto";sp.textContent="abierto";sp.style.marginLeft="6px";tr.children[2].insertBefore(sp,tr.children[2].firstChild.nextSibling)}
-    if(i.auto){const sp=document.createElement("span");sp.className="pill auto";sp.textContent="auto";sp.title="Clasificado automáticamente desde el CAU; edítalo para confirmarlo";tr.children[4].appendChild(document.createTextNode(" "));tr.children[4].appendChild(sp)}
-    if(isOwner){const ra=document.createElement("div");ra.className="row-actions";ra.innerHTML='<button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button>';ra.querySelector('[data-act=edit]').onclick=()=>editInc(i);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/incidentes/"+i.id).then(()=>toast("Incidente eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)));tr.children[5].appendChild(ra)}
+    if(i.auto){const sp=document.createElement("span");sp.className="pill auto";sp.textContent="auto";sp.title="Clasificado automáticamente desde el CAU; edítalo para confirmarlo";tr.children[5].appendChild(document.createTextNode(" "));tr.children[5].appendChild(sp)}
+    if(isOwner){const ra=document.createElement("div");ra.className="row-actions";ra.innerHTML='<button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button>';ra.querySelector('[data-act=edit]').onclick=()=>editInc(i);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/incidentes/"+i.id).then(()=>toast("Incidente eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)));tr.children[6].appendChild(ra)}
     tb.appendChild(tr)});
 }
 function renderCaus(){
@@ -443,20 +491,22 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
 
 let incEditing=null;
 function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
-  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
+  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-mitre").value=(i.mitre||[]).join(", ");$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
   $("#i-status").textContent="Editando: "+(i.titulo||"");$("#admin").scrollIntoView({behavior:"smooth"})}
 $("#i-cancel").onclick=()=>{incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
 $("#form-inc").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#i-id").value||("i"+Date.now().toString(36));
   const prev=(incEditing&&incEditing.id===id)?incEditing:{};
-  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:$("#i-estado").value,aprox:false,origen:prev.origen||"manual",cau_id:prev.cau_id||null,auto:false,actualizado:new Date().toISOString()};
+  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:$("#i-estado").value,mitre:$("#i-mitre").value.split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x)),aprox:false,origen:prev.origen||"manual",cau_id:prev.cau_id||null,auto:false,actualizado:new Date().toISOString()};
   try{await api("PUT","/api/incidentes/"+id,body);toast("Incidente guardado");incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let cfgTipos=[];
+function renderCfgMitre(){const c=$("#c-mitre");c.innerHTML="";const m={...DEF_MITRE,...(cfg.mitre||{})};cfgTipos.forEach(t=>{const row=document.createElement("label");row.style.cssText="display:grid;grid-template-columns:minmax(120px,1fr) 2fr;gap:8px;align-items:center;font-size:.8rem";row.innerHTML=`<span></span><input data-tipo="">`;row.children[0].textContent=t;row.children[1].dataset.tipo=t;row.children[1].value=m[t]||"";c.appendChild(row)})}
 function renderCfgTipos(){const c=$("#c-tipos");c.innerHTML="";cfgTipos.forEach((t,i)=>{const s=document.createElement("span");s.className="chip";s.innerHTML=`<span></span><button type="button" aria-label="Quitar">×</button>`;s.children[0].textContent=t;s.children[1].onclick=()=>{cfgTipos.splice(i,1);renderCfgTipos()};c.appendChild(s)})}
-$("#c-addtipo").onclick=()=>{const v=$("#c-newtipo").value.trim();if(v&&!cfgTipos.includes(v)){cfgTipos.push(v);$("#c-newtipo").value="";renderCfgTipos()}};
+$("#c-addtipo").onclick=()=>{const v=$("#c-newtipo").value.trim();if(v&&!cfgTipos.includes(v)){cfgTipos.push(v);$("#c-newtipo").value="";renderCfgTipos();renderCfgMitre()}};
 $("#form-cfg").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
-  try{await api("PUT","/api/config",{departamento:$("#c-dept").value.trim(),titulo:$("#c-title").value.trim(),tipos:cfgTipos.slice(),actualizado:new Date().toISOString()});toast("Ajustes guardados")}catch(err){toast("No se pudo guardar: "+err.code)}};
+  const mitre={};document.querySelectorAll("#c-mitre input").forEach(i=>mitre[i.dataset.tipo]=parseIds(i.value).join(", "));
+  try{await api("PUT","/api/config",{departamento:$("#c-dept").value.trim(),titulo:$("#c-title").value.trim(),tipos:cfgTipos.slice(),mitre,actualizado:new Date().toISOString()});toast("Ajustes guardados")}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 $("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes()};
 $("#f-mes").onchange=e=>{fMes=e.target.value;renderTabla()};
@@ -476,7 +526,7 @@ $("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dat
 isOwner=__IS_ADMIN__;
 async function api(method,url,body){const r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});if(!r.ok){const e=new Error("http");e.code=r.status===401?"sin sesión":"HTTP "+r.status;throw e}return r.json()}
 async function load(){try{const d=await api("GET","/api/data");cfg={...cfg,...(d.config||{})};proyectos=d.proyectos||[];incidentes=d.incidentes||[];caus=d.caus||[];
-  cfgTipos=(cfg.tipos||DEF_TIPOS).slice();$("#c-dept").value=cfg.departamento||"";$("#c-title").value=cfg.titulo||"";renderCfgTipos();renderAll();
+  cfgTipos=(cfg.tipos||DEF_TIPOS).slice();$("#c-dept").value=cfg.departamento||"";$("#c-title").value=cfg.titulo||"";renderCfgTipos();renderCfgMitre();renderAll();
   const all=[...proyectos,...incidentes].map(x=>x.actualizado).filter(Boolean).sort();if(all.length){const dt=new Date(all[all.length-1]);$("#foot-upd").textContent="Última actualización "+dt.toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"})}}
   catch(e){$("#proy-grid").innerHTML='<div class="empty">No se pudieron cargar los datos ('+e.code+').</div>'}}
 const badge=$("#role-badge");badge.textContent=isOwner?"Administrador · puede editar":"Solo lectura";badge.classList.toggle("owner",isOwner);
