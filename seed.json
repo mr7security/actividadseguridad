@@ -508,10 +508,35 @@
       "inicio": "2026-04-03",
       "fin": "2026-10-10",
       "moneda": "EUR",
-      "presupuesto": null,
-      "partidas": [],
+      "presupuesto": 9638.74,
+      "partidas": [
+        {
+          "concepto": "Cot. 15919 (13/08/2026) — +50 servidores, +2 usuarios",
+          "unidades": 1,
+          "precio": 1970.16,
+          "periodo": "hasta 20/05/2027"
+        },
+        {
+          "concepto": "Cot. 15980 (27/08/2026) — +50 equipos, +3 usuarios",
+          "unidades": 1,
+          "precio": 1983.75,
+          "periodo": "hasta 20/05/2027"
+        },
+        {
+          "concepto": "Cot. 16159 (21/09/2026) — +100 equipos, +1 usuario",
+          "unidades": 1,
+          "precio": 2201.87,
+          "periodo": "hasta 20/05/2027"
+        },
+        {
+          "concepto": "Cot. 16346 (21/10/2026) — +200 equipos",
+          "unidades": 1,
+          "precio": 3482.96,
+          "periodo": "hasta 20/05/2027"
+        }
+      ],
       "recursos": "720tec + Sistemas + Seguridad",
-      "notas": "Licencia: 50 servidores (50/50 asignados) + 50 puntos de conexión (25 en uso), 4 técnicos; caduca el 20/05/2027. Fase 6 requiere ampliar licencia. Importe de la licencia pendiente de cargar como partida.",
+      "notas": "Licencia actual (Security Edition, hasta 20/05/2027): 100 servidores, 400 equipos, 9 técnicos. Partidas = ampliaciones contratadas a 720tec (importes sin IVA; con IVA 11.662,87 €). La licencia inicial (50 servidores + 50 equipos + 4 técnicos) no tiene cotización en el dashboard. Las cotizaciones suman 10 usuarios (4+2+3+1) frente a los 9 indicados: revisar.",
       "hitos": [
         {
           "fecha": "2026-04-24",
@@ -560,6 +585,30 @@
           "nombre": "Fase 7 – Cierre y publicación de resultados",
           "hecho": false,
           "aprox": false
+        },
+        {
+          "fecha": "2026-08-13",
+          "nombre": "Ampliación +50 servidores, +2 usuarios (cot. 15919)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-08-27",
+          "nombre": "Ampliación +50 equipos, +3 usuarios (cot. 15980)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-09-21",
+          "nombre": "Ampliación +100 equipos, +1 usuario (cot. 16159)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-21",
+          "nombre": "Ampliación +200 equipos (cot. 16346)",
+          "hecho": true,
+          "aprox": false
         }
       ],
       "log": [
@@ -572,10 +621,16 @@
           "fecha": "2026-08-11",
           "texto": "Plan v1.4: 75 sistemas administrados (50 servidores / 25 equipos), 53 en buen estado y 22 altamente vulnerables; 801 vulnerabilidades detectadas (250 explotables, 105 activamente explotadas, 71 zero-day); 2.716 parches instalados y 266 pendientes (41 críticos). 51 de 224 servidores incorporados.",
           "estado": "En curso"
+        },
+        {
+          "fecha": "2026-11-03",
+          "texto": "Cargadas 4 ampliaciones de licencia (ago–oct 2026): 9.638,74 € sin IVA. Parque licenciado: 100 servidores, 400 equipos, 9 técnicos.",
+          "estado": "En curso"
         }
       ],
       "id": "p-endpoint-central",
-      "actualizado": "2026-11-03T12:00:00+00:00"
+      "actualizado": "2026-11-03T12:00:00+00:00",
+      "impuestos": true
     }
   ],
   "incidentes": [
