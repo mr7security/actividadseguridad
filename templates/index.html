@@ -95,6 +95,8 @@ body.editing #th-act,body.editing td.acts{display:table-cell}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
 .panel h3{font-size:.85rem;font-weight:600;margin-bottom:10px;color:var(--muted)}
 svg text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.mbar{cursor:pointer}.mbar:hover{opacity:.85}
+.chips .chip{cursor:pointer;color:var(--accent);border-color:var(--accent)}
 .tipos{display:flex;flex-direction:column;gap:8px}
 .tipo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.82rem}
 .tipo .bar{grid-column:1/-1;height:6px}
@@ -165,12 +167,16 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .lg-num{width:16px;height:16px;border-radius:50%;background:var(--info);color:#fff;font-style:normal;font-size:.62rem;font-weight:600;text-align:center;line-height:16px}
 .lg-hoy{width:0;height:12px;border-left:2px dashed var(--accent)}
 /* mitre */
-.mitre{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px}
-.tac{border:1px solid var(--line);border-radius:6px;padding:8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--panel2)}
+.mitre{display:grid;grid-template-columns:repeat(14,minmax(0,1fr));gap:4px}
+@media (max-width:1100px){.mitre{grid-template-columns:repeat(7,minmax(0,1fr))}}
+@media (max-width:560px){.mitre{grid-template-columns:repeat(4,minmax(0,1fr))}}
+.tac{border:1px solid var(--line);border-radius:6px;padding:8px 4px 6px;display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--panel2);cursor:pointer;text-align:center;transition:border-color .15s,transform .15s}
+.tac:hover{border-color:var(--accent)}.tac.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.tac .n{text-align:center}.tac .t{font-size:.58rem;line-height:1.15;hyphens:auto;overflow-wrap:anywhere}
 .tac .n{font-family:var(--font-mono);font-size:1.15rem;font-variant-numeric:tabular-nums;line-height:1}
 .tac .t{font-size:.62rem;line-height:1.2;color:var(--muted);overflow-wrap:anywhere}
 .tac.l1{background:color-mix(in srgb,var(--info) 18%,var(--panel))}.tac.l2{background:color-mix(in srgb,var(--info) 38%,var(--panel))}.tac.l3{background:color-mix(in srgb,var(--info) 60%,var(--panel));color:#fff}.tac.l3 .t{color:#e8ecf4}
-.tech{display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.8rem}
+.tech.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}.tech{cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.8rem}
 .tech .id{font-family:var(--font-mono);font-size:.72rem;color:var(--accent)}
 .tech .bar{grid-column:1/-1;height:5px}
 /* admin */
@@ -248,26 +254,27 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 
 <div class="view" id="view-inc">
 <div class="kpis">
-  <div class="kpi"><span class="eyebrow">Incidentes</span><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span></div>
-  <div class="kpi"><span class="eyebrow">Tipo más frecuente</span><span class="v mono" id="k-inc-tipo" style="font-size:1.1rem">—</span><span class="s" id="k-inc-tipo-s"></span></div>
-  <div class="kpi"><span class="eyebrow">Alta / crítica</span><span class="v mono" id="k-inc-alta">—</span><span class="s">con severidad alta o crítica</span></div>
-  <div class="kpi"><span class="eyebrow">Desde CAUs</span><span class="v mono" id="k-inc-ref">—</span><span class="s" id="k-inc-ref-s">clasificados automáticamente</span></div>
+  <div class="kpi k1"><div class="kh"><span class="eyebrow">Incidentes</span><span class="ico">&#9888;</span></div><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span><div class="mini" id="k-inc-bar"></div></div>
+  <div class="kpi k2"><div class="kh"><span class="eyebrow">Tipo más frecuente</span><span class="ico">&#9776;</span></div><span class="v mono" id="k-inc-tipo" style="font-size:1.15rem">—</span><span class="s" id="k-inc-tipo-s"></span><div class="mini" id="k-inc-tipo-bar"></div></div>
+  <div class="kpi k3" style="--kc:var(--bad)"><div class="kh"><span class="eyebrow">Alta / crítica</span><span class="ico">&#9650;</span></div><div class="ring-wrap"><svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="k-inc-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--bad)" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 113.1" transform="rotate(-90 22 22)"/></svg><div><span class="v mono" id="k-inc-alta">—</span><span class="s" id="k-inc-alta-s">con severidad alta o crítica</span></div></div></div>
+  <div class="kpi k4"><div class="kh"><span class="eyebrow">Desde CAUs</span><span class="ico">&#9741;</span></div><span class="v mono" id="k-inc-ref">—</span><span class="s" id="k-inc-ref-s">clasificados automáticamente</span><div class="mini" id="k-inc-ref-bar"></div></div>
 </div>
 <section class="block">
   <div class="sec-head"><div><div class="eyebrow">Incidentes</div><h2>Resueltos por mes y por tipo</h2></div><span class="note" id="inc-note"></span></div>
   <div class="two">
-    <div class="panel"><h3>Por mes</h3><div id="chart-mes"></div></div>
+    <div class="panel"><h3>Por mes <span class="note">· clic en una barra filtra el mes</span></h3><div id="chart-mes"></div></div>
     <div class="panel"><h3>Por tipo</h3><div class="tipos" id="chart-tipo"></div></div>
   </div>
   <div class="two" style="margin-top:12px">
-    <div class="panel"><h3>Cobertura MITRE ATT&amp;CK por táctica <span class="note" id="mitre-note"></span></h3><div class="mitre" id="mitre-tac"></div></div>
+    <div class="panel"><h3>Cobertura MITRE ATT&amp;CK por táctica <span class="note" id="mitre-note"></span></h3><div class="mitre" id="mitre-tac"></div><div class="note" style="margin-top:6px">Clic en una táctica o técnica filtra el detalle; clic de nuevo lo quita.</div></div>
     <div class="panel"><h3>Técnicas más observadas</h3><div class="tipos" id="mitre-tech"></div></div>
   </div>
   <div class="panel" style="margin-top:12px">
-    <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle</h3>
+    <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle <span class="note" id="inc-count"></span></h3>
       <div class="filters">
         <select id="f-mes" aria-label="Filtrar por mes"><option value="">Todos los meses</option></select>
         <select id="f-tipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+        <span class="chips" id="f-chips"></span>
       </div>
     </div>
     <div class="tablewrap"><table id="tbl-inc"><thead><tr><th>Fecha</th><th>Tipo</th><th>Incidente</th><th>Severidad</th><th>ATT&amp;CK</th><th>Ref.</th><th id="th-act" hidden></th></tr></thead><tbody></tbody></table></div>
@@ -417,7 +424,7 @@ let cfg={departamento:"Departamento de IT · Seguridad de la Información",titul
 const parseIds=s=>String(s||"").split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x));
 function mitreIds(i){if(i.mitre&&i.mitre.length)return i.mitre;const m=cfg.mitre||DEF_MITRE;return parseIds(m[i.tipo]??DEF_MITRE[i.tipo]??"")}
 let proyectos=[],incidentes=[],caus=[];
-let year=new Date().getFullYear(),fMes="",fTipo="",fcMes="",fcEst="",fcQ="";
+let year=new Date().getFullYear(),fMes="",fTipo="",fTac="",fTech="",fcMes="",fcEst="",fcQ="";
 const eur=(n,cur)=>new Intl.NumberFormat("es-ES",{style:"currency",currency:cur||"EUR",maximumFractionDigits:0}).format(n);
 const presDe=p=>{const part=(p.partidas||[]).filter(x=>x.precio!=null);if(part.length)return part.reduce((a,x)=>a+(+x.unidades||0)*(+x.precio||0),0);return(p.presupuesto!=null&&p.presupuesto!=="")?+p.presupuesto:null};
 const fmtD=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return d&&m?`${d}/${m}/${y}`:s};
@@ -436,12 +443,12 @@ function renderHeader(){
   const it=$("#i-tipo");const k2=it.value;it.innerHTML="";tipos.forEach(t=>{const o=document.createElement("option");o.textContent=t;it.appendChild(o)});if(tipos.includes(k2))it.value=k2;
 }
 
+const stack=(parts,host)=>{const tot=parts.reduce((a,x)=>a+x.n,0)||1;const vis=parts.filter(x=>x.n);host.innerHTML=`<div class="stack">${vis.map(x=>`<i style="width:${x.n/tot*100}%;background:${x.c}" title="${x.l}: ${x.t||x.n}"></i>`).join("")}</div><div class="lg">${vis.map(x=>`<span title="${x.l}: ${x.t||x.n}"><b style="background:${x.c}"></b>${x.l} <strong>${x.t||x.n}</strong></span>`).join("")}</div>`};
 function renderKPIs(){
   const enCurso=proyectos.filter(p=>p.estado==="En curso");
   $("#k-proy").textContent=enCurso.length;$("#k-proy-s").textContent=`de ${proyectos.length} registrados`;
   const avg=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length):0;
   $("#k-avance").textContent=enCurso.length?avg+" %":"—";$("#k-ring").setAttribute("stroke-dasharray",(113.1*avg/100).toFixed(1)+" 113.1");
-  const stack=(parts,host)=>{const tot=parts.reduce((a,x)=>a+x.n,0)||1;const vis=parts.filter(x=>x.n);host.innerHTML=`<div class="stack">${vis.map(x=>`<i style="width:${x.n/tot*100}%;background:${x.c}" title="${x.l}: ${x.t||x.n}"></i>`).join("")}</div><div class="lg">${vis.map(x=>`<span title="${x.l}: ${x.t||x.n}"><b style="background:${x.c}"></b>${x.l} <strong>${x.t||x.n}</strong></span>`).join("")}</div>`};
   const cnt=e=>proyectos.filter(p=>p.estado===e).length;
   stack([{l:"En curso",n:cnt("En curso"),c:"var(--info)"},{l:"En pausa",n:cnt("En pausa"),c:"var(--warn)"},{l:"Planificado",n:cnt("Planificado"),c:"var(--muted)"},{l:"Finalizado",n:cnt("Finalizado"),c:"var(--ok)"}],$("#k-proy-bar"));
   const conPres=proyectos.filter(p=>presDe(p)!=null);
@@ -454,10 +461,15 @@ function renderKPIs(){
   stack([{l:"Internos",n:proyectos.filter(p=>p.modalidad!=="Tercerizado").length,c:"var(--info)"},{l:"Tercerizados",n:proyectos.filter(p=>p.modalidad==="Tercerizado").length,c:"#8E7CC3"}],$("#k-mod-bar"));
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
   $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`en ${year} · ${incY.filter(i=>i.estado!=="Abierto").length} resueltos`;
-  const bt={};incY.forEach(i=>{bt[i.tipo||"Otro"]=(bt[i.tipo||"Otro"]||0)+1});const top=Object.entries(bt).sort((a,b)=>b[1]-a[1])[0];
-  $("#k-inc-tipo").textContent=top?top[0]:"—";$("#k-inc-tipo-s").textContent=top?`${top[1]} de ${incY.length}`:"";
-  $("#k-inc-alta").textContent=incY.filter(i=>/Alta|Crítica/.test(i.severidad||"")).length;
-  $("#k-inc-ref").textContent=incY.filter(i=>i.origen==="cau").length;$("#k-inc-ref-s").textContent=`${incY.filter(i=>i.auto).length} pendientes de revisar`;
+  const bt={};incY.forEach(i=>{bt[i.tipo||"Otro"]=(bt[i.tipo||"Otro"]||0)+1});const bts=Object.entries(bt).sort((a,b)=>b[1]-a[1]);const top=bts[0];
+  $("#k-inc-tipo").textContent=top?top[0]:"—";$("#k-inc-tipo-s").textContent=top?`${top[1]} de ${incY.length} (${Math.round(top[1]/incY.length*100)} %)`:"";
+  const TC=["var(--info)","var(--accent)","#8E7CC3","var(--ok)","var(--muted)"];stack(bts.slice(0,4).map(([t,n],k)=>({l:t,n,c:TC[k]})).concat(bts.length>4?[{l:"Otros",n:bts.slice(4).reduce((a,x)=>a+x[1],0),c:TC[4]}]:[]),$("#k-inc-tipo-bar"));
+  const sv=e=>incY.filter(i=>(i.severidad||"Media")===e).length;
+  stack([{l:"Crítica",n:sv("Crítica"),c:"var(--bad)"},{l:"Alta",n:sv("Alta"),c:"var(--warn)"},{l:"Media",n:sv("Media"),c:"var(--info)"},{l:"Baja",n:sv("Baja"),c:"var(--muted)"}],$("#k-inc-bar"));
+  const alta=incY.filter(i=>/Alta|Crítica/.test(i.severidad||"")).length;$("#k-inc-alta").textContent=alta;$("#k-inc-alta-s").textContent=incY.length?`${Math.round(alta/incY.length*100)} % del total`:"con severidad alta o crítica";
+  $("#k-inc-ring").setAttribute("stroke-dasharray",(incY.length?113.1*alta/incY.length:0).toFixed(1)+" 113.1");
+  const nc=incY.filter(i=>i.origen==="cau").length,na=incY.filter(i=>i.auto).length;$("#k-inc-ref").textContent=nc;$("#k-inc-ref-s").textContent=`${na} pendientes de revisar`;
+  stack([{l:"Revisados",n:nc-na,c:"var(--ok)"},{l:"Pendientes",n:na,c:"var(--warn)"},{l:"Manuales",n:incY.length-nc,c:"var(--info)"}],$("#k-inc-ref-bar"));
   // CAUs
   const cY=caus.filter(c=>(c.creacion||"").startsWith(year));
   $("#k-cau-tot").textContent=cY.length;$("#k-cau-tot-s").textContent=`recibidos en ${year}`;
@@ -595,17 +607,19 @@ function renderIncidentes(){
   const W=560,H=190,padL=28,padB=24,padT=14;const max=Math.max(1,...counts);
   const bw=(W-padL-10)/12;let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Incidentes resueltos por mes">`;
   const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);s+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${padL-6}" y="${y+3}" text-anchor="end">${v}</text>`}
-  counts.forEach((c,i)=>{const h=(H-padT-padB)*c/max;const x=padL+i*bw+bw*.18;const y=H-padB-h;const now=new Date();const isCur=year===now.getFullYear()&&i===now.getMonth();
-    s+=`<rect x="${x}" y="${y}" width="${bw*.64}" height="${h}" rx="2" fill="${isCur?'var(--accent)':'var(--info)'}"><title>${MESES[i]} ${year}: ${c}</title></rect>`;
-    if(c)s+=`<text x="${x+bw*.32}" y="${y-4}" text-anchor="middle" style="fill:var(--fg)">${c}</text>`;
-    s+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle">${MESES[i]}</text>`});
+  counts.forEach((c,i)=>{const h=(H-padT-padB)*c/max;const x=padL+i*bw+bw*.18;const y=H-padB-h;const sel=fMes&&+fMes===i+1;const dim=fMes&&!sel;
+    s+=`<g class="mbar" data-m="${i+1}"><rect x="${padL+i*bw}" y="${padT}" width="${bw}" height="${H-padT-padB}" fill="${sel?'var(--accent)':'transparent'}" opacity="${sel?.12:0}"/>`;
+    s+=`<rect x="${x}" y="${Math.min(y,H-padB-2)}" width="${bw*.64}" height="${Math.max(h,c?2:0)}" rx="3" fill="${sel?'var(--accent)':'var(--info)'}" opacity="${dim?.4:1}"><title>${MESES[i]} ${year}: ${c} · clic para filtrar</title></rect>`;
+    if(c)s+=`<text x="${x+bw*.32}" y="${y-4}" text-anchor="middle" style="fill:var(--fg);opacity:${dim?.5:1}">${c}</text>`;
+    s+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle" style="${sel?'fill:var(--accent);font-weight:600':''}">${MESES[i]}</text></g>`});
   s+="</svg>";$("#chart-mes").innerHTML=incY.length?s:'<div class="empty">Sin incidentes registrados en '+year+'.</div>';
+  $("#chart-mes").querySelectorAll(".mbar").forEach(el=>el.onclick=()=>{const m=el.dataset.m;fMes=(fMes===m)?"":m;$("#f-mes").value=fMes;renderIncidentes()});
   // por tipo
   const byT={};incY.forEach(i=>{byT[i.tipo||"Otro"]=(byT[i.tipo||"Otro"]||0)+1});
   const arr=Object.entries(byT).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...arr.map(a=>a[1]));
   const ct=$("#chart-tipo");ct.innerHTML="";
   if(!arr.length)ct.innerHTML='<div class="empty">—</div>';
-  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--info)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=n+" · "+Math.round(n/incY.length*100)+" %";d.onclick=()=>{$("#f-tipo").value=t;fTipo=t;renderTabla()};d.style.cursor="pointer";ct.appendChild(d)});
+  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--info)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=n+" · "+Math.round(n/incY.length*100)+" %";d.onclick=()=>{fTipo=(fTipo===t)?"":t;$("#f-tipo").value=fTipo;renderIncidentes()};d.style.cursor="pointer";if(fTipo===t)d.classList.add("tech","sel");ct.appendChild(d)});
   renderMitre(incY);
   renderTabla();
 }
@@ -614,15 +628,20 @@ function renderMitre(incY){
   incY.forEach(i=>{const ids=mitreIds(i);if(ids.length)conMapeo++;const tacs=new Set();ids.forEach(t=>{techCount[t]=(techCount[t]||0)+1;((TECH[t]||TECH[t.split(".")[0]]||{t:[]}).t).forEach(x=>tacs.add(x))});tacs.forEach(x=>tacCount[x]=(tacCount[x]||0)+1)});
   $("#mitre-note").textContent=incY.length?`· ${conMapeo} de ${incY.length} incidentes mapeados`:"";
   const max=Math.max(1,...Object.values(tacCount));const g=$("#mitre-tac");g.innerHTML="";
-  TACTICAS.forEach(([id,nm])=>{const n=tacCount[id]||0;const lvl=!n?"":n/max>.66?"l3":n/max>.33?"l2":"l1";const d=document.createElement("div");d.className="tac "+lvl;d.innerHTML=`<span class="n"></span><span class="t"></span>`;d.children[0].textContent=n;d.children[1].textContent=nm;d.title=id+" · "+nm+": "+n+" incidente"+(n===1?"":"s");g.appendChild(d)});
+  TACTICAS.forEach(([id,nm])=>{const n=tacCount[id]||0;const lvl=!n?"":n/max>.66?"l3":n/max>.33?"l2":"l1";const d=document.createElement("div");d.className="tac "+lvl+(fTac===id?" sel":"");d.innerHTML=`<span class="n"></span><span class="t"></span>`;d.children[0].textContent=n;d.children[1].textContent=nm;d.title=id+" · "+nm+": "+n+" incidente"+(n===1?"":"s")+" · clic para filtrar";
+    d.onclick=()=>{fTac=(fTac===id)?"":id;fTech="";renderIncidentes()};g.appendChild(d)});
   const arr=Object.entries(techCount).sort((a,b)=>b[1]-a[1]).slice(0,8);const mx=Math.max(1,...arr.map(a=>a[1]));const ct=$("#mitre-tech");ct.innerHTML="";
   if(!arr.length)ct.innerHTML='<div class="empty">Sin técnicas asignadas.</div>';
-  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tech";d.innerHTML=`<span class="id"></span><span></span><span class="n mono"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--accent)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=(TECH[t]||{}).n||"(sin nombre en el catálogo)";d.children[2].textContent=n;ct.appendChild(d)});
+  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tech";d.innerHTML=`<span class="id"></span><span></span><span class="n mono"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--accent)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=(TECH[t]||{}).n||"(sin nombre en el catálogo)";d.children[2].textContent=n;if(fTech===t)d.classList.add("sel");d.onclick=()=>{fTech=(fTech===t)?"":t;fTac="";renderIncidentes()};ct.appendChild(d)});
 }
+const tacsDe=i=>{const st=new Set();mitreIds(i).forEach(t=>((TECH[t]||TECH[t.split(".")[0]]||{t:[]}).t).forEach(x=>st.add(x)));return st};
 function renderTabla(){
   const tb=$("#tbl-inc tbody");tb.innerHTML="";$("#th-act").hidden=false;
-  const rows=incidentes.filter(i=>(i.fecha||"").startsWith(year)&&(!fMes||+i.fecha.slice(5,7)===+fMes)&&(!fTipo||i.tipo===fTipo)).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
-  $("#inc-empty").hidden=!!rows.length;
+  const rows=incidentes.filter(i=>(i.fecha||"").startsWith(year)&&(!fMes||+i.fecha.slice(5,7)===+fMes)&&(!fTipo||i.tipo===fTipo)&&(!fTac||tacsDe(i).has(fTac))&&(!fTech||mitreIds(i).includes(fTech))).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+  $("#inc-empty").hidden=!!rows.length;$("#inc-count").textContent=`· ${rows.length}`;
+  const ch=$("#f-chips");ch.innerHTML="";const chip=(l,fn)=>{const c=document.createElement("span");c.className="chip";c.textContent=l+" ×";c.title="Quitar filtro";c.onclick=fn;ch.appendChild(c)};
+  if(fMes)chip(MESES[+fMes-1],()=>{fMes="";$("#f-mes").value="";renderIncidentes()});if(fTipo)chip(fTipo,()=>{fTipo="";$("#f-tipo").value="";renderIncidentes()});
+  if(fTac)chip((TACTICAS.find(t=>t[0]===fTac)||[,fTac])[1],()=>{fTac="";renderIncidentes()});if(fTech)chip(fTech+" "+((TECH[fTech]||{}).n||""),()=>{fTech="";renderIncidentes()});
   rows.forEach(i=>{const tr=document.createElement("tr");
     tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="mono"></td><td class="acts"></td>`;
     tr.children[4].textContent=mitreIds(i).join(", ");tr.children[4].title=mitreIds(i).map(t=>t+" "+(TECH[t]?TECH[t].n:"")).join("\n");
@@ -726,8 +745,8 @@ $("#form-cfg").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   try{await api("PUT","/api/config",{departamento:$("#c-dept").value.trim(),titulo:$("#c-title").value.trim(),usd_eur:+$("#c-rate").value||0.92,tipos:cfgTipos.slice(),mitre,actualizado:new Date().toISOString()});toast("Ajustes guardados")}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 $("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes();renderCaus();renderGantt()};
-$("#f-mes").onchange=e=>{fMes=e.target.value;renderTabla()};
-$("#f-tipo").onchange=e=>{fTipo=e.target.value;renderTabla()};
+$("#f-mes").onchange=e=>{fMes=e.target.value;renderIncidentes()};
+$("#f-tipo").onchange=e=>{fTipo=e.target.value;renderIncidentes()};
 $("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderTablaCau()};
 $("#f-cau-est").onchange=e=>{fcEst=e.target.value;renderTablaCau()};
 $("#f-cau-q").oninput=e=>{fcQ=e.target.value;renderTablaCau()};
