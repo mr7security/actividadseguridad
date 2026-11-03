@@ -160,12 +160,16 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   <div class="kpi"><span class="eyebrow">Internos / tercerizados</span><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span></div>
 </div>
 <section class="block">
-  <div class="sec-head"><div><div class="eyebrow">Proyectos internos</div><h2>Con recursos propios</h2></div><span class="note" id="proy-note"></span></div>
+  <div class="sec-head">
+    <div class="tabs" role="tablist" aria-label="Tipo de proyecto">
+      <button role="tab" aria-selected="true" data-ptab="int">Internos <span class="mono" id="cnt-int"></span></button>
+      <button role="tab" aria-selected="false" data-ptab="ext">Tercerizados <span class="mono" id="cnt-ext"></span></button>
+    </div>
+    <span class="note" id="proy-note"></span>
+  </div>
   <div class="grid-proj" id="proy-grid"><div class="empty">Cargando proyectos…</div></div>
-</section>
-<section class="block">
-  <div class="sec-head"><div><div class="eyebrow">Proyectos tercerizados</div><h2>Con proveedor externo</h2></div><span class="note" id="proy-note-ext"></span></div>
-  <div class="grid-proj" id="proy-grid-ext"><div class="empty">Cargando proyectos…</div></div>
+  <div class="grid-proj" id="proy-grid-ext" hidden><div class="empty">Cargando proyectos…</div></div>
+  <span class="note" id="proy-note-ext" hidden></span>
 </section>
 </div>
 
@@ -359,16 +363,25 @@ function renderKPIs(){
   const months=new Set(cY.map(c=>c.creacion.slice(0,7)));$("#k-cau-med").textContent=months.size?(cY.length/months.size).toFixed(1):"—";
 }
 
+let ptab="int";
 function renderProyectos(){
-  renderGrupo($("#proy-grid"),$("#proy-note"),proyectos.filter(p=>p.modalidad!=="Tercerizado"),"internos");
-  renderGrupo($("#proy-grid-ext"),$("#proy-note-ext"),proyectos.filter(p=>p.modalidad==="Tercerizado"),"tercerizados");
+  const ints=proyectos.filter(p=>p.modalidad!=="Tercerizado"),exts=proyectos.filter(p=>p.modalidad==="Tercerizado");
+  renderGrupo($("#proy-grid"),$("#proy-note"),ints,"internos");
+  renderGrupo($("#proy-grid-ext"),$("#proy-note-ext"),exts,"tercerizados");
+  $("#cnt-int").textContent=ints.length?`(${ints.length})`:"";$("#cnt-ext").textContent=exts.length?`(${exts.length})`:"";
+  showPtab(ptab);
 }
+function showPtab(t){ptab=t;document.querySelectorAll('[data-ptab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.ptab===t));
+  $("#proy-grid").hidden=t!=="int";$("#proy-grid-ext").hidden=t!=="ext";
+  $("#proy-note").textContent=(t==="int"?$("#proy-note").dataset.txt:$("#proy-note-ext").dataset.txt)||"";try{localStorage.setItem("ptab",t)}catch(e){}}
+document.querySelectorAll('[data-ptab]').forEach(b=>b.onclick=()=>showPtab(b.dataset.ptab));
+try{const t=localStorage.getItem("ptab");if(t==="ext")ptab="ext"}catch(e){}
 function renderGrupo(g,note,lista,nombre){
   g.innerHTML="";
   const order={"En curso":0,"En pausa":1,"Planificado":2,"Finalizado":3};
   const list=[...lista].sort((a,b)=>(order[a.estado]??9)-(order[b.estado]??9)||(b.inicio||"").localeCompare(a.inicio||""));
   const pres=list.filter(p=>p.presupuesto!=null&&p.presupuesto!=="").reduce((a,p)=>a+(+p.presupuesto||0),0);
-  note.textContent=list.length?`${list.length} proyecto${list.length>1?"s":""} · ${list.filter(p=>p.estado==="En curso").length} en curso`+(pres?` · ${eur(pres)} aprobados`:""):"";
+  note.dataset.txt=list.length?`${list.filter(p=>p.estado==="En curso").length} en curso`+(pres?` · ${eur(pres)} aprobados`:""):"";
   if(!list.length){g.innerHTML='<div class="empty">Sin proyectos '+nombre+'. '+(isOwner?'Añádelos desde Administrar.':'')+'</div>';return}
   list.forEach(p=>{
     const c=document.createElement("article");c.className="card";
