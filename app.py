@@ -197,7 +197,7 @@ def api_incidente(did):
 def api_config():
     require_admin()
     body = request.get_json(silent=True) or {}
-    cfg = {**get_config(), **{k: body[k] for k in ("departamento", "titulo", "tipos", "mitre") if k in body}}
+    cfg = {**get_config(), **{k: body[k] for k in ("departamento", "titulo", "tipos", "mitre", "usd_eur") if k in body}}
     cfg["actualizado"] = datetime.now(timezone.utc).isoformat()
     put_doc("config", "general", cfg)
     return jsonify(ok=True)
