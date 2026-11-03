@@ -71,7 +71,10 @@ section.block{margin-top:26px}
 .meta div{display:flex;flex-direction:column;gap:1px;min-width:0}
 .meta .l{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
 .meta .d{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
-.row-actions{display:flex;gap:6px;justify-content:flex-end}
+.row-actions{display:none;gap:6px;justify-content:flex-end}
+body.editing .row-actions{display:flex}
+#th-act,td.acts{display:none}
+body.editing #th-act,body.editing td.acts{display:table-cell}
 .two{display:grid;grid-template-columns:3fr 2fr;gap:12px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
@@ -446,11 +449,11 @@ function renderMitre(incY){
   arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tech";d.innerHTML=`<span class="id"></span><span></span><span class="n mono"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--accent)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=(TECH[t]||{}).n||"(sin nombre en el catálogo)";d.children[2].textContent=n;ct.appendChild(d)});
 }
 function renderTabla(){
-  const tb=$("#tbl-inc tbody");tb.innerHTML="";$("#th-act").hidden=!isOwner;
+  const tb=$("#tbl-inc tbody");tb.innerHTML="";$("#th-act").hidden=false;
   const rows=incidentes.filter(i=>(i.fecha||"").startsWith(year)&&(!fMes||+i.fecha.slice(5,7)===+fMes)&&(!fTipo||i.tipo===fTipo)).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
   $("#inc-empty").hidden=!!rows.length;
   rows.forEach(i=>{const tr=document.createElement("tr");
-    tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="mono"></td><td class="acts" ${isOwner?"":"hidden"}></td>`;
+    tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="mono"></td><td class="acts"></td>`;
     tr.children[4].textContent=mitreIds(i).join(", ");tr.children[4].title=mitreIds(i).map(t=>t+" "+(TECH[t]?TECH[t].n:"")).join("\n");
     tr.children[0].textContent=fmtD(i.fecha)+(i.aprox?" ~":"");tr.children[1].textContent=i.tipo||"—";
     tr.children[2].textContent=i.titulo||"";if(i.descripcion){const sm=document.createElement("div");sm.className="note";sm.textContent=i.descripcion;tr.children[2].appendChild(sm)}
@@ -499,9 +502,9 @@ try{const v=localStorage.getItem("vista");if(v&&$("#view-"+v))showView(v)}catch(
 /* ---- admin ---- */
 function showTab(t){document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));document.querySelectorAll('.admin-body form').forEach(f=>f.hidden=f.dataset.tab!==t)}
 document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
-$("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;$("#btn-admin").textContent=a.hidden?"Administrar":"Cerrar administración";if(!a.hidden)a.scrollIntoView({behavior:"smooth",block:"start"})};
+$("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;document.body.classList.toggle("editing",!a.hidden);$("#btn-admin").textContent=a.hidden?"Administrar":"Cerrar administración";if(!a.hidden)a.scrollIntoView({behavior:"smooth",block:"start"})};
 
-function editProy(p){showTab("proy");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
+function editProy(p){showTab("proy");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
   $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
   $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";
   $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
@@ -514,7 +517,7 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let incEditing=null;
-function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
+function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
   $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-mitre").value=(i.mitre||[]).join(", ");$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
   $("#i-status").textContent="Editando: "+(i.titulo||"");$("#admin").scrollIntoView({behavior:"smooth"})}
 $("#i-cancel").onclick=()=>{incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
