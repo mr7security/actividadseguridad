@@ -143,7 +143,7 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
 .card>.pausa-msg,.card>.log,.card>.partidas{grid-column:1}
 .partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
-.part-row{display:grid;grid-template-columns:2fr 70px 100px 60px 90px auto;gap:6px;align-items:center}
+.part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{display:grid;grid-template-columns:130px 1fr auto auto;gap:6px;align-items:center}
@@ -153,7 +153,7 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
 .card>.pausa-msg,.card>.log,.card>.partidas{grid-column:1}
 .partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
-.part-row{display:grid;grid-template-columns:2fr 70px 100px 60px 90px auto;gap:6px;align-items:center}
+.part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{grid-template-columns:1fr 1fr}}
@@ -344,12 +344,12 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Avance (%)<input id="p-avance" type="number" min="0" max="100" step="5" value="0"></label>
       <label>Inicio<input id="p-inicio" type="date"></label>
       <label>Fin (real o previsto)<input id="p-fin" type="date"></label>
-      <label>Moneda<select id="p-moneda"><option value="EUR">€ EUR</option><option value="USD">$ USD</option></select></label>
-      <label>Presupuesto aprobado<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto (o se calcula de las partidas)"></label>
+      <select id="p-moneda" hidden><option value="EUR" selected>€ EUR</option></select>
+      <label>Presupuesto aprobado (€)<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto; con partidas se calcula solo"></label>
       <label>Recursos<input id="p-rec" placeholder="Recursos propios"></label>
       <label class="full">Notas / enlace<input id="p-notas"></label>
       <div class="full">
-        <div class="eyebrow" style="margin-bottom:6px">Partidas de coste (concepto · unidades · precio unitario · periodo) — si hay partidas, el presupuesto se calcula con ellas</div>
+        <div class="eyebrow" style="margin-bottom:6px">Partidas de coste en euros (concepto · unidades · precio unitario · periodo) — si hay partidas, el presupuesto se calcula con ellas</div>
         <div id="p-partidas" style="display:grid;gap:6px"></div>
         <div style="display:flex;gap:8px;margin-top:6px;align-items:center"><button type="button" class="small" id="p-addpartida">+ Añadir partida</button><span class="note" id="p-partidas-total"></span></div>
       </div>
@@ -393,7 +393,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
     <form class="f" id="form-cfg" data-tab="cfg" hidden>
       <label class="full">Línea superior (departamento / área)<input id="c-dept"></label>
       <label class="full">Título<input id="c-title"></label>
-      <label>Tipo de cambio USD → EUR (para el total de presupuesto)<input id="c-rate" type="number" step="0.01" min="0.1" placeholder="0.92"></label>
+      <input id="c-rate" type="hidden">
       <div class="full">
         <div class="eyebrow" style="margin-bottom:6px">Tipos de incidente</div>
         <div class="chips" id="c-tipos"></div>
@@ -568,7 +568,7 @@ function renderGrupo(g,note,lista,nombre){
   list.forEach(p=>{
     const c=document.createElement("article");c.className="card";c.id="proy-"+p.id;
     const av=Math.max(0,Math.min(100,+p.avance||0));
-    const pv=presDe(p);const pres=pv!=null?eur(pv,p.moneda||"EUR")+((p.partidas||[]).length?" / año":""):"Sin presupuesto";
+    const pv=presDe(p);const pres=pv!=null?eur(pv)+((p.partidas||[]).length&&(p.partidas||[]).every(x=>/año/.test(x.periodo||""))?" / año":""):"Sin presupuesto";
     c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
       <p class="desc"></p>
       <div class="av-block"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
@@ -750,7 +750,7 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let pHitos=[],pLog=[],pPart=[];
-function renderPartEditor(){const c=$("#p-partidas");c.innerHTML="";pPart.forEach((x,i)=>{const r=document.createElement("div");r.className="part-row";r.innerHTML=`<input placeholder="Concepto" aria-label="Concepto"><input type="number" min="0" placeholder="Uds." aria-label="Unidades"><input type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio unitario"><select aria-label="Moneda"><option value="EUR">€</option><option value="USD">$</option></select><input placeholder="año / mes" aria-label="Periodo"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
+function renderPartEditor(){const c=$("#p-partidas");c.innerHTML="";pPart.forEach((x,i)=>{const r=document.createElement("div");r.className="part-row";r.innerHTML=`<input placeholder="Concepto" aria-label="Concepto"><input type="number" min="0" placeholder="Uds." aria-label="Unidades"><input type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio unitario"><select aria-label="Moneda" hidden><option value="EUR">€</option></select><input placeholder="año / mes" aria-label="Periodo"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
   const [fc,fu,fp,fm,fpe,bt]=r.children;fc.value=x.concepto||"";fu.value=x.unidades??"";fp.value=x.precio??"";fm.value=x.moneda||$("#p-moneda").value;fpe.value=x.periodo||"";
   fc.oninput=e=>x.concepto=e.target.value;fu.oninput=e=>{x.unidades=e.target.value;totalPart()};fp.oninput=e=>{x.precio=e.target.value;totalPart()};fm.onchange=e=>{x.moneda=e.target.value;totalPart()};fpe.oninput=e=>x.periodo=e.target.value;bt.onclick=()=>{pPart.splice(i,1);renderPartEditor()};c.appendChild(r)});totalPart()}
 function totalPart(){const pm=$("#p-moneda").value;const t=pPart.reduce((a,x)=>a+conv((+x.unidades||0)*(+x.precio||0),x.moneda||pm,pm),0);$("#p-partidas-total").textContent=pPart.length?"Total: "+eur(t,pm):""}

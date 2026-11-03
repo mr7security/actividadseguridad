@@ -42,7 +42,8 @@
           "hecho": true,
           "aprox": true
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -83,7 +84,8 @@
           "hecho": true,
           "aprox": true
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -112,7 +114,8 @@
           "hecho": false,
           "aprox": true
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -123,7 +126,7 @@
       "inicio": "2026-09-22",
       "nombre": "Paso de cuentas de IA compartidas a nominales",
       "notas": "Presupuesto Enterprise recibido (38–48 USD/usuario/mes), sin aprobar.",
-      "presupuesto": 11520,
+      "presupuesto": 15782.4,
       "recursos": "Recursos propios",
       "id": "p-cuentas-nominales",
       "modalidad": "Interno",
@@ -159,16 +162,16 @@
         {
           "concepto": "ChatGPT Business — puesto Estándar",
           "unidades": 43,
-          "precio": 240,
+          "precio": 220.8,
           "periodo": "año",
-          "moneda": "USD"
+          "moneda": "EUR"
         },
         {
           "concepto": "ChatGPT Business — puesto Prémium",
           "unidades": 1,
-          "precio": 1200,
+          "precio": 1104.0,
           "periodo": "año",
-          "moneda": "USD"
+          "moneda": "EUR"
         },
         {
           "concepto": "Claude Team — puesto Estándar",
@@ -502,7 +505,8 @@
           "hecho": true,
           "aprox": false
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -537,7 +541,8 @@
           "hecho": true,
           "aprox": false
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -572,7 +577,8 @@
           "hecho": false,
           "aprox": true
         }
-      ]
+      ],
+      "moneda": "EUR"
     },
     {
       "nombre": "Implantación de ManageEngine Endpoint Central",
@@ -590,37 +596,43 @@
           "concepto": "Cot. 15374 (16/02/2026) — licencia inicial: 50 servidores + 2 usuarios + ML Pack",
           "unidades": 1,
           "precio": 2654.2,
-          "periodo": "año, hasta 20/05/2027"
+          "periodo": "año, hasta 20/05/2027",
+          "moneda": "EUR"
         },
         {
           "concepto": "Cot. 15374 (16/02/2026) — jornada de formación del producto",
           "unidades": 1,
           "precio": 420.0,
-          "periodo": "único"
+          "periodo": "único",
+          "moneda": "EUR"
         },
         {
           "concepto": "Cot. 15919 (13/08/2026) — +50 servidores, +2 usuarios",
           "unidades": 1,
           "precio": 1970.16,
-          "periodo": "hasta 20/05/2027"
+          "periodo": "hasta 20/05/2027",
+          "moneda": "EUR"
         },
         {
           "concepto": "Cot. 15980 (27/08/2026) — +50 equipos, +3 usuarios",
           "unidades": 1,
           "precio": 1983.75,
-          "periodo": "hasta 20/05/2027"
+          "periodo": "hasta 20/05/2027",
+          "moneda": "EUR"
         },
         {
           "concepto": "Cot. 16159 (21/09/2026) — +100 equipos, +1 usuario",
           "unidades": 1,
           "precio": 2201.87,
-          "periodo": "hasta 20/05/2027"
+          "periodo": "hasta 20/05/2027",
+          "moneda": "EUR"
         },
         {
           "concepto": "Cot. 16346 (21/10/2026) — +200 equipos",
           "unidades": 1,
           "precio": 3482.96,
-          "periodo": "hasta 20/05/2027"
+          "periodo": "hasta 20/05/2027",
+          "moneda": "EUR"
         }
       ],
       "recursos": "720tec + Sistemas + Seguridad",
@@ -742,13 +754,15 @@
           "concepto": "Fase 1 — Assessment unificación de tenants (OPP000529073, 04/12/2025)",
           "unidades": 1,
           "precio": 3220.0,
-          "periodo": "único"
+          "periodo": "único",
+          "moneda": "EUR"
         },
         {
           "concepto": "Fase 2 — Ejecución unificación: AAE + Landing Zone + migración cross-tenant (OPP000532115, 11/03/2026, con descuento −1.615 €)",
           "unidades": 1,
           "precio": 28405.0,
-          "periodo": "único"
+          "periodo": "único",
+          "moneda": "EUR"
         }
       ],
       "presupuesto": 31625.0,
