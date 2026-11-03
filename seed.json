@@ -497,6 +497,85 @@
           "aprox": true
         }
       ]
+    },
+    {
+      "nombre": "Implantación de ManageEngine Endpoint Central",
+      "descripcion": "Gestión centralizada de parches, vulnerabilidades e inventario del parque de 224 servidores del Grupo STN (Security Edition, on-premise en SRVMGENDPOINT). Primera etapa de 50 servidores completada; en Fase 6 (producción por tramos) e incorporación de los 25 equipos del Departamento de IT.",
+      "modalidad": "Tercerizado",
+      "proveedor": "720tec (partner de ManageEngine) · con Sistemas (M. Pitarch)",
+      "estado": "En curso",
+      "avance": 55,
+      "inicio": "2026-04-03",
+      "fin": "2026-10-10",
+      "moneda": "EUR",
+      "presupuesto": null,
+      "partidas": [],
+      "recursos": "720tec + Sistemas + Seguridad",
+      "notas": "Licencia: 50 servidores (50/50 asignados) + 50 puntos de conexión (25 en uso), 4 técnicos; caduca el 20/05/2027. Fase 6 requiere ampliar licencia. Importe de la licencia pendiente de cargar como partida.",
+      "hitos": [
+        {
+          "fecha": "2026-04-24",
+          "nombre": "Fase 1 – Planificación y diseño",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-05-23",
+          "nombre": "Fase 2 – Instalación del servidor y consola (720tec)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-05-27",
+          "nombre": "Fase 3 – Agentes en los 13 servidores iniciales",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-05-29",
+          "nombre": "Fase 4 – Configuración de módulos",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-06-30",
+          "nombre": "Fase 5 – Piloto validado, ampliación a 50 servidores",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-08-11",
+          "nombre": "Primera etapa completada: 50/50 servidores + 25 equipos de IT",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-09-30",
+          "nombre": "Fase 6 – Producción por tramos hasta 224 servidores",
+          "hecho": false,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-10",
+          "nombre": "Fase 7 – Cierre y publicación de resultados",
+          "hecho": false,
+          "aprox": false
+        }
+      ],
+      "log": [
+        {
+          "fecha": "2026-06-03",
+          "texto": "Plan de implementación v1.0 redactado (alcance, inventario, licenciamiento).",
+          "estado": "En curso"
+        },
+        {
+          "fecha": "2026-08-11",
+          "texto": "Plan v1.4: 75 sistemas administrados (50 servidores / 25 equipos), 53 en buen estado y 22 altamente vulnerables; 801 vulnerabilidades detectadas (250 explotables, 105 activamente explotadas, 71 zero-day); 2.716 parches instalados y 266 pendientes (41 críticos). 51 de 224 servidores incorporados.",
+          "estado": "En curso"
+        }
+      ],
+      "id": "p-endpoint-central",
+      "actualizado": "2026-11-03T12:00:00+00:00"
     }
   ],
   "incidentes": [

@@ -25,4 +25,5 @@ Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl rest
 - `templates/index.html` — el dashboard (HTML/CSS/JS, sin dependencias externas salvo fuentes de Google).
 - `seed.json` — datos iniciales (solo se usan si la base está vacía).
 - `cargar_puestos_ia.py` — carga única de partidas y puestos de ChatGPT en el proyecto de cuentas nominales.
+- `cargar_endpoint_central.py` — alta única del proyecto Endpoint Central (del plan de implementación v1.4).
 - `cargar_hitos.py` — carga única de hitos en los proyectos existentes de una base ya creada (`.venv/bin/python cargar_hitos.py`).
