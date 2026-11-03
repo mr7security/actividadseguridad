@@ -11,13 +11,6 @@ html{color-scheme:dark}
   --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
   color-scheme:dark;
 }
-@media (prefers-color-scheme: light){
-  :root:not([data-theme="dark"]){
-    --bg:#F3F5F9; --panel:#FFFFFF; --panel2:#EEF1F7; --line:#D6DCE8;
-    --fg:#1A2235; --muted:#5B6782; --accent:#9A7415; --accent-soft:rgba(154,116,21,.12);
-    --ok:#1F8F5F; --warn:#B57B12; --bad:#C23B35; --info:#2D6BC4; color-scheme:light;
-  }
-}
 :root[data-theme="light"]{
   --bg:#F3F5F9; --panel:#FFFFFF; --panel2:#EEF1F7; --line:#D6DCE8;
   --fg:#1A2235; --muted:#5B6782; --accent:#9A7415; --accent-soft:rgba(154,116,21,.12);
@@ -26,8 +19,8 @@ html{color-scheme:dark}
 *{box-sizing:border-box}
 [hidden]{display:none!important}
 body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.45;
-  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
-.wrap{max-width:1180px;margin:0 auto}
+  padding-left:max(24px,env(safe-area-inset-left,0px));padding-right:max(24px,env(safe-area-inset-right,0px));padding-block:0 32px}
+.wrap{max-width:1900px;margin:0 auto}
 h1,h2,h3{margin:0;text-wrap:balance}
 h1{font-size:1.35rem;font-weight:600;letter-spacing:-.01em}
 h2{font-size:1rem;font-weight:600;letter-spacing:.01em}
@@ -37,7 +30,6 @@ header.top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justif
 .brand{display:flex;gap:16px;align-items:center}
 .logo{height:46px;width:auto;display:block}
 .logo-light{display:none}.logo-dark{display:block}
-@media (prefers-color-scheme: light){:root:not([data-theme="dark"]) .logo-light{display:block}:root:not([data-theme="dark"]) .logo-dark{display:none}}
 :root[data-theme="light"] .logo-light{display:block}:root[data-theme="light"] .logo-dark{display:none}
 .controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
 select,input,textarea,button{font:inherit;color:var(--fg)}
@@ -52,9 +44,9 @@ button.small{padding:4px 9px;font-size:.78rem}
 .sel-year{width:auto}
 .role{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);padding:5px 9px;border:1px dashed var(--line);border-radius:6px}
 .role.owner{color:var(--accent);border-color:var(--accent)}
-.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
 .kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
-.kpi .v{font-family:var(--font-mono);font-size:1.7rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .v{font-family:var(--font-mono);font-size:2rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:.78rem;color:var(--muted)}
 section.block{margin-top:26px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -186,6 +178,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   </div>
   <div class="controls">
     <select id="sel-year" class="sel-year" aria-label="Año"></select>
+    <button id="btn-theme" class="ghost" title="Cambiar tema" aria-label="Cambiar tema">☾</button>
     <span class="role" id="role-badge">Solo lectura</span>
     <button id="btn-admin" class="primary" hidden>Administrar</button>
     <a id="lnk-login" class="role" href="/login" style="text-decoration:none">Entrar</a>
@@ -694,6 +687,10 @@ $("#form-cau").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;const f=
 $("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dataset.c="1";b.textContent="¿Seguro? Pulsa otra vez";setTimeout(()=>{delete b.dataset.c;b.textContent="Vaciar CAUs"},3500);return}
   delete b.dataset.c;b.textContent="Vaciar CAUs";try{await api("DELETE","/api/caus");toast("CAUs eliminados")}catch(err){toast("No se pudo: "+err.code)}};
 
+/* tema */
+(function(){const root=document.documentElement;let t="dark";try{t=localStorage.getItem("tema")||"dark"}catch(e){}
+  const apply=v=>{root.setAttribute("data-theme",v);$("#btn-theme").textContent=v==="dark"?"☀":"☾";try{localStorage.setItem("tema",v)}catch(e){}};
+  apply(t);$("#btn-theme").onclick=()=>apply(root.getAttribute("data-theme")==="dark"?"light":"dark")})();
 /* ---- boot ---- */
 isOwner=__IS_ADMIN__;
 async function api(method,url,body){const r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});if(!r.ok){const e=new Error("http");e.code=r.status===401?"sin sesión":"HTTP "+r.status;throw e}return r.json()}
