@@ -45,7 +45,19 @@ button.small{padding:4px 9px;font-size:.78rem}
 .role{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);padding:5px 9px;border:1px dashed var(--line);border-radius:6px}
 .role.owner{color:var(--accent);border-color:var(--accent)}
 .kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));gap:14px;margin-top:18px}
-.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.kpi{position:relative;overflow:hidden;background:linear-gradient(160deg,var(--panel),var(--panel2));border:1px solid var(--line);border-radius:10px;padding:14px 16px 12px;display:flex;flex-direction:column;gap:6px;transition:transform .15s,border-color .15s}
+.kpi:hover{transform:translateY(-1px);border-color:var(--accent)}
+.kpi::before{content:"";position:absolute;left:0;top:0;bottom:0;width:4px;background:var(--kc,var(--accent))}
+.kpi.k1{--kc:var(--info)}.kpi.k2{--kc:var(--accent)}.kpi.k3{--kc:var(--ok)}.kpi.k4{--kc:#8E7CC3}
+.kpi .kh{display:flex;justify-content:space-between;align-items:center}
+.kpi .ico{width:28px;height:28px;border-radius:8px;display:grid;place-items:center;font-size:.95rem;color:var(--kc,var(--accent));background:color-mix(in srgb,var(--kc,var(--accent)) 16%,transparent)}
+.ring-wrap{display:flex;gap:12px;align-items:center}.ring{width:56px;height:56px;flex:none}
+.ring-wrap>div{display:flex;flex-direction:column;gap:4px}
+.mini{margin-top:6px;display:flex;flex-direction:column;gap:4px}
+.mini .stack{display:flex;height:7px;border-radius:999px;overflow:hidden;background:var(--line)}
+.mini .stack i{display:block;height:100%}
+.mini .lg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.68rem;color:var(--muted)}
+.mini .lg b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .kpi .v{font-family:var(--font-mono);font-size:2rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:.78rem;color:var(--muted)}
 section.block{margin-top:26px}
@@ -204,10 +216,10 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 
 <div class="view on" id="view-proy">
 <div class="kpis">
-  <div class="kpi"><span class="eyebrow">Proyectos en curso</span><span class="v mono" id="k-proy">—</span><span class="s" id="k-proy-s">de los registrados</span></div>
-  <div class="kpi"><span class="eyebrow">Avance medio</span><span class="v mono" id="k-avance">—</span><span class="s">proyectos en curso</span></div>
-  <div class="kpi"><span class="eyebrow">Presupuesto aprobado</span><span class="v mono" id="k-pres">—</span><span class="s" id="k-pres-s">sin presupuesto asignado</span></div>
-  <div class="kpi"><span class="eyebrow">Internos / tercerizados</span><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span></div>
+  <div class="kpi k1"><div class="kh"><span class="eyebrow">Proyectos en curso</span><span class="ico">&#9881;</span></div><span class="v mono" id="k-proy">—</span><span class="s" id="k-proy-s">de los registrados</span><div class="mini" id="k-proy-bar"></div></div>
+  <div class="kpi k2"><div class="kh"><span class="eyebrow">Avance medio</span><span class="ico">&#9673;</span></div><div class="ring-wrap"><svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="k-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--accent)" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 113.1" transform="rotate(-90 22 22)"/></svg><div><span class="v mono" id="k-avance">—</span><span class="s">proyectos en curso</span></div></div></div>
+  <div class="kpi k3"><div class="kh"><span class="eyebrow">Presupuesto aprobado</span><span class="ico">&#8364;</span></div><span class="v mono" id="k-pres">—</span><span class="s" id="k-pres-s">sin presupuesto asignado</span><div class="mini" id="k-pres-bar"></div></div>
+  <div class="kpi k4"><div class="kh"><span class="eyebrow">Internos / tercerizados</span><span class="ico">&#9638;</span></div><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span><div class="mini" id="k-mod-bar"></div></div>
 </div>
 <section class="block">
   <div class="sec-head"><div><div class="eyebrow">Línea temporal</div><h2>Proyectos e hitos en el año</h2></div><div class="leyenda" aria-label="Leyenda">
@@ -425,12 +437,19 @@ function renderHeader(){
 function renderKPIs(){
   const enCurso=proyectos.filter(p=>p.estado==="En curso");
   $("#k-proy").textContent=enCurso.length;$("#k-proy-s").textContent=`de ${proyectos.length} registrados`;
-  $("#k-avance").textContent=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length)+" %":"—";
+  const avg=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length):0;
+  $("#k-avance").textContent=enCurso.length?avg+" %":"—";$("#k-ring").setAttribute("stroke-dasharray",(113.1*avg/100).toFixed(1)+" 113.1");
+  const stack=(parts,host)=>{const tot=parts.reduce((a,x)=>a+x.n,0)||1;host.innerHTML=`<div class="stack">${parts.filter(x=>x.n).map(x=>`<i style="width:${x.n/tot*100}%;background:${x.c}" title="${x.l}: ${x.t||x.n}"></i>`).join("")}</div><div class="lg">${parts.filter(x=>x.n).map(x=>`<span><b style="background:${x.c}"></b>${x.l} ${x.t||x.n}</span>`).join("")}</div>`};
+  const cnt=e=>proyectos.filter(p=>p.estado===e).length;
+  stack([{l:"En curso",n:cnt("En curso"),c:"var(--info)"},{l:"En pausa",n:cnt("En pausa"),c:"var(--warn)"},{l:"Planificado",n:cnt("Planificado"),c:"var(--muted)"},{l:"Finalizado",n:cnt("Finalizado"),c:"var(--ok)"}],$("#k-proy-bar"));
   const conPres=proyectos.filter(p=>presDe(p)!=null);
   const rate=+cfg.usd_eur||0.92;let totalEur=0,usd=0;conPres.forEach(p=>{const v=presDe(p);if((p.moneda||"EUR")==="USD"){usd+=v;totalEur+=v*rate}else totalEur+=v});
   $("#k-pres").textContent=conPres.length?eur(totalEur):"0 €";
+  const pe=m=>conPres.filter(p=>(p.modalidad==="Tercerizado")===(m==="ext")).reduce((a,p)=>a+((p.moneda||"EUR")==="USD"?presDe(p)*rate:presDe(p)),0);
+  const eI=pe("int"),eE=pe("ext");stack([{l:"Internos",n:eI,t:eur(eI),c:"var(--ok)"},{l:"Tercerizados",n:eE,t:eur(eE),c:"#8E7CC3"}],$("#k-pres-bar"));
   $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
   const enc=proyectos.filter(p=>p.estado==="En curso");$("#k-fin").textContent=enc.filter(p=>p.modalidad!=="Tercerizado").length+" / "+enc.filter(p=>p.modalidad==="Tercerizado").length;$("#k-fin-s").textContent=`en curso · ${proyectos.filter(p=>p.modalidad==="Tercerizado").length} tercerizados en total`;
+  stack([{l:"Internos",n:proyectos.filter(p=>p.modalidad!=="Tercerizado").length,c:"var(--info)"},{l:"Tercerizados",n:proyectos.filter(p=>p.modalidad==="Tercerizado").length,c:"#8E7CC3"}],$("#k-mod-bar"));
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
   $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`en ${year} · ${incY.filter(i=>i.estado!=="Abierto").length} resueltos`;
   const bt={};incY.forEach(i=>{bt[i.tipo||"Otro"]=(bt[i.tipo||"Otro"]||0)+1});const top=Object.entries(bt).sort((a,b)=>b[1]-a[1])[0];
