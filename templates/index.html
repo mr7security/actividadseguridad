@@ -157,6 +157,13 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{grid-template-columns:1fr 1fr}}
+/* heatmap tipo × táctica */
+.heat{margin-top:10px;display:grid;grid-template-columns:minmax(120px,160px) repeat(14,minmax(0,1fr));gap:3px;align-items:center}
+.heat .hl{font-size:.7rem;color:var(--muted);padding-right:6px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.heat .hc{height:22px;border-radius:4px;background:var(--panel2);border:1px solid transparent;display:grid;place-items:center;font-family:var(--font-mono);font-size:.68rem;color:var(--fg);cursor:pointer}
+.heat .hc:hover{border-color:var(--accent)}.heat .hc.sel{outline:2px solid var(--accent);outline-offset:-1px}
+.heat .hc.z{color:transparent;cursor:default}
+@media (max-width:1100px){.heat{display:none}}
 /* leyenda */
 .leyenda{display:flex;flex-direction:column;gap:3px;font-size:.74rem;color:var(--muted);padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:560px}
 .leyenda .eyebrow{margin-bottom:2px}
@@ -267,7 +274,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
     <div class="panel"><h3>Por tipo</h3><div class="tipos" id="chart-tipo"></div></div>
   </div>
   <div class="two" style="margin-top:12px">
-    <div class="panel"><h3>Cobertura MITRE ATT&amp;CK por táctica <span class="note" id="mitre-note"></span></h3><div class="mitre" id="mitre-tac"></div><div class="note" style="margin-top:6px">Clic en una táctica o técnica filtra el detalle; clic de nuevo lo quita.</div></div>
+    <div class="panel"><h3>Cobertura MITRE ATT&amp;CK por táctica <span class="note" id="mitre-note"></span></h3><div class="mitre" id="mitre-tac"></div><div class="heat" id="mitre-heat"></div><div class="note" style="margin-top:8px">Clic en una táctica, técnica o celda filtra el detalle; clic de nuevo lo quita.</div></div>
     <div class="panel"><h3>Técnicas más observadas</h3><div class="tipos" id="mitre-tech"></div></div>
   </div>
   <div class="panel" style="margin-top:12px">
@@ -631,6 +638,14 @@ function renderMitre(incY){
   const max=Math.max(1,...Object.values(tacCount));const g=$("#mitre-tac");g.innerHTML="";
   TACTICAS.forEach(([id,nm])=>{const n=tacCount[id]||0;const lvl=!n?"":n/max>.66?"l3":n/max>.33?"l2":"l1";const d=document.createElement("div");d.className="tac "+lvl+(fTac===id?" sel":"");d.innerHTML=`<span class="n"></span><span class="t"></span>`;d.children[0].textContent=n;d.children[1].textContent=nm;d.title=id+" · "+nm+": "+n+" incidente"+(n===1?"":"s")+" · clic para filtrar";
     d.onclick=()=>{fTac=(fTac===id)?"":id;fTech="";renderIncidentes()};g.appendChild(d)});
+  // mapa de calor tipo × táctica
+  const hm={};incY.forEach(i=>{const t=i.tipo||"Otro";hm[t]=hm[t]||{};tacsDe(i).forEach(x=>hm[t][x]=(hm[t][x]||0)+1)});
+  const tipos=Object.keys(hm).sort((a,b)=>Object.values(hm[b]).reduce((x,y)=>x+y,0)-Object.values(hm[a]).reduce((x,y)=>x+y,0));
+  const hmax=Math.max(1,...tipos.flatMap(t=>Object.values(hm[t])));const he=$("#mitre-heat");he.innerHTML="";
+  tipos.forEach(t=>{const l=document.createElement("div");l.className="hl";l.textContent=t;l.title=t;he.appendChild(l);
+    TACTICAS.forEach(([id,nm])=>{const n=hm[t][id]||0;const c=document.createElement("div");c.className="hc"+(n?"":" z")+((fTipo===t&&fTac===id)?" sel":"");c.textContent=n||"·";
+      if(n){c.style.background=`color-mix(in srgb,var(--info) ${Math.round(15+70*n/hmax)}%,var(--panel))`;c.title=`${t} × ${nm}: ${n}`;c.onclick=()=>{if(fTipo===t&&fTac===id){fTipo="";fTac=""}else{fTipo=t;fTac=id;fTech=""}$("#f-tipo").value=fTipo;renderIncidentes()}}
+      he.appendChild(c)})});
   const arr=Object.entries(techCount).sort((a,b)=>b[1]-a[1]).slice(0,8);const mx=Math.max(1,...arr.map(a=>a[1]));const ct=$("#mitre-tech");ct.innerHTML="";
   if(!arr.length)ct.innerHTML='<div class="empty">Sin técnicas asignadas.</div>';
   arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tech";d.innerHTML=`<span class="id"></span><span></span><span class="n mono"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--accent)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=(TECH[t]||{}).n||"(sin nombre en el catálogo)";d.children[2].textContent=n;if(fTech===t)d.classList.add("sel");d.onclick=()=>{fTech=(fTech===t)?"":t;fTac="";renderIncidentes()};ct.appendChild(d)});
