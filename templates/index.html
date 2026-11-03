@@ -114,6 +114,9 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .gantt svg{display:block;min-width:640px}
 .gantt text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
 .gantt .lbl{font-family:var(--font-sans);font-size:11px;fill:var(--fg)}
+.gantt .grow{cursor:pointer;outline:none}.gantt .grow:hover>rect:first-child,.gantt .grow:focus-visible>rect:first-child{fill:var(--accent-soft)}
+.card.flash{box-shadow:0 0 0 2px var(--accent)}
+@media (prefers-reduced-motion:no-preference){.card{transition:box-shadow .4s}}
 .hitos{display:flex;flex-direction:column;gap:4px;font-size:.78rem}
 .hito{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:baseline}
 .hito .d{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);white-space:nowrap}
@@ -396,18 +399,26 @@ function renderGantt(){
   const g=$("#gantt");const y0=new Date(year,0,1),y1=new Date(year+1,0,1);const today=new Date();
   const list=[...proyectos].filter(p=>p.inicio||p.fin).map(p=>{const a=p.inicio?new Date(p.inicio):null;let b=p.fin?new Date(p.fin):null;const open=!b;if(!b)b=p.estado==="Finalizado"?a:(today>y1?y1:today);return{p,a:a||b,b,open}}).filter(r=>r.b>=y0&&r.a<y1).sort((x,y)=>x.a-y.a);
   if(!list.length){g.innerHTML='<div class="empty">Sin proyectos con fechas en '+year+'.</div>';return}
-  const W=900,L=210,R=16,rowH=26,top=22,H=top+list.length*rowH+10;const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
+  const wrap=n=>{n=n||"";if(n.length<=34)return[n];const cut=n.lastIndexOf(" ",34);const a=cut>12?cut:34;const b=n.slice(a).trim();return[n.slice(0,a).trim(),b.length>36?b.slice(0,35)+"…":b]};
+  const rows=list.map(r=>({...r,lines:wrap(r.p.nombre)}));
+  const W=960,L=270,R=16,top=22;const rowH=rows.some(r=>r.lines.length>1)?34:26;const H=top+rows.length*rowH+10;const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
   let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Línea temporal de proyectos">`;
   MESES.forEach((m,i)=>{const x=sx(new Date(year,i,1));sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--line)"/><text x="${x+3}" y="${top-9}">${m}</text>`});
   if(today>=y0&&today<y1){const x=sx(today);sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--accent)" stroke-dasharray="3 3"/>`}
-  list.forEach((r,i)=>{const y=top+i*rowH;const col=r.p.estado==="Finalizado"?"var(--ok)":r.p.estado==="En pausa"?"var(--warn)":r.p.estado==="Planificado"?"var(--muted)":"var(--info)";
-    const x1=sx(r.a),x2=Math.max(sx(r.b),x1+3);const nm=(r.p.nombre||"").length>32?(r.p.nombre||"").slice(0,31)+"…":(r.p.nombre||"");
-    sv+=`<text class="lbl" x="${L-8}" y="${y+14}" text-anchor="end">${esc(nm).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
-    sv+=`<rect x="${x1}" y="${y+4}" width="${x2-x1}" height="14" rx="3" fill="${col}" ${r.open?'opacity=".55" stroke="'+col+'" stroke-dasharray="4 3"':''}><title>${esc(r.p.nombre)}: ${fmtD(r.p.inicio)} → ${r.p.fin?fmtD(r.p.fin):"en curso"} · ${r.p.avance||0} %</title></rect>`;
-    if(r.p.estado!=="Finalizado"&&r.p.avance)sv+=`<rect x="${x1}" y="${y+4}" width="${(x2-x1)*Math.min(100,+r.p.avance)/100}" height="14" rx="3" fill="${col}"/>`;
-    (r.p.hitos||[]).forEach(h=>{if(!h.fecha)return;const d=new Date(h.fecha);if(d<y0||d>=y1)return;const x=sx(d);sv+=`<path d="M${x} ${y+2} l6 9 l-6 9 l-6 -9 z" fill="${h.hecho?'var(--fg)':'var(--bg)'}" stroke="var(--fg)" stroke-width="1.2"><title>${esc(h.nombre)} · ${fmtD(h.fecha)}${h.hecho?"":" (pendiente)"}</title></path>`})});
+  const X=t=>esc(t).replace(/&/g,"&amp;").replace(/</g,"&lt;");
+  rows.forEach((r,i)=>{const y=top+i*rowH;const col=r.p.estado==="Finalizado"?"var(--ok)":r.p.estado==="En pausa"?"var(--warn)":r.p.estado==="Planificado"?"var(--muted)":"var(--info)";
+    const x1=sx(r.a),x2=Math.max(sx(r.b),x1+3);const cy=y+rowH/2;
+    sv+=`<g class="grow" data-pid="${X(r.p.id)}" tabindex="0" role="link"><rect x="0" y="${y}" width="${W}" height="${rowH}" fill="transparent"/>`;
+    r.lines.forEach((ln,k)=>{sv+=`<text class="lbl" x="${L-10}" y="${cy+(r.lines.length>1?(k?9:-3):4)}" text-anchor="end">${X(ln)}</text>`});
+    sv+=`<rect x="${x1}" y="${cy-7}" width="${x2-x1}" height="14" rx="3" fill="${col}" ${r.open?'opacity=".55" stroke="'+col+'" stroke-dasharray="4 3"':''}><title>${X(r.p.nombre)}: ${fmtD(r.p.inicio)} → ${r.p.fin?fmtD(r.p.fin):"en curso"} · ${r.p.avance||0} % · clic para ver la tarjeta</title></rect>`;
+    if(r.p.estado!=="Finalizado"&&r.p.avance)sv+=`<rect x="${x1}" y="${cy-7}" width="${(x2-x1)*Math.min(100,+r.p.avance)/100}" height="14" rx="3" fill="${col}"/>`;
+    (r.p.hitos||[]).forEach(h=>{if(!h.fecha)return;const d=new Date(h.fecha);if(d<y0||d>=y1)return;const x=sx(d);sv+=`<path d="M${x} ${cy-9} l6 9 l-6 9 l-6 -9 z" fill="${h.hecho?'var(--fg)':'var(--bg)'}" stroke="var(--fg)" stroke-width="1.2"><title>${X(h.nombre)} · ${fmtD(h.fecha)}${h.hecho?"":" (pendiente)"}</title></path>`});
+    sv+=`</g>`});
   sv+="</svg>";g.innerHTML=sv;
+  g.querySelectorAll(".grow").forEach(el=>{const go=()=>irAProyecto(el.dataset.pid);el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
 }
+function irAProyecto(pid){const p=proyectos.find(x=>x.id===pid);if(!p)return;showPtab(p.modalidad==="Tercerizado"?"ext":"int");
+  const c=document.getElementById("proy-"+pid);if(!c)return;c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),1600)}
 let ptab="int";
 function renderProyectos(){
   renderGantt();
@@ -430,7 +441,7 @@ function renderGrupo(g,note,lista,nombre){
   note.dataset.txt=list.length?`${list.filter(p=>p.estado==="En curso").length} en curso`+(pres?` · ${eur(pres)} aprobados`:""):"";
   if(!list.length){g.innerHTML='<div class="empty">Sin proyectos '+nombre+'. '+(isOwner?'Añádelos desde Administrar.':'')+'</div>';return}
   list.forEach(p=>{
-    const c=document.createElement("article");c.className="card";
+    const c=document.createElement("article");c.className="card";c.id="proy-"+p.id;
     const av=Math.max(0,Math.min(100,+p.avance||0));
     const pres=(p.presupuesto!=null&&p.presupuesto!=="")?eur(+p.presupuesto):"Sin presupuesto";
     c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
