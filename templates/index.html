@@ -55,8 +55,13 @@ button.small{padding:4px 9px;font-size:.78rem}
 section.block{margin-top:26px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
 .sec-head .eyebrow{margin-bottom:3px}
-.grid-proj{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
-.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.grid-proj{display:grid;grid-template-columns:1fr;gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 18px;display:grid;grid-template-columns:minmax(0,3fr) minmax(260px,2fr);grid-auto-rows:min-content;gap:8px 28px;min-width:0;align-items:start}
+.card>.ttl,.card>.desc,.card>.hitos,.card>.notas{grid-column:1}
+.card>.av-block,.card>.meta{grid-column:2}
+.card>.av-block{grid-row:1}.card>.meta{grid-row:2/span 3}
+.card>.row-actions{grid-column:1/-1}
+@media (max-width:700px){.card{grid-template-columns:1fr}.card>*{grid-column:1!important;grid-row:auto!important}}
 .card .ttl{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
 .card h3{font-size:.98rem;font-weight:600}
 .card p{margin:0;color:var(--muted);font-size:.85rem}
@@ -430,7 +435,7 @@ function renderGrupo(g,note,lista,nombre){
     const pres=(p.presupuesto!=null&&p.presupuesto!=="")?eur(+p.presupuesto):"Sin presupuesto";
     c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
       <p class="desc"></p>
-      <div><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
+      <div class="av-block"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
       <div class="meta">
         <div><span class="l">Inicio</span><span class="d ini"></span></div>
         <div><span class="l">Fin</span><span class="d fin"></span></div>
