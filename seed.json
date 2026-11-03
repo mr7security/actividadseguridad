@@ -154,241 +154,317 @@
           "aprox": true
         }
       ],
-      "moneda": "USD",
+      "moneda": "EUR",
       "partidas": [
         {
           "concepto": "ChatGPT Business — puesto Estándar",
           "unidades": 43,
           "precio": 240,
-          "periodo": "año"
+          "periodo": "año",
+          "moneda": "USD"
         },
         {
           "concepto": "ChatGPT Business — puesto Prémium",
           "unidades": 1,
           "precio": 1200,
+          "periodo": "año",
+          "moneda": "USD"
+        },
+        {
+          "concepto": "Claude Team — puesto Estándar",
+          "unidades": 9,
+          "precio": 216,
+          "moneda": "EUR",
+          "periodo": "año"
+        },
+        {
+          "concepto": "Claude Team — puesto Premium",
+          "unidades": 3,
+          "precio": 1080,
+          "moneda": "EUR",
           "periodo": "año"
         }
       ],
       "puestos": [
         {
           "email": "administracionsgp@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2024-12-11"
         },
         {
           "email": "apastor@logiplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-02-27"
         },
         {
           "email": "alozano@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-24"
         },
         {
           "email": "alpedernera@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-23"
         },
         {
           "email": "amachordom@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "djimenez@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "drosell@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-23"
         },
         {
           "email": "informatica@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2024-11-07"
         },
         {
           "email": "dtomas@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-23"
         },
         {
           "email": "esanchez@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-18"
         },
         {
           "email": "fribera@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-24"
         },
         {
           "email": "garoca@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "gvillar@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-27"
         },
         {
           "email": "amiralles@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-02-12"
         },
         {
           "email": "jcbarbera@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-04-14"
         },
         {
           "email": "jtirado@ktlceramica.com",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-07"
         },
         {
           "email": "laguilera@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-23"
         },
         {
           "email": "lmateu@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "lmollon@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-23"
         },
         {
           "email": "lperez@nuevaalaplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-28"
         },
         {
           "email": "mromeroa@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "mccruz@vitacer.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-16"
         },
         {
           "email": "mrebolledo@serviplana.es",
-          "tipo": "Prémium",
+          "tipo": "ChatGPT Prémium",
           "fecha": "2026-10-02"
         },
         {
           "email": "mnavarro@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-26"
         },
         {
           "email": "nvila@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "pdetomas@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-24"
         },
         {
           "email": "pvalls@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-30"
         },
         {
           "email": "pcueco@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-17"
         },
         {
           "email": "pnavarro@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-16"
         },
         {
           "email": "prevencion@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-03-30"
         },
         {
           "email": "r.aparici@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-07"
         },
         {
           "email": "rtorres@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-21"
         },
         {
           "email": "rrhh@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-03-23"
         },
         {
           "email": "sveral@venuxsurface.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-07-16"
         },
         {
           "email": "santiago.tirado@nuevaalaplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-01"
         },
         {
           "email": "sbeneyto@ktlceramica.com",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-08"
         },
         {
           "email": "sergio.gutierrez@nuevaalaplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-28"
         },
         {
           "email": "svazquez@nuevaalaplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-09-28"
         },
         {
           "email": "stncomercialgpt@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-06-04"
         },
         {
           "email": "tgualde@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "trodriguez@stnceramica.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "vleon@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-15"
         },
         {
           "email": "vperez@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2026-10-19"
         },
         {
           "email": "varnaug@serviplana.es",
-          "tipo": "Estándar",
+          "tipo": "ChatGPT Estándar",
           "fecha": "2025-03-05"
+        },
+        {
+          "email": "informatica@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "arivera@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "acuecos@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "dtomas@serviplana.es",
+          "tipo": "Claude Premium",
+          "fecha": ""
+        },
+        {
+          "email": "fribera@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "fespinoza@serviplana.es",
+          "tipo": "Claude Premium",
+          "fecha": ""
+        },
+        {
+          "email": "lmollon@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "maforner@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "msubies@serviplana.es",
+          "tipo": "Claude Premium",
+          "fecha": ""
+        },
+        {
+          "email": "mmarti@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "onavarro@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
+        },
+        {
+          "email": "pdetomas@serviplana.es",
+          "tipo": "Claude Estándar",
+          "fecha": ""
         }
       ],
       "impuestos": true
