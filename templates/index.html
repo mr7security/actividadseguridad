@@ -293,23 +293,28 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 
 <div class="view" id="view-cau">
 <div class="kpis">
-  <div class="kpi"><span class="eyebrow">Recibidos</span><span class="v mono" id="k-cau-tot">—</span><span class="s" id="k-cau-tot-s">en el año</span></div>
-  <div class="kpi"><span class="eyebrow">Cerrados</span><span class="v mono" id="k-cau-cer">—</span><span class="s" id="k-cau-cer-s">del año</span></div>
-  <div class="kpi"><span class="eyebrow">Abiertos ahora</span><span class="v mono" id="k-cau-abi">—</span><span class="s">pendientes (todos los años)</span></div>
-  <div class="kpi"><span class="eyebrow">Media mensual</span><span class="v mono" id="k-cau-med">—</span><span class="s">CAUs recibidos por mes</span></div>
+  <div class="kpi k1"><div class="kh"><span class="eyebrow">Recibidos</span><span class="ico">&#9993;</span></div><span class="v mono" id="k-cau-tot">—</span><span class="s" id="k-cau-tot-s">en el año</span><div class="mini" id="k-cau-tot-bar"></div></div>
+  <div class="kpi k3"><div class="kh"><span class="eyebrow">Cerrados</span><span class="ico">&#10003;</span></div><div class="ring-wrap"><svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="k-cau-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--ok)" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 113.1" transform="rotate(-90 22 22)"/></svg><div><span class="v mono" id="k-cau-cer">—</span><span class="s" id="k-cau-cer-s">del año</span></div></div></div>
+  <div class="kpi k2" style="--kc:var(--warn)"><div class="kh"><span class="eyebrow">Abiertos ahora</span><span class="ico">&#9203;</span></div><span class="v mono" id="k-cau-abi">—</span><span class="s">pendientes (todos los años)</span><div class="mini" id="k-cau-abi-bar"></div></div>
+  <div class="kpi k4"><div class="kh"><span class="eyebrow">Media mensual</span><span class="ico">&#8776;</span></div><span class="v mono" id="k-cau-med">—</span><span class="s">CAUs recibidos por mes</span><div class="mini" id="k-cau-med-bar"></div></div>
 </div>
 <section class="block">
   <div class="sec-head"><div><div class="eyebrow">CAUs</div><h2>Solicitudes recibidas por el área</h2></div><span class="note" id="cau-note"></span></div>
   <div class="two">
-    <div class="panel"><h3>Por mes de creación</h3><div class="legend"><span><i style="background:var(--ok)"></i>Cerrados</span><span><i style="background:var(--warn)"></i>Abiertos</span><span><i style="background:var(--bad)"></i>Rechazados</span></div><div id="chart-cau-mes"></div></div>
-    <div class="panel"><h3>Por prioridad y estado</h3><div class="tipos" id="chart-cau-prio"></div></div>
+    <div class="panel"><h3>Por mes de creación <span class="note">· clic en una barra filtra el mes</span></h3><div class="legend"><span><i style="background:var(--ok)"></i>Cerrados</span><span><i style="background:var(--warn)"></i>Abiertos</span><span><i style="background:var(--bad)"></i>Rechazados</span></div><div id="chart-cau-mes"></div></div>
+    <div class="panel"><h3>Por prioridad y estado <span class="note">· clic filtra</span></h3><div class="tipos" id="chart-cau-prio"></div></div>
+  </div>
+  <div class="two" style="margin-top:12px">
+    <div class="panel"><h3>Solicitantes más frecuentes <span class="note">· clic filtra</span></h3><div class="tipos" id="chart-cau-sol"></div></div>
+    <div class="panel"><h3>Clasificados como incidente de seguridad</h3><div class="tipos" id="chart-cau-inc"></div></div>
   </div>
   <div class="panel" style="margin-top:12px">
-    <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle</h3>
+    <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle <span class="note" id="cau-count"></span></h3>
       <div class="filters">
         <input id="f-cau-q" class="search" placeholder="Buscar asunto o solicitante" aria-label="Buscar">
         <select id="f-cau-mes" aria-label="Filtrar por mes"><option value="">Todos los meses</option></select>
         <select id="f-cau-est" aria-label="Filtrar por estado"><option value="">Todos los estados</option><option>ABIERTA</option><option>CERRADA</option><option>RECHAZADA</option></select>
+        <span class="chips" id="fc-chips"></span>
       </div>
     </div>
     <div class="tablewrap"><table id="tbl-cau"><thead><tr><th>ID</th><th>Creado</th><th>Asunto</th><th>Solicitante</th><th>Prioridad</th><th>Estado</th><th>Vence</th></tr></thead><tbody></tbody></table></div>
@@ -432,7 +437,7 @@ let cfg={departamento:"Departamento de IT · Seguridad de la Información",titul
 const parseIds=s=>String(s||"").split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x));
 function mitreIds(i){if(i.mitre&&i.mitre.length)return i.mitre;const m=cfg.mitre||DEF_MITRE;return parseIds(m[i.tipo]??DEF_MITRE[i.tipo]??"")}
 let proyectos=[],incidentes=[],caus=[];
-let year=new Date().getFullYear(),fMes="",fTipo="",fTac="",fTech="",fcMes="",fcEst="",fcQ="";
+let year=new Date().getFullYear(),fMes="",fTipo="",fTac="",fTech="",fcMes="",fcEst="",fcQ="",fcPrio="",fcSol="";
 const eur=(n,cur)=>new Intl.NumberFormat("es-ES",{style:"currency",currency:cur||"EUR",maximumFractionDigits:0}).format(n);
 const presDe=p=>{const part=(p.partidas||[]).filter(x=>x.precio!=null);if(part.length)return part.reduce((a,x)=>a+(+x.unidades||0)*(+x.precio||0),0);return(p.presupuesto!=null&&p.presupuesto!=="")?+p.presupuesto:null};
 const fmtD=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return d&&m?`${d}/${m}/${y}`:s};
@@ -481,9 +486,12 @@ function renderKPIs(){
   // CAUs
   const cY=caus.filter(c=>(c.creacion||"").startsWith(year));
   $("#k-cau-tot").textContent=cY.length;$("#k-cau-tot-s").textContent=`recibidos en ${year}`;
-  $("#k-cau-cer").textContent=cY.filter(c=>c.estado==="CERRADA").length;$("#k-cau-cer-s").textContent=`cerrados de los de ${year}`;
-  $("#k-cau-abi").textContent=caus.filter(c=>c.estado==="ABIERTA").length;
+  const ce=e=>cY.filter(c=>c.estado===e).length;stack([{l:"Cerrados",n:ce("CERRADA"),c:"var(--ok)"},{l:"Abiertos",n:ce("ABIERTA"),c:"var(--warn)"},{l:"Rechazados",n:ce("RECHAZADA"),c:"var(--bad)"}],$("#k-cau-tot-bar"));
+  const cer=ce("CERRADA");$("#k-cau-cer").textContent=cer;$("#k-cau-cer-s").textContent=cY.length?`${Math.round(cer/cY.length*100)} % de los de ${year}`:`cerrados de los de ${year}`;$("#k-cau-ring").setAttribute("stroke-dasharray",(cY.length?113.1*cer/cY.length:0).toFixed(1)+" 113.1");
+  const ab=caus.filter(c=>c.estado==="ABIERTA");const hoy=new Date().toISOString().slice(0,10);const venc=ab.filter(c=>c.vencimiento&&c.vencimiento.slice(0,10)<hoy).length;
+  $("#k-cau-abi").textContent=ab.length;stack([{l:"En plazo",n:ab.length-venc,c:"var(--info)"},{l:"Vencidos",n:venc,c:"var(--bad)"}],$("#k-cau-abi-bar"));
   const months=new Set(cY.map(c=>c.creacion.slice(0,7)));$("#k-cau-med").textContent=months.size?(cY.length/months.size).toFixed(1):"—";
+  const ni=cY.filter(c=>c.tipo_incidente).length;stack([{l:"Seguridad",n:ni,c:"var(--bad)"},{l:"Peticiones",n:cY.length-ni,c:"var(--info)"}],$("#k-cau-med-bar"));
 }
 
 function renderGantt(){
@@ -690,18 +698,31 @@ function renderCaus(){
   const byP={};cY.forEach(c=>{const k=c.prioridad||"—";byP[k]=byP[k]||{n:0,ab:0};byP[k].n++;if(c.estado==="ABIERTA")byP[k].ab++});
   const arr=Object.entries(byP).sort((a,b)=>b[1].n-a[1].n);const mx=Math.max(1,...arr.map(a=>a[1].n));
   if(!arr.length)ct.innerHTML='<div class="empty">—</div>';
-  arr.forEach(([k,v])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${v.n/mx*100}%;background:var(--info)"></i></div>`;d.children[0].textContent="Prioridad "+k;d.children[1].textContent=`${v.n} · ${v.ab} abiertos`;ct.appendChild(d)});
+  const item=(host,label,val,w,color,sel,fn)=>{const d=document.createElement("div");d.className="tipo tech"+(sel?" sel":"");d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${w}%;background:${color}"></i></div>`;d.children[0].textContent=label;d.children[1].textContent=val;d.onclick=fn;host.appendChild(d)};
+  arr.forEach(([k,v])=>item(ct,"Prioridad "+k,`${v.n} · ${v.ab} abiertos`,v.n/mx*100,"var(--info)",fcPrio===k,()=>{fcPrio=(fcPrio===k)?"":k;renderCaus()}));
   const st={};cY.forEach(c=>{st[c.estado||"—"]=(st[c.estado||"—"]||0)+1});
-  Object.entries(st).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${n/cY.length*100}%;background:${COL[k]||'var(--muted)'}"></i></div>`;d.children[0].textContent=k.charAt(0)+k.slice(1).toLowerCase()+"s";d.children[1].textContent=n+" · "+Math.round(n/cY.length*100)+" %";ct.appendChild(d)});
+  Object.entries(st).sort((a,b)=>b[1]-a[1]).forEach(([k,n])=>item(ct,k.charAt(0)+k.slice(1).toLowerCase()+"s",n+" · "+Math.round(n/cY.length*100)+" %",n/cY.length*100,COL[k]||'var(--muted)',fcEst===k,()=>{fcEst=(fcEst===k)?"":k;$("#f-cau-est").value=fcEst;renderCaus()}));
+  // solicitantes
+  const so={};cY.forEach(c=>{const k=c.solicitante||"—";so[k]=(so[k]||0)+1});const sa=Object.entries(so).sort((a,b)=>b[1]-a[1]).slice(0,8);const smx=Math.max(1,...sa.map(x=>x[1]));
+  const cs=$("#chart-cau-sol");cs.innerHTML="";if(!sa.length)cs.innerHTML='<div class="empty">—</div>';
+  sa.forEach(([k,n])=>item(cs,k,n+" · "+Math.round(n/cY.length*100)+" %",n/smx*100,"#8E7CC3",fcSol===k,()=>{fcSol=(fcSol===k)?"":k;renderCaus()}));
+  // clasificados como incidente
+  const ti={};cY.forEach(c=>{if(c.tipo_incidente)ti[c.tipo_incidente]=(ti[c.tipo_incidente]||0)+1});const ta=Object.entries(ti).sort((a,b)=>b[1]-a[1]);const tmx=Math.max(1,...ta.map(x=>x[1]));
+  const ci=$("#chart-cau-inc");ci.innerHTML="";if(!ta.length)ci.innerHTML='<div class="empty">Ninguno en '+year+'.</div>';
+  const nInc=ta.reduce((a,x)=>a+x[1],0);
+  ta.forEach(([k,n])=>item(ci,k,n+" · "+Math.round(n/nInc*100)+" %",n/tmx*100,"var(--bad)",false,()=>{showView("inc");fTipo=k;$("#f-tipo").value=k;renderIncidentes();window.scrollTo({top:0,behavior:"smooth"})}));
   renderTablaCau();
 }
 function renderTablaCau(){
   const tb=$("#tbl-cau tbody");tb.innerHTML="";const q=fcQ.toLowerCase();
-  const rows=caus.filter(c=>(c.creacion||"").startsWith(year)&&(!fcMes||+c.creacion.slice(5,7)===+fcMes)&&(!fcEst||c.estado===fcEst)&&(!q||(c.asunto||"").toLowerCase().includes(q)||(c.solicitante||"").toLowerCase().includes(q))).sort((a,b)=>(b.creacion||"").localeCompare(a.creacion||""));
-  $("#cau-empty").hidden=!!rows.length;
+  const rows=caus.filter(c=>(c.creacion||"").startsWith(year)&&(!fcMes||+c.creacion.slice(5,7)===+fcMes)&&(!fcEst||c.estado===fcEst)&&(!fcPrio||(c.prioridad||"—")===fcPrio)&&(!fcSol||(c.solicitante||"—")===fcSol)&&(!q||(c.asunto||"").toLowerCase().includes(q)||(c.solicitante||"").toLowerCase().includes(q))).sort((a,b)=>(b.creacion||"").localeCompare(a.creacion||""));
+  $("#cau-empty").hidden=!!rows.length;$("#cau-count").textContent=`· ${rows.length}`;
+  const ch=$("#fc-chips");ch.innerHTML="";const chip=(l,fn)=>{const c=document.createElement("span");c.className="chip";c.textContent=l+" ×";c.title="Quitar filtro";c.onclick=fn;ch.appendChild(c)};
+  if(fcMes)chip(MESES[+fcMes-1],()=>{fcMes="";$("#f-cau-mes").value="";renderCaus()});if(fcEst)chip(fcEst.charAt(0)+fcEst.slice(1).toLowerCase(),()=>{fcEst="";$("#f-cau-est").value="";renderCaus()});
+  if(fcPrio)chip("Prioridad "+fcPrio,()=>{fcPrio="";renderCaus()});if(fcSol)chip(fcSol,()=>{fcSol="";renderCaus()});
   rows.forEach(c=>{const tr=document.createElement("tr");tr.innerHTML=`<td class="mono"></td><td class="mono"></td><td></td><td></td><td></td><td></td><td class="mono"></td>`;
     tr.children[0].textContent=c.id;tr.children[1].textContent=fmtD((c.creacion||"").slice(0,10));tr.children[2].textContent=c.asunto||"";if(c.tipo_incidente){const sp=document.createElement("span");sp.className="pill auto";sp.textContent=c.tipo_incidente;sp.style.marginLeft="6px";tr.children[2].appendChild(sp)}tr.children[3].textContent=c.solicitante||"";tr.children[4].textContent=c.prioridad||"";
-    const sp=document.createElement("span");sp.className="pill "+(c.estado||"").toLowerCase();sp.textContent=c.estado||"";tr.children[5].appendChild(sp);tr.children[6].textContent=fmtD((c.vencimiento||"").slice(0,10));tb.appendChild(tr)});
+    const sp=document.createElement("span");sp.className="pill "+(c.estado||"").toLowerCase();sp.textContent=c.estado||"";tr.children[5].appendChild(sp);tr.children[6].textContent=fmtD((c.vencimiento||"").slice(0,10));if(c.estado==="ABIERTA"&&c.vencimiento&&c.vencimiento.slice(0,10)<new Date().toISOString().slice(0,10)){tr.children[6].style.color="var(--bad)";tr.children[6].title="Vencido"}tb.appendChild(tr)});
 }
 function renderAll(){renderHeader();renderKPIs();renderProyectos();renderIncidentes();renderCaus();}
 document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
@@ -767,7 +788,7 @@ $("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes()
 $("#f-mes").onchange=e=>{fMes=e.target.value;renderIncidentes()};
 $("#f-tipo").onchange=e=>{fTipo=e.target.value;renderIncidentes()};
 $("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderCaus()};
-$("#f-cau-est").onchange=e=>{fcEst=e.target.value;renderTablaCau()};
+$("#f-cau-est").onchange=e=>{fcEst=e.target.value;renderCaus()};
 $("#f-cau-q").oninput=e=>{fcQ=e.target.value;renderTablaCau()};
 $("#form-cau").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;const f=$("#cau-file").files[0];if(!f)return;
   $("#cau-status").textContent="Importando…";const fd=new FormData();fd.append("file",f);
