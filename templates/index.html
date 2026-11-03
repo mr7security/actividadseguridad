@@ -104,6 +104,18 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .search{width:auto;min-width:180px}
 .pill.auto{color:var(--accent);border-color:var(--accent)}
 .pill.abierto{color:var(--warn);border-color:var(--warn)}
+/* timeline */
+.gantt{overflow-x:auto}
+.gantt svg{display:block;min-width:640px}
+.gantt text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.gantt .lbl{font-family:var(--font-sans);font-size:11px;fill:var(--fg)}
+.hitos{display:flex;flex-direction:column;gap:4px;font-size:.78rem}
+.hito{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:baseline}
+.hito .d{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);white-space:nowrap}
+.hito .dot{width:8px;height:8px;border-radius:50%;background:var(--ok);align-self:center}
+.hito.pend .dot{background:transparent;border:2px solid var(--muted)}
+.hito-row{display:grid;grid-template-columns:130px 1fr auto auto;gap:6px;align-items:center}
+@media (max-width:560px){.hito-row{grid-template-columns:1fr 1fr}}
 /* mitre */
 .mitre{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px}
 .tac{border:1px solid var(--line);border-radius:6px;padding:8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--panel2)}
@@ -162,6 +174,10 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   <div class="kpi"><span class="eyebrow">Presupuesto aprobado</span><span class="v mono" id="k-pres">—</span><span class="s" id="k-pres-s">sin presupuesto asignado</span></div>
   <div class="kpi"><span class="eyebrow">Internos / tercerizados</span><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span></div>
 </div>
+<section class="block">
+  <div class="sec-head"><div><div class="eyebrow">Línea temporal</div><h2>Proyectos e hitos en el año</h2></div><span class="note">Barra = inicio → fin (previsto en punteado) · ◆ hito cumplido · ◇ hito pendiente</span></div>
+  <div class="panel gantt" id="gantt"></div>
+</section>
 <section class="block">
   <div class="sec-head">
     <div class="tabs" role="tablist" aria-label="Tipo de proyecto">
@@ -257,6 +273,11 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Presupuesto aprobado (€)<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto"></label>
       <label>Recursos<input id="p-rec" placeholder="Recursos propios"></label>
       <label class="full">Notas / enlace<input id="p-notas"></label>
+      <div class="full">
+        <div class="eyebrow" style="margin-bottom:6px">Hitos</div>
+        <div id="p-hitos" style="display:grid;gap:6px"></div>
+        <button type="button" class="small" id="p-addhito" style="margin-top:6px">+ Añadir hito</button>
+      </div>
       <div class="acts"><span class="note" id="p-status"></span><button type="button" class="ghost" id="p-cancel">Limpiar</button><button type="submit" class="primary">Guardar proyecto</button></div>
     </form>
 
@@ -366,8 +387,25 @@ function renderKPIs(){
   const months=new Set(cY.map(c=>c.creacion.slice(0,7)));$("#k-cau-med").textContent=months.size?(cY.length/months.size).toFixed(1):"—";
 }
 
+function renderGantt(){
+  const g=$("#gantt");const y0=new Date(year,0,1),y1=new Date(year+1,0,1);const today=new Date();
+  const list=[...proyectos].filter(p=>p.inicio||p.fin).map(p=>{const a=p.inicio?new Date(p.inicio):null;let b=p.fin?new Date(p.fin):null;const open=!b;if(!b)b=p.estado==="Finalizado"?a:(today>y1?y1:today);return{p,a:a||b,b,open}}).filter(r=>r.b>=y0&&r.a<y1).sort((x,y)=>x.a-y.a);
+  if(!list.length){g.innerHTML='<div class="empty">Sin proyectos con fechas en '+year+'.</div>';return}
+  const W=900,L=210,R=16,rowH=26,top=22,H=top+list.length*rowH+10;const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
+  let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Línea temporal de proyectos">`;
+  MESES.forEach((m,i)=>{const x=sx(new Date(year,i,1));sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--line)"/><text x="${x+3}" y="${top-9}">${m}</text>`});
+  if(today>=y0&&today<y1){const x=sx(today);sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--accent)" stroke-dasharray="3 3"/>`}
+  list.forEach((r,i)=>{const y=top+i*rowH;const col=r.p.estado==="Finalizado"?"var(--ok)":r.p.estado==="En pausa"?"var(--warn)":r.p.estado==="Planificado"?"var(--muted)":"var(--info)";
+    const x1=sx(r.a),x2=Math.max(sx(r.b),x1+3);const nm=(r.p.nombre||"").length>32?(r.p.nombre||"").slice(0,31)+"…":(r.p.nombre||"");
+    sv+=`<text class="lbl" x="${L-8}" y="${y+14}" text-anchor="end">${esc(nm).replace(/&/g,"&amp;").replace(/</g,"&lt;")}</text>`;
+    sv+=`<rect x="${x1}" y="${y+4}" width="${x2-x1}" height="14" rx="3" fill="${col}" ${r.open?'opacity=".55" stroke="'+col+'" stroke-dasharray="4 3"':''}><title>${esc(r.p.nombre)}: ${fmtD(r.p.inicio)} → ${r.p.fin?fmtD(r.p.fin):"en curso"} · ${r.p.avance||0} %</title></rect>`;
+    if(r.p.estado!=="Finalizado"&&r.p.avance)sv+=`<rect x="${x1}" y="${y+4}" width="${(x2-x1)*Math.min(100,+r.p.avance)/100}" height="14" rx="3" fill="${col}"/>`;
+    (r.p.hitos||[]).forEach(h=>{if(!h.fecha)return;const d=new Date(h.fecha);if(d<y0||d>=y1)return;const x=sx(d);sv+=`<path d="M${x} ${y+2} l6 9 l-6 9 l-6 -9 z" fill="${h.hecho?'var(--fg)':'var(--bg)'}" stroke="var(--fg)" stroke-width="1.2"><title>${esc(h.nombre)} · ${fmtD(h.fecha)}${h.hecho?"":" (pendiente)"}</title></path>`})});
+  sv+="</svg>";g.innerHTML=sv;
+}
 let ptab="int";
 function renderProyectos(){
+  renderGantt();
   const ints=proyectos.filter(p=>p.modalidad!=="Tercerizado"),exts=proyectos.filter(p=>p.modalidad==="Tercerizado");
   renderGrupo($("#proy-grid"),$("#proy-note"),ints,"internos");
   renderGrupo($("#proy-grid-ext"),$("#proy-note-ext"),exts,"tercerizados");
@@ -399,12 +437,15 @@ function renderGrupo(g,note,lista,nombre){
         <div><span class="l">Presupuesto</span><span class="d pre"></span></div>
         <div><span class="l">Recursos</span><span class="d rec"></span></div>
       </div>
+      <div class="hitos"></div>
       <p class="notas" style="font-size:.78rem"></p>
       <div class="row-actions" hidden><button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button></div>`;
     c.querySelector("h3").textContent=p.nombre||"(sin nombre)";c.querySelector(".pill").textContent=p.estado||"—";
     c.querySelector(".desc").textContent=p.descripcion||"";c.querySelector(".av").textContent=av+" %";
     c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
     c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.modalidad==="Tercerizado"?(p.proveedor?"Proveedor: "+p.proveedor:"Proveedor externo"):(p.recursos||"Recursos propios");
+    const hl=c.querySelector(".hitos");const hs=[...(p.hitos||[])].sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||""));
+    if(hs.length){hs.forEach(h=>{const d=document.createElement("div");d.className="hito"+(h.hecho?"":" pend");d.innerHTML=`<span class="dot"></span><span class="d"></span><span></span>`;d.children[1].textContent=fmtD(h.fecha)+(h.aprox?" ~":"");d.children[2].textContent=h.nombre||"";hl.appendChild(d)})}else hl.remove();
     const n=c.querySelector(".notas");if(p.notas){ if(/^https?:\/\//.test(p.notas)){const a=document.createElement("a");a.href=p.notas;a.target="_blank";a.rel="noopener";a.textContent=p.notas;a.style.color="var(--accent)";n.appendChild(a)}else n.textContent=p.notas}else n.remove();
     if(isOwner){const ra=c.querySelector(".row-actions");ra.hidden=false;ra.querySelector('[data-act=edit]').onclick=()=>editProy(p);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/proyectos/"+p.id).then(()=>toast("Proyecto eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)))}
     g.appendChild(c);
@@ -506,16 +547,22 @@ $("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;document.bod
 
 function editProy(p){showTab("proy");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
   $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
-  $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";
+  $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";pHitos=(p.hitos||[]).map(h=>({...h}));renderHitosEditor();
   $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
-$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""};
+$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor()};
 $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#p-id").value||("p"+Date.now().toString(36));
   const pres=$("#p-pres").value;
   const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
-    inicio:$("#p-inicio").value,fin:$("#p-fin").value,presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
-  try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
+    inicio:$("#p-inicio").value,fin:$("#p-fin").value,hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
+  try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
 
+let pHitos=[];
+function renderHitosEditor(){const c=$("#p-hitos");c.innerHTML="";pHitos.forEach((h,i)=>{const r=document.createElement("div");r.className="hito-row";
+  r.innerHTML=`<input type="date" aria-label="Fecha"><input placeholder="Nombre del hito" aria-label="Hito"><label style="display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);white-space:nowrap"><input type="checkbox" style="width:auto">Hecho</label><button type="button" class="small danger" aria-label="Quitar">×</button>`;
+  const [fd,fn,lb,bt]=r.children;fd.value=h.fecha||"";fn.value=h.nombre||"";lb.firstElementChild.checked=!!h.hecho;
+  fd.oninput=e=>h.fecha=e.target.value;fn.oninput=e=>h.nombre=e.target.value;lb.firstElementChild.onchange=e=>h.hecho=e.target.checked;bt.onclick=()=>{pHitos.splice(i,1);renderHitosEditor()};c.appendChild(r)})}
+$("#p-addhito").onclick=()=>{pHitos.push({fecha:"",nombre:"",hecho:false});renderHitosEditor()};
 let incEditing=null;
 function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
   $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-mitre").value=(i.mitre||[]).join(", ");$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
@@ -535,7 +582,7 @@ $("#form-cfg").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const mitre={};document.querySelectorAll("#c-mitre input").forEach(i=>mitre[i.dataset.tipo]=parseIds(i.value).join(", "));
   try{await api("PUT","/api/config",{departamento:$("#c-dept").value.trim(),titulo:$("#c-title").value.trim(),tipos:cfgTipos.slice(),mitre,actualizado:new Date().toISOString()});toast("Ajustes guardados")}catch(err){toast("No se pudo guardar: "+err.code)}};
 
-$("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes()};
+$("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes();renderCaus();renderGantt()};
 $("#f-mes").onchange=e=>{fMes=e.target.value;renderTabla()};
 $("#f-tipo").onchange=e=>{fTipo=e.target.value;renderTabla()};
 $("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderTablaCau()};

@@ -23,12 +23,26 @@
       "fin": "2026-09-14",
       "inicio": "2026-09-01",
       "nombre": "Mapeo de cumplimiento del AI Act",
-      "notas": "Entregables: Excel de mapeo y PPTX para Gerencia.",
+      "notas": "Entregables: Excel de mapeo y PPTX para Gerencia. Fecha de inicio aproximada.",
       "presupuesto": null,
       "recursos": "Recursos propios",
       "id": "p-ai-act",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-09-14",
+          "nombre": "Matriz artículo × departamento (Excel)",
+          "hecho": true,
+          "aprox": true
+        },
+        {
+          "fecha": "2026-09-14",
+          "nombre": "Presentación a Gerencia (PPTX)",
+          "hecho": true,
+          "aprox": true
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -38,12 +52,38 @@
       "fin": "2026-12-31",
       "inicio": "2026-03-01",
       "nombre": "Programa de concienciación en ciberseguridad",
-      "notas": "Programa continuo durante el año. Fecha de inicio aproximada: ajustar.",
+      "notas": "Programa continuo durante el año. Fecha de inicio aproximada: ajustar. Fecha de inicio aproximada.",
       "presupuesto": null,
       "recursos": "Recursos propios",
       "id": "p-concienciacion",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-05-12",
+          "nombre": "Guía rápida: phishing del falso SharePoint (CAU 162813)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-08-12",
+          "nombre": "Simulacros: contraseñas, datos, incidentes, IA",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-08-13",
+          "nombre": "Portal de formación en seguridad",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-08-22",
+          "nombre": "Campañas: phishing, smishing, personaje Pepe, GIFs",
+          "hecho": true,
+          "aprox": true
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -58,7 +98,21 @@
       "recursos": "Recursos propios",
       "id": "p-cpd-tv",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-10-02",
+          "nombre": "Boceto visual 1920×1080 del plano de la sala",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-12-15",
+          "nombre": "Integración de sondas, cámaras y cerradura",
+          "hecho": false,
+          "aprox": true
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -66,14 +120,40 @@
       "descripcion": "Eliminación de cuentas compartidas de ChatGPT y Claude y asignación de cuentas nominales; evaluación del salto de ChatGPT Business a Enterprise.",
       "estado": "En curso",
       "fin": "",
-      "inicio": "2026-10-01",
+      "inicio": "2026-09-22",
       "nombre": "Paso de cuentas de IA compartidas a nominales",
       "notas": "Presupuesto Enterprise recibido (38–48 USD/usuario/mes), sin aprobar.",
       "presupuesto": null,
       "recursos": "Recursos propios",
       "id": "p-cuentas-nominales",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-09-22",
+          "nombre": "Solicitud de cuentas de IA nominativas (CAU 177678)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-01",
+          "nombre": "Licencias Claude para el equipo de software (CAU 178865)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-15",
+          "nombre": "Primera cuenta ChatGPT nominal creada (CAU 180104)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-11-30",
+          "nombre": "Decisión sobre el salto a ChatGPT Enterprise",
+          "hecho": false,
+          "aprox": true
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -88,22 +168,62 @@
       "recursos": "Recursos propios",
       "id": "p-reportes-erp",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-10-23",
+          "nombre": "Conexión a la réplica de solo lectura del ERP",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-26",
+          "nombre": "Dashboard Flask con login y envío por Direct Send",
+          "hecho": true,
+          "aprox": true
+        },
+        {
+          "fecha": "2026-10-28",
+          "nombre": "Segundo reporte Ventas (Alb) y multi-reporte en producción",
+          "hecho": true,
+          "aprox": false
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
       "avance": 100,
       "descripcion": "Panel web de temperatura y humedad de las sedes de SGP (sondas HW-group STE2/Poseidon2 y Delta EnviroStation). Histórico diario y servicio en el servidor Ubuntu.",
       "estado": "Finalizado",
-      "fin": "2026-08-15",
-      "inicio": "2026-06-01",
+      "fin": "2026-09-04",
+      "inicio": "2026-08-01",
       "nombre": "Dashboard de monitorización ambiental",
-      "notas": "En producción. Fechas aproximadas: ajustar.",
+      "notas": "En producción. Fechas aproximadas: ajustar. Fecha de inicio aproximada.",
       "presupuesto": null,
       "recursos": "Recursos propios",
       "id": "p-sensores",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-08-31",
+          "nombre": "Primera versión publicada (environmental-dashboard)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-09-04",
+          "nombre": "Repo dashboard-sensores en producción",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-02",
+          "nombre": "Boceto de la vista del CPD para TV",
+          "hecho": true,
+          "aprox": false
+        }
+      ]
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -118,7 +238,27 @@
       "recursos": "Recursos propios",
       "id": "p-uso-ia",
       "modalidad": "Interno",
-      "proveedor": ""
+      "proveedor": "",
+      "hitos": [
+        {
+          "fecha": "2026-10-02",
+          "nombre": "Boceto con datos simulados",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-10-07",
+          "nombre": "Repo dashboard-ia publicado",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-11-30",
+          "nombre": "Carga de datos reales de puestos y costes",
+          "hecho": false,
+          "aprox": true
+        }
+      ]
     }
   ],
   "incidentes": [
