@@ -564,9 +564,9 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
 
 let pHitos=[];
 function renderHitosEditor(){const c=$("#p-hitos");c.innerHTML="";pHitos.forEach((h,i)=>{const r=document.createElement("div");r.className="hito-row";
-  r.innerHTML=`<input type="date" aria-label="Fecha"><input placeholder="Nombre del hito" aria-label="Hito"><label style="display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);white-space:nowrap"><input type="checkbox" style="width:auto">Hecho</label><button type="button" class="small danger" aria-label="Quitar">×</button>`;
-  const [fd,fn,lb,bt]=r.children;fd.value=h.fecha||"";fn.value=h.nombre||"";lb.firstElementChild.checked=!!h.hecho;
-  fd.oninput=e=>h.fecha=e.target.value;fn.oninput=e=>h.nombre=e.target.value;lb.firstElementChild.onchange=e=>h.hecho=e.target.checked;bt.onclick=()=>{pHitos.splice(i,1);renderHitosEditor()};c.appendChild(r)})}
+  r.innerHTML=`<input type="date" aria-label="Fecha"><input placeholder="Nombre del hito" aria-label="Hito"><span style="display:flex;gap:10px"><label style="display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);white-space:nowrap"><input type="checkbox" style="width:auto">Hecho</label><label style="display:flex;gap:4px;align-items:center;font-size:.75rem;color:var(--muted);white-space:nowrap"><input type="checkbox" style="width:auto">Aprox.</label></span><button type="button" class="small danger" aria-label="Quitar">×</button>`;
+  const [fd,fn,sp,bt]=r.children;const [lh,la]=sp.children;fd.value=h.fecha||"";fn.value=h.nombre||"";lh.firstElementChild.checked=!!h.hecho;la.firstElementChild.checked=!!h.aprox;
+  fd.oninput=e=>h.fecha=e.target.value;fn.oninput=e=>h.nombre=e.target.value;lh.firstElementChild.onchange=e=>h.hecho=e.target.checked;la.firstElementChild.onchange=e=>h.aprox=e.target.checked;bt.onclick=()=>{pHitos.splice(i,1);renderHitosEditor()};c.appendChild(r)})}
 $("#p-addhito").onclick=()=>{pHitos.push({fecha:"",nombre:"",hecho:false});renderHitosEditor()};
 let incEditing=null;
 function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
