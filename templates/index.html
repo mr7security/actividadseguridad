@@ -157,11 +157,15 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   <div class="kpi"><span class="eyebrow">Proyectos en curso</span><span class="v mono" id="k-proy">—</span><span class="s" id="k-proy-s">de los registrados</span></div>
   <div class="kpi"><span class="eyebrow">Avance medio</span><span class="v mono" id="k-avance">—</span><span class="s">proyectos en curso</span></div>
   <div class="kpi"><span class="eyebrow">Presupuesto aprobado</span><span class="v mono" id="k-pres">—</span><span class="s" id="k-pres-s">sin presupuesto asignado</span></div>
-  <div class="kpi"><span class="eyebrow">Finalizados</span><span class="v mono" id="k-fin">—</span><span class="s">proyectos cerrados</span></div>
+  <div class="kpi"><span class="eyebrow">Internos / tercerizados</span><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span></div>
 </div>
 <section class="block">
-  <div class="sec-head"><div><div class="eyebrow">Proyectos</div><h2>Cartera en ejecución</h2></div><span class="note" id="proy-note"></span></div>
+  <div class="sec-head"><div><div class="eyebrow">Proyectos internos</div><h2>Con recursos propios</h2></div><span class="note" id="proy-note"></span></div>
   <div class="grid-proj" id="proy-grid"><div class="empty">Cargando proyectos…</div></div>
+</section>
+<section class="block">
+  <div class="sec-head"><div><div class="eyebrow">Proyectos tercerizados</div><h2>Con proveedor externo</h2></div><span class="note" id="proy-note-ext"></span></div>
+  <div class="grid-proj" id="proy-grid-ext"><div class="empty">Cargando proyectos…</div></div>
 </section>
 </div>
 
@@ -237,6 +241,8 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <input type="hidden" id="p-id">
       <label class="full">Nombre del proyecto<input id="p-nombre" required></label>
       <label class="full">Descripción<textarea id="p-desc"></textarea></label>
+      <label>Modalidad<select id="p-modal"><option>Interno</option><option>Tercerizado</option></select></label>
+      <label>Proveedor (si es tercerizado)<input id="p-prov" placeholder="Empresa externa"></label>
       <label>Estado<select id="p-estado"><option>En curso</option><option>Planificado</option><option>En pausa</option><option>Finalizado</option></select></label>
       <label>Avance (%)<input id="p-avance" type="number" min="0" max="100" step="5" value="0"></label>
       <label>Inicio<input id="p-inicio" type="date"></label>
@@ -338,7 +344,7 @@ function renderKPIs(){
   const total=conPres.reduce((a,p)=>a+(+p.presupuesto||0),0);
   $("#k-pres").textContent=conPres.length?eur(total):"0 €";
   $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
-  $("#k-fin").textContent=proyectos.filter(p=>p.estado==="Finalizado").length;
+  const enc=proyectos.filter(p=>p.estado==="En curso");$("#k-fin").textContent=enc.filter(p=>p.modalidad!=="Tercerizado").length+" / "+enc.filter(p=>p.modalidad==="Tercerizado").length;$("#k-fin-s").textContent=`en curso · ${proyectos.filter(p=>p.modalidad==="Tercerizado").length} tercerizados en total`;
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
   $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`en ${year} · ${incY.filter(i=>i.estado!=="Abierto").length} resueltos`;
   const bt={};incY.forEach(i=>{bt[i.tipo||"Otro"]=(bt[i.tipo||"Otro"]||0)+1});const top=Object.entries(bt).sort((a,b)=>b[1]-a[1])[0];
@@ -354,11 +360,16 @@ function renderKPIs(){
 }
 
 function renderProyectos(){
-  const g=$("#proy-grid");g.innerHTML="";
+  renderGrupo($("#proy-grid"),$("#proy-note"),proyectos.filter(p=>p.modalidad!=="Tercerizado"),"internos");
+  renderGrupo($("#proy-grid-ext"),$("#proy-note-ext"),proyectos.filter(p=>p.modalidad==="Tercerizado"),"tercerizados");
+}
+function renderGrupo(g,note,lista,nombre){
+  g.innerHTML="";
   const order={"En curso":0,"En pausa":1,"Planificado":2,"Finalizado":3};
-  const list=[...proyectos].sort((a,b)=>(order[a.estado]??9)-(order[b.estado]??9)||(b.inicio||"").localeCompare(a.inicio||""));
-  $("#proy-note").textContent=list.length?`${list.length} proyecto${list.length>1?"s":""}`:"";
-  if(!list.length){g.innerHTML='<div class="empty">Todavía no hay proyectos. '+(isOwner?'Añade el primero desde Administrar.':'')+'</div>';return}
+  const list=[...lista].sort((a,b)=>(order[a.estado]??9)-(order[b.estado]??9)||(b.inicio||"").localeCompare(a.inicio||""));
+  const pres=list.filter(p=>p.presupuesto!=null&&p.presupuesto!=="").reduce((a,p)=>a+(+p.presupuesto||0),0);
+  note.textContent=list.length?`${list.length} proyecto${list.length>1?"s":""} · ${list.filter(p=>p.estado==="En curso").length} en curso`+(pres?` · ${eur(pres)} aprobados`:""):"";
+  if(!list.length){g.innerHTML='<div class="empty">Sin proyectos '+nombre+'. '+(isOwner?'Añádelos desde Administrar.':'')+'</div>';return}
   list.forEach(p=>{
     const c=document.createElement("article");c.className="card";
     const av=Math.max(0,Math.min(100,+p.avance||0));
@@ -377,7 +388,7 @@ function renderProyectos(){
     c.querySelector("h3").textContent=p.nombre||"(sin nombre)";c.querySelector(".pill").textContent=p.estado||"—";
     c.querySelector(".desc").textContent=p.descripcion||"";c.querySelector(".av").textContent=av+" %";
     c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
-    c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.recursos||"Recursos propios";
+    c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.modalidad==="Tercerizado"?(p.proveedor?"Proveedor: "+p.proveedor:"Proveedor externo"):(p.recursos||"Recursos propios");
     const n=c.querySelector(".notas");if(p.notas){ if(/^https?:\/\//.test(p.notas)){const a=document.createElement("a");a.href=p.notas;a.target="_blank";a.rel="noopener";a.textContent=p.notas;a.style.color="var(--accent)";n.appendChild(a)}else n.textContent=p.notas}else n.remove();
     if(isOwner){const ra=c.querySelector(".row-actions");ra.hidden=false;ra.querySelector('[data-act=edit]').onclick=()=>editProy(p);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/proyectos/"+p.id).then(()=>toast("Proyecto eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)))}
     g.appendChild(c);
@@ -478,14 +489,14 @@ document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.onclick=()=>showTab(b
 $("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;$("#btn-admin").textContent=a.hidden?"Administrar":"Cerrar administración";if(!a.hidden)a.scrollIntoView({behavior:"smooth",block:"start"})};
 
 function editProy(p){showTab("proy");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
-  $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-avance").value=p.avance??0;
+  $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
   $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";
   $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
 $("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""};
 $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#p-id").value||("p"+Date.now().toString(36));
   const pres=$("#p-pres").value;
-  const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
+  const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
     inicio:$("#p-inicio").value,fin:$("#p-fin").value,presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 

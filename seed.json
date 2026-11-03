@@ -26,7 +26,9 @@
       "notas": "Entregables: Excel de mapeo y PPTX para Gerencia.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-ai-act"
+      "id": "p-ai-act",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -39,7 +41,9 @@
       "notas": "Programa continuo durante el año. Fecha de inicio aproximada: ajustar.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-concienciacion"
+      "id": "p-concienciacion",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -52,7 +56,9 @@
       "notas": "Boceto visual hecho. Pendiente: protocolo de cámaras, mapa sonda→rack, API de la cerradura.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-cpd-tv"
+      "id": "p-cpd-tv",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -65,7 +71,9 @@
       "notas": "Presupuesto Enterprise recibido (38–48 USD/usuario/mes), sin aprobar.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-cuentas-nominales"
+      "id": "p-cuentas-nominales",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -78,7 +86,9 @@
       "notas": "En producción en el servidor de dashboards. ~1 semana de desarrollo.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-reportes-erp"
+      "id": "p-reportes-erp",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -91,7 +101,9 @@
       "notas": "En producción. Fechas aproximadas: ajustar.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-sensores"
+      "id": "p-sensores",
+      "modalidad": "Interno",
+      "proveedor": ""
     },
     {
       "actualizado": "2026-10-30T21:30:00.000Z",
@@ -104,7 +116,9 @@
       "notas": "Boceto con datos simulados. Pendiente: datos reales de puestos y costes.",
       "presupuesto": null,
       "recursos": "Recursos propios",
-      "id": "p-uso-ia"
+      "id": "p-uso-ia",
+      "modalidad": "Interno",
+      "proveedor": ""
     }
   ],
   "incidentes": [
