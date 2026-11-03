@@ -35,18 +35,23 @@ def main():
     if not row:
         print("No existe el proyecto; ejecuta antes cargar_endpoint_central.py"); return
     p = json.loads(row[0])
-    if p.get("partidas"):
-        print("El proyecto ya tiene partidas; no se toca."); return
-    p["moneda"] = "EUR"; p["partidas"] = PARTIDAS; p["impuestos"] = True
-    p["presupuesto"] = round(sum(x["precio"] * x["unidades"] for x in PARTIDAS), 2)
+    conceptos = {x.get("concepto") for x in p.get("partidas", [])}
+    nuevas = [x for x in PARTIDAS if x["concepto"] not in conceptos]
+    if not nuevas:
+        print("Las 4 ampliaciones ya están cargadas; no se toca."); return
+    p["moneda"] = "EUR"; p["partidas"] = p.get("partidas", []) + nuevas; p["impuestos"] = True
+    p["presupuesto"] = round(sum((x.get("precio") or 0) * (x.get("unidades") or 0) for x in p["partidas"]), 2)
     nombres = {h.get("nombre") for h in p.get("hitos", [])}
     p["hitos"] = p.get("hitos", []) + [h for h in HITOS if h["nombre"] not in nombres]
-    p["notas"] = NOTAS
+    if "Cot. 15374" in str(p.get("partidas")):
+        p["notas"] = NOTAS.replace("La licencia inicial (50 servidores + 50 equipos + 4 técnicos) no tiene cotización en el dashboard. ", "") + " Coste total del proyecto con la licencia inicial: 12.712,94 € sin IVA (15.382,65 € con IVA)."
+    else:
+        p["notas"] = NOTAS
     p["log"] = p.get("log", []) + [LOG]
     p["actualizado"] = datetime.now(timezone.utc).isoformat()
     con.execute("UPDATE docs SET body=? WHERE coll='proyectos' AND id=?", (json.dumps(p, ensure_ascii=False), PID))
     con.commit()
-    print("Listo: %d partidas (%.2f EUR sin IVA), %d hitos." % (len(PARTIDAS), p["presupuesto"], len(p["hitos"])))
+    print("Listo: %d partidas en total (%.2f EUR sin IVA), %d hitos." % (len(p["partidas"]), p["presupuesto"], len(p["hitos"])))
 
 
 if __name__ == "__main__":
