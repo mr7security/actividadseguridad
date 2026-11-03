@@ -20,6 +20,6 @@ sudo systemctl daemon-reload && sudo systemctl enable --now actividad-it
 Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl restart actividad-it`.
 
 ## Ficheros
-- `app.py` — Flask: página, login, API REST (`/api/data`, `/api/proyectos/<id>`, `/api/incidentes/<id>`, `/api/config`, `/api/export`).
+- `app.py` — Flask: página, login, API REST (`/api/data`, `/api/proyectos/<id>`, `/api/incidentes/<id>`, `/api/caus/import` (CSV de ServiceDesk), `/api/config`, `/api/export`).
 - `templates/index.html` — el dashboard (HTML/CSS/JS, sin dependencias externas salvo fuentes de Google).
 - `seed.json` — datos iniciales (solo se usan si la base está vacía).

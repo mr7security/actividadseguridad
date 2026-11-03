@@ -4,6 +4,8 @@
 Lectura libre (sin login) para consulta; edición solo tras login con APP_PASSWORD.
 Datos en SQLite (actividad.db) junto a este fichero. Sin dependencias más allá de Flask y python-dotenv.
 """
+import csv
+import io
 import json
 import os
 import secrets
@@ -13,6 +15,8 @@ from pathlib import Path
 
 from dotenv import load_dotenv
 from flask import Flask, Response, abort, jsonify, redirect, render_template_string, request, session, url_for
+
+MAX_CSV_BYTES = 10 * 1024 * 1024
 
 BASE = Path(__file__).resolve().parent
 load_dotenv(BASE / ".env")
@@ -27,6 +31,7 @@ if not APP_PASSWORD:
     raise SystemExit("Falta APP_PASSWORD en .env (contraseña del administrador)")
 
 app = Flask(__name__, static_folder=None)
+app.config["MAX_CONTENT_LENGTH"] = MAX_CSV_BYTES
 app.secret_key = APP_SECRET
 app.config.update(SESSION_COOKIE_HTTPONLY=True, SESSION_COOKIE_SAMESITE="Lax")
 
@@ -143,7 +148,8 @@ def index():
 
 @app.route("/api/data")
 def api_data():
-    return jsonify({"config": get_config(), "proyectos": get_all("proyectos"), "incidentes": get_all("incidentes")})
+    return jsonify({"config": get_config(), "proyectos": get_all("proyectos"), "incidentes": get_all("incidentes"),
+                    "caus": get_all("caus")})
 
 
 def _stamp(body):
@@ -195,11 +201,104 @@ def api_config():
     return jsonify(ok=True)
 
 
+# ---------------- CAUs (import CSV de ServiceDesk) ----------------
+CAU_COLS = {
+    "id de la solicitud": "id", "asunto": "asunto", "solicitante": "solicitante", "técnico": "tecnico",
+    "tecnico": "tecnico", "fecha de vencimiento": "vencimiento", "estado": "estado", "fecha de creación": "creacion",
+    "fecha de creacion": "creacion", "sitio": "sitio", "prioridad": "prioridad", "grupo": "grupo",
+    "es solicitud de servicio": "servicio",
+}
+
+
+def _parse_sd_date(txt):
+    """'03/11/2026 10:43 AM' -> '2026-11-03T10:43' (vacío si no se reconoce)."""
+    txt = (txt or "").strip()
+    for fmt in ("%d/%m/%Y %I:%M %p", "%d/%m/%Y %H:%M", "%d/%m/%Y"):
+        try:
+            return datetime.strptime(txt, fmt).strftime("%Y-%m-%dT%H:%M")
+        except ValueError:
+            continue
+    return ""
+
+
+def parse_servicedesk_csv(raw: bytes):
+    """Devuelve la lista de tickets del CSV exportado por ServiceDesk.
+    Tolera las líneas de cabecera del informe (título, 'Generado por', 'Registros totales')."""
+    text = None
+    for enc in ("utf-8-sig", "cp1252", "latin-1"):
+        try:
+            text = raw.decode(enc)
+            break
+        except UnicodeDecodeError:
+            continue
+    if text is None:
+        raise ValueError("No se pudo leer el fichero (codificación desconocida)")
+    rows = list(csv.reader(io.StringIO(text)))
+    header_idx = next((i for i, r in enumerate(rows) if any("id de la solicitud" in (c or "").strip().lower() for c in r)), None)
+    if header_idx is None:
+        raise ValueError("No encuentro la columna 'ID de la solicitud' en el CSV")
+    header = [CAU_COLS.get((c or "").strip().lower(), None) for c in rows[header_idx]]
+    out = []
+    for r in rows[header_idx + 1:]:
+        if not r or not any((c or "").strip() for c in r):
+            continue
+        d = {}
+        for key, val in zip(header, r):
+            if key:
+                d[key] = (val or "").strip()
+        tid = d.get("id", "")
+        if not tid.isdigit():
+            continue
+        d["estado"] = d.get("estado", "").upper()
+        d["creacion"] = _parse_sd_date(d.get("creacion"))
+        d["vencimiento"] = _parse_sd_date(d.get("vencimiento"))
+        d["servicio"] = d.get("servicio", "").lower() == "true"
+        out.append(d)
+    return out
+
+
+@app.route("/api/caus/import", methods=["POST"])
+def api_caus_import():
+    require_admin()
+    f = request.files.get("file")
+    if not f:
+        return jsonify(error="Falta el fichero"), 400
+    try:
+        tickets = parse_servicedesk_csv(f.read())
+    except ValueError as e:
+        return jsonify(error=str(e)), 400
+    existing = {t["id"] for t in get_all("caus")}
+    nuevos = actualizados = 0
+    now = datetime.now(timezone.utc).isoformat()
+    with db() as con:
+        for t in tickets:
+            tid = t.pop("id")
+            t["actualizado"] = now
+            con.execute("INSERT OR REPLACE INTO docs VALUES ('caus',?,?)", (tid, json.dumps(t, ensure_ascii=False)))
+            if tid in existing:
+                actualizados += 1
+            else:
+                nuevos += 1
+    cfg = get_config()
+    cfg["caus_import"] = now
+    put_doc("config", "general", cfg)
+    return jsonify(ok=True, importados=len(tickets), nuevos=nuevos, actualizados=actualizados)
+
+
+@app.route("/api/caus", methods=["DELETE"])
+def api_caus_clear():
+    require_admin()
+    with db() as con:
+        con.execute("DELETE FROM docs WHERE coll='caus'")
+    return jsonify(ok=True)
+
+
 @app.route("/api/export")
 def api_export():
     """Copia de seguridad completa en JSON (solo administrador)."""
     require_admin()
-    data = {"config": get_config(), "proyectos": get_all("proyectos"), "incidentes": get_all("incidentes")}
+    data = {"config": get_config(), "proyectos": get_all("proyectos"), "incidentes": get_all("incidentes"),
+            "caus": get_all("caus")}
     return Response(json.dumps(data, ensure_ascii=False, indent=2), mimetype="application/json",
                     headers={"Content-Disposition": "attachment; filename=actividad-export.json"})
 
