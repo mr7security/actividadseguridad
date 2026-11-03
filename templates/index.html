@@ -56,7 +56,9 @@ button.small{padding:4px 9px;font-size:.78rem}
 .mini{margin-top:6px;display:flex;flex-direction:column;gap:4px}
 .mini .stack{display:flex;height:7px;border-radius:999px;overflow:hidden;background:var(--line)}
 .mini .stack i{display:block;height:100%}
-.mini .lg{display:flex;flex-wrap:wrap;gap:4px 10px;font-size:.68rem;color:var(--muted)}
+.mini .lg{display:flex;font-size:.68rem;color:var(--muted)}
+.mini .lg span{min-width:0;overflow:hidden;white-space:nowrap;text-overflow:ellipsis;padding-right:6px;box-sizing:border-box}
+.mini .lg strong{color:var(--fg);font-weight:500;font-family:var(--font-mono)}
 .mini .lg b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
 .kpi .v{font-family:var(--font-mono);font-size:2rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:.78rem;color:var(--muted)}
@@ -439,7 +441,7 @@ function renderKPIs(){
   $("#k-proy").textContent=enCurso.length;$("#k-proy-s").textContent=`de ${proyectos.length} registrados`;
   const avg=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length):0;
   $("#k-avance").textContent=enCurso.length?avg+" %":"—";$("#k-ring").setAttribute("stroke-dasharray",(113.1*avg/100).toFixed(1)+" 113.1");
-  const stack=(parts,host)=>{const tot=parts.reduce((a,x)=>a+x.n,0)||1;host.innerHTML=`<div class="stack">${parts.filter(x=>x.n).map(x=>`<i style="width:${x.n/tot*100}%;background:${x.c}" title="${x.l}: ${x.t||x.n}"></i>`).join("")}</div><div class="lg">${parts.filter(x=>x.n).map(x=>`<span><b style="background:${x.c}"></b>${x.l} ${x.t||x.n}</span>`).join("")}</div>`};
+  const stack=(parts,host)=>{const tot=parts.reduce((a,x)=>a+x.n,0)||1;const vis=parts.filter(x=>x.n);host.innerHTML=`<div class="stack">${vis.map(x=>`<i style="width:${x.n/tot*100}%;background:${x.c}" title="${x.l}: ${x.t||x.n}"></i>`).join("")}</div><div class="lg">${vis.map(x=>`<span style="width:${x.n/tot*100}%" title="${x.l}: ${x.t||x.n}"><b style="background:${x.c}"></b>${x.l} <strong>${x.t||x.n}</strong></span>`).join("")}</div>`};
   const cnt=e=>proyectos.filter(p=>p.estado===e).length;
   stack([{l:"En curso",n:cnt("En curso"),c:"var(--info)"},{l:"En pausa",n:cnt("En pausa"),c:"var(--warn)"},{l:"Planificado",n:cnt("Planificado"),c:"var(--muted)"},{l:"Finalizado",n:cnt("Finalizado"),c:"var(--ok)"}],$("#k-proy-bar"));
   const conPres=proyectos.filter(p=>presDe(p)!=null);
