@@ -128,14 +128,20 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .log{display:flex;flex-direction:column;gap:3px;font-size:.76rem;color:var(--muted)}
 .log .e{display:grid;grid-template-columns:auto 1fr;gap:8px}.log .d{font-family:var(--font-mono);font-size:.68rem;white-space:nowrap}
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
-.card>.pausa-msg,.card>.log{grid-column:1}
+.card>.pausa-msg,.card>.log,.card>.partidas{grid-column:1}
+.partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
+.part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
+@media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{display:grid;grid-template-columns:130px 1fr auto auto;gap:6px;align-items:center}
 @media (max-width:560px){.pausa-msg{font-size:.78rem;color:var(--warn);border-left:3px solid var(--warn);padding:4px 8px;background:color-mix(in srgb,var(--warn) 10%,transparent);border-radius:0 4px 4px 0}
 .log{display:flex;flex-direction:column;gap:3px;font-size:.76rem;color:var(--muted)}
 .log .e{display:grid;grid-template-columns:auto 1fr;gap:8px}.log .d{font-family:var(--font-mono);font-size:.68rem;white-space:nowrap}
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
-.card>.pausa-msg,.card>.log{grid-column:1}
+.card>.pausa-msg,.card>.log,.card>.partidas{grid-column:1}
+.partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
+.part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
+@media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{grid-template-columns:1fr 1fr}}
 /* mitre */
@@ -292,9 +298,19 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Avance (%)<input id="p-avance" type="number" min="0" max="100" step="5" value="0"></label>
       <label>Inicio<input id="p-inicio" type="date"></label>
       <label>Fin (real o previsto)<input id="p-fin" type="date"></label>
-      <label>Presupuesto aprobado (€)<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto"></label>
+      <label>Moneda<select id="p-moneda"><option value="EUR">€ EUR</option><option value="USD">$ USD</option></select></label>
+      <label>Presupuesto aprobado<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto (o se calcula de las partidas)"></label>
       <label>Recursos<input id="p-rec" placeholder="Recursos propios"></label>
       <label class="full">Notas / enlace<input id="p-notas"></label>
+      <div class="full">
+        <div class="eyebrow" style="margin-bottom:6px">Partidas de coste (concepto · unidades · precio unitario · periodo) — si hay partidas, el presupuesto se calcula con ellas</div>
+        <div id="p-partidas" style="display:grid;gap:6px"></div>
+        <div style="display:flex;gap:8px;margin-top:6px;align-items:center"><button type="button" class="small" id="p-addpartida">+ Añadir partida</button><span class="note" id="p-partidas-total"></span></div>
+      </div>
+      <div class="full">
+        <div class="eyebrow" style="margin-bottom:6px">Puestos / usuarios asignados (una línea por usuario: <span class="mono">email; tipo; fecha AAAA-MM-DD</span>)</div>
+        <textarea id="p-puestos" placeholder="usuario@serviplana.es; Estándar; 2026-09-23" style="min-height:90px;font-family:var(--font-mono);font-size:.75rem"></textarea>
+      </div>
       <div class="full">
         <div class="eyebrow" style="margin-bottom:6px">Registro de seguimiento (fecha · nota)</div>
         <div id="p-log" style="display:grid;gap:6px"></div>
@@ -375,7 +391,8 @@ const parseIds=s=>String(s||"").split(",").map(x=>x.trim().toUpperCase()).filter
 function mitreIds(i){if(i.mitre&&i.mitre.length)return i.mitre;const m=cfg.mitre||DEF_MITRE;return parseIds(m[i.tipo]??DEF_MITRE[i.tipo]??"")}
 let proyectos=[],incidentes=[],caus=[];
 let year=new Date().getFullYear(),fMes="",fTipo="",fcMes="",fcEst="",fcQ="";
-const eur=n=>new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const eur=(n,cur)=>new Intl.NumberFormat("es-ES",{style:"currency",currency:cur||"EUR",maximumFractionDigits:0}).format(n);
+const presDe=p=>{const part=(p.partidas||[]).filter(x=>x.precio!=null);if(part.length)return part.reduce((a,x)=>a+(+x.unidades||0)*(+x.precio||0),0);return(p.presupuesto!=null&&p.presupuesto!=="")?+p.presupuesto:null};
 const fmtD=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return d&&m?`${d}/${m}/${y}`:s};
 const esc=s=>String(s??"");
 function toast(t){let e=$(".toast");if(!e){e=document.createElement("div");e.className="toast";document.body.appendChild(e)}e.textContent=t;e.hidden=false;clearTimeout(e._t);e._t=setTimeout(()=>e.hidden=true,2600)}
@@ -396,9 +413,10 @@ function renderKPIs(){
   const enCurso=proyectos.filter(p=>p.estado==="En curso");
   $("#k-proy").textContent=enCurso.length;$("#k-proy-s").textContent=`de ${proyectos.length} registrados`;
   $("#k-avance").textContent=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length)+" %":"—";
-  const conPres=proyectos.filter(p=>p.presupuesto!=null&&p.presupuesto!=="");
-  const total=conPres.reduce((a,p)=>a+(+p.presupuesto||0),0);
-  $("#k-pres").textContent=conPres.length?eur(total):"0 €";
+  const conPres=proyectos.filter(p=>presDe(p)!=null);
+  const porMon={};conPres.forEach(p=>{const m=p.moneda||"EUR";porMon[m]=(porMon[m]||0)+presDe(p)});
+  const txt=Object.entries(porMon).map(([m,v])=>eur(v,m)).join(" + ");
+  $("#k-pres").textContent=conPres.length?txt:"0 €";if(Object.keys(porMon).length>1)$("#k-pres").style.fontSize="1.2rem";
   $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
   const enc=proyectos.filter(p=>p.estado==="En curso");$("#k-fin").textContent=enc.filter(p=>p.modalidad!=="Tercerizado").length+" / "+enc.filter(p=>p.modalidad==="Tercerizado").length;$("#k-fin-s").textContent=`en curso · ${proyectos.filter(p=>p.modalidad==="Tercerizado").length} tercerizados en total`;
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
@@ -466,13 +484,13 @@ function renderGrupo(g,note,lista,nombre){
   g.innerHTML="";
   const order={"En curso":0,"En pausa":1,"Planificado":2,"Finalizado":3};
   const list=[...lista].sort((a,b)=>(order[a.estado]??9)-(order[b.estado]??9)||(b.inicio||"").localeCompare(a.inicio||""));
-  const pres=list.filter(p=>p.presupuesto!=null&&p.presupuesto!=="").reduce((a,p)=>a+(+p.presupuesto||0),0);
-  note.dataset.txt=list.length?`${list.filter(p=>p.estado==="En curso").length} en curso`+(pres?` · ${eur(pres)} aprobados`:""):"";
+  const pm={};list.forEach(p=>{const v=presDe(p);if(v!=null){const m=p.moneda||"EUR";pm[m]=(pm[m]||0)+v}});const presTxt=Object.entries(pm).map(([m,v])=>eur(v,m)).join(" + ");
+  note.dataset.txt=list.length?`${list.filter(p=>p.estado==="En curso").length} en curso`+(presTxt?` · ${presTxt} presupuestados`:""):"";
   if(!list.length){g.innerHTML='<div class="empty">Sin proyectos '+nombre+'. '+(isOwner?'Añádelos desde Administrar.':'')+'</div>';return}
   list.forEach(p=>{
     const c=document.createElement("article");c.className="card";c.id="proy-"+p.id;
     const av=Math.max(0,Math.min(100,+p.avance||0));
-    const pres=(p.presupuesto!=null&&p.presupuesto!=="")?eur(+p.presupuesto):"Sin presupuesto";
+    const pv=presDe(p);const pres=pv!=null?eur(pv,p.moneda||"EUR")+((p.partidas||[]).length?" / año":""):"Sin presupuesto";
     c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
       <p class="desc"></p>
       <div class="av-block"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
@@ -482,6 +500,7 @@ function renderGrupo(g,note,lista,nombre){
         <div><span class="l">Presupuesto</span><span class="d pre"></span></div>
         <div><span class="l">Recursos</span><span class="d rec"></span></div>
       </div>
+      <div class="partidas" hidden></div>
       <div class="hitos"></div>
       <div class="pausa-msg" hidden></div>
       <div class="log" hidden></div>
@@ -492,6 +511,15 @@ function renderGrupo(g,note,lista,nombre){
     c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
     c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.modalidad==="Tercerizado"?(p.proveedor?"Proveedor: "+p.proveedor:"Proveedor externo"):(p.recursos||"Recursos propios");
     const log=[...(p.log||[])].sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+    const pa=c.querySelector(".partidas");const part=(p.partidas||[]).filter(x=>x.concepto);
+    if(part.length||(p.puestos||[]).length){pa.hidden=false;
+      part.forEach(x=>{const d=document.createElement("div");d.className="e";d.innerHTML=`<span></span><span class="mono"></span>`;d.children[0].textContent=`${x.concepto} · ${x.unidades||0} × ${eur(+x.precio||0,p.moneda||"EUR")}${x.periodo?"/"+x.periodo:""}`;d.children[1].textContent=eur((+x.unidades||0)*(+x.precio||0),p.moneda||"EUR");pa.appendChild(d)});
+      if(part.length&&p.impuestos)pa.appendChild(Object.assign(document.createElement("div"),{className:"note",textContent:"Importes sin impuestos."}));
+      const pu=p.puestos||[];if(pu.length){const det=document.createElement("details");det.innerHTML=`<summary></summary>`;const byT={};pu.forEach(u=>{byT[u.tipo||"—"]=(byT[u.tipo||"—"]||0)+1});
+        det.querySelector("summary").textContent=`${pu.length} puestos asignados (${Object.entries(byT).map(([t,n])=>n+" "+t).join(", ")}) · ver lista`;
+        const tw=document.createElement("div");tw.className="tablewrap";const tb=document.createElement("table");tb.innerHTML="<thead><tr><th>Usuario</th><th>Tipo</th><th>Alta</th></tr></thead><tbody></tbody>";
+        [...pu].sort((a,b)=>(a.email||"").localeCompare(b.email||"")).forEach(u=>{const tr=document.createElement("tr");tr.innerHTML="<td></td><td></td><td class=mono></td>";tr.children[0].textContent=u.email||"";tr.children[1].textContent=u.tipo||"";tr.children[2].textContent=fmtD(u.fecha);tb.querySelector("tbody").appendChild(tr)});
+        tw.appendChild(tb);det.appendChild(tw);pa.appendChild(det)}}else pa.remove();
     let shown=null;
     if(p.estado==="En pausa"){const pm=c.querySelector(".pausa-msg");const last=log.find(e=>e.estado==="En pausa")||log[0];shown=last;pm.hidden=false;pm.textContent="En pausa"+(last?` desde ${fmtD(last.fecha)}: ${last.texto}`:"")}else c.querySelector(".pausa-msg").remove();
     const rest=log.filter(e=>e!==shown);
@@ -600,19 +628,26 @@ $("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;document.bod
 
 function editProy(p){showTab("proy");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
   $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
-  $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";pHitos=(p.hitos||[]).map(h=>({...h}));renderHitosEditor();pLog=(p.log||[]).map(e=>({...e}));renderLogEditor();
+  $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";pHitos=(p.hitos||[]).map(h=>({...h}));renderHitosEditor();pLog=(p.log||[]).map(e=>({...e}));renderLogEditor();$("#p-moneda").value=p.moneda||"EUR";pPart=(p.partidas||[]).map(x=>({...x}));renderPartEditor();$("#p-puestos").value=(p.puestos||[]).map(u=>[u.email,u.tipo,u.fecha].join("; ")).join("\n");
   $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
-$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor()};
+$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()};
 $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#p-id").value||("p"+Date.now().toString(36));
   const pend=$("#p-lognew-t").value.trim();if(pend){pLog.push({fecha:$("#p-lognew-f").value||new Date().toISOString().slice(0,10),texto:pend,estado:$("#p-estado").value});$("#p-lognew-t").value="";$("#p-lognew-f").value="";renderLogEditor()}
   if($("#p-estado").value==="En pausa"){const prev=proyectos.find(x=>x.id===id);const wasPaused=prev&&prev.estado==="En pausa";const hasReason=pLog.some(x=>x.estado==="En pausa"&&x.texto);if(!wasPaused&&!hasReason||!hasReason){$("#p-status").textContent="Indica el motivo de la pausa en el registro de seguimiento.";$("#p-lognew-t").focus();return}}
   const pres=$("#p-pres").value;
   const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
-    inicio:$("#p-inicio").value,fin:$("#p-fin").value,hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),log:pLog.filter(x=>x.fecha&&x.texto).map(x=>({fecha:x.fecha,texto:x.texto.trim(),estado:x.estado||""})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
-  try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
+    inicio:$("#p-inicio").value,fin:$("#p-fin").value,moneda:$("#p-moneda").value,partidas:pPart.filter(x=>x.concepto&&x.precio!=="").map(x=>({concepto:x.concepto.trim(),unidades:+x.unidades||0,precio:+x.precio||0,periodo:(x.periodo||"").trim()})),puestos:parsePuestos($("#p-puestos").value),hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),log:pLog.filter(x=>x.fecha&&x.texto).map(x=>({fecha:x.fecha,texto:x.texto.trim(),estado:x.estado||""})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
+  try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
 
-let pHitos=[],pLog=[];
+let pHitos=[],pLog=[],pPart=[];
+function renderPartEditor(){const c=$("#p-partidas");c.innerHTML="";pPart.forEach((x,i)=>{const r=document.createElement("div");r.className="part-row";r.innerHTML=`<input placeholder="Concepto" aria-label="Concepto"><input type="number" min="0" placeholder="Uds." aria-label="Unidades"><input type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio unitario"><input placeholder="año / mes" aria-label="Periodo"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
+  const [fc,fu,fp,fpe,bt]=r.children;fc.value=x.concepto||"";fu.value=x.unidades??"";fp.value=x.precio??"";fpe.value=x.periodo||"";
+  fc.oninput=e=>x.concepto=e.target.value;fu.oninput=e=>{x.unidades=e.target.value;totalPart()};fp.oninput=e=>{x.precio=e.target.value;totalPart()};fpe.oninput=e=>x.periodo=e.target.value;bt.onclick=()=>{pPart.splice(i,1);renderPartEditor()};c.appendChild(r)});totalPart()}
+function totalPart(){const t=pPart.reduce((a,x)=>a+(+x.unidades||0)*(+x.precio||0),0);$("#p-partidas-total").textContent=pPart.length?"Total: "+eur(t,$("#p-moneda").value):""}
+$("#p-addpartida").onclick=()=>{pPart.push({concepto:"",unidades:1,precio:"",periodo:"año"});renderPartEditor()};
+$("#p-moneda").onchange=totalPart;
+const parsePuestos=t=>t.split("\n").map(l=>l.trim()).filter(Boolean).map(l=>{const [email,tipo,fecha]=l.split(/\s*[;,\t]\s*/);return{email:(email||"").trim(),tipo:(tipo||"").trim(),fecha:(fecha||"").trim()}}).filter(u=>u.email);
 function renderLogEditor(){const c=$("#p-log");c.innerHTML="";[...pLog].sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||"")).forEach(e=>{const r=document.createElement("div");r.className="log-row";r.innerHTML=`<input type="date" aria-label="Fecha"><input aria-label="Nota"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
   const [fd,ft,bt]=r.children;fd.value=e.fecha||"";ft.value=e.texto||"";fd.oninput=x=>e.fecha=x.target.value;ft.oninput=x=>e.texto=x.target.value;bt.onclick=()=>{pLog.splice(pLog.indexOf(e),1);renderLogEditor()};c.appendChild(r)})}
 $("#p-addlog").onclick=()=>{const f=$("#p-lognew-f").value||new Date().toISOString().slice(0,10);const t=$("#p-lognew-t").value.trim();if(!t)return;pLog.push({fecha:f,texto:t,estado:$("#p-estado").value});$("#p-lognew-t").value="";$("#p-lognew-f").value="";renderLogEditor()};

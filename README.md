@@ -24,4 +24,5 @@ Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl rest
 - `clasificador.py` — reglas por palabras clave que convierten asuntos de CAU en incidentes de seguridad (editar aquí para afinar).
 - `templates/index.html` — el dashboard (HTML/CSS/JS, sin dependencias externas salvo fuentes de Google).
 - `seed.json` — datos iniciales (solo se usan si la base está vacía).
+- `cargar_puestos_ia.py` — carga única de partidas y puestos de ChatGPT en el proyecto de cuentas nominales.
 - `cargar_hitos.py` — carga única de hitos en los proyectos existentes de una base ya creada (`.venv/bin/python cargar_hitos.py`).
