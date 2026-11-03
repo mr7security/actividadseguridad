@@ -475,8 +475,6 @@ function renderGrupo(g,note,lista,nombre){
     const pres=(p.presupuesto!=null&&p.presupuesto!=="")?eur(+p.presupuesto):"Sin presupuesto";
     c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
       <p class="desc"></p>
-      <div class="pausa-msg" hidden></div>
-      <div class="log" hidden></div>
       <div class="av-block"><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
       <div class="meta">
         <div><span class="l">Inicio</span><span class="d ini"></span></div>
@@ -485,6 +483,8 @@ function renderGrupo(g,note,lista,nombre){
         <div><span class="l">Recursos</span><span class="d rec"></span></div>
       </div>
       <div class="hitos"></div>
+      <div class="pausa-msg" hidden></div>
+      <div class="log" hidden></div>
       <p class="notas" style="font-size:.78rem"></p>
       <div class="row-actions" hidden><button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button></div>`;
     c.querySelector("h3").textContent=p.nombre||"(sin nombre)";c.querySelector(".pill").textContent=p.estado||"—";
@@ -492,9 +492,11 @@ function renderGrupo(g,note,lista,nombre){
     c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
     c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.modalidad==="Tercerizado"?(p.proveedor?"Proveedor: "+p.proveedor:"Proveedor externo"):(p.recursos||"Recursos propios");
     const log=[...(p.log||[])].sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
-    if(p.estado==="En pausa"){const pm=c.querySelector(".pausa-msg");const last=log.find(e=>e.estado==="En pausa")||log[0];pm.hidden=false;pm.textContent="En pausa"+(last?` desde ${fmtD(last.fecha)}: ${last.texto}`:"")}else c.querySelector(".pausa-msg").remove();
-    const lg=c.querySelector(".log");if(log.length){lg.hidden=false;const draw=(n)=>{lg.innerHTML="";log.slice(0,n).forEach(e=>{const d=document.createElement("div");d.className="e";d.innerHTML=`<span class="d"></span><span></span>`;d.children[0].textContent=fmtD(e.fecha);d.children[1].textContent=(e.estado?`[${e.estado}] `:"")+e.texto;lg.appendChild(d)});
-      if(log.length>n){const b=document.createElement("button");b.type="button";b.className="more";b.textContent=`Ver ${log.length-n} más`;b.onclick=()=>draw(log.length);lg.appendChild(b)}};draw(2)}else lg.remove();
+    let shown=null;
+    if(p.estado==="En pausa"){const pm=c.querySelector(".pausa-msg");const last=log.find(e=>e.estado==="En pausa")||log[0];shown=last;pm.hidden=false;pm.textContent="En pausa"+(last?` desde ${fmtD(last.fecha)}: ${last.texto}`:"")}else c.querySelector(".pausa-msg").remove();
+    const rest=log.filter(e=>e!==shown);
+    const lg=c.querySelector(".log");if(rest.length){lg.hidden=false;const draw=(n)=>{lg.innerHTML="";rest.slice(0,n).forEach(e=>{const d=document.createElement("div");d.className="e";d.innerHTML=`<span class="d"></span><span></span>`;d.children[0].textContent=fmtD(e.fecha);d.children[1].textContent=(e.estado?`[${e.estado}] `:"")+e.texto;lg.appendChild(d)});
+      if(rest.length>n){const b=document.createElement("button");b.type="button";b.className="more";b.textContent=`Ver ${rest.length-n} más`;b.onclick=()=>draw(rest.length);lg.appendChild(b)}};draw(2)}else lg.remove();
     const hl=c.querySelector(".hitos");const hs=[...(p.hitos||[])].sort((a,b)=>(a.fecha||"").localeCompare(b.fecha||""));
     if(hs.length){hs.forEach(h=>{const d=document.createElement("div");d.className="hito"+(h.hecho?"":" pend");d.innerHTML=`<span class="dot"></span><span class="d"></span><span></span>`;d.children[1].textContent=fmtD(h.fecha)+(h.aprox?" ~":"");d.children[2].textContent=h.nombre||"";hl.appendChild(d)})}else hl.remove();
     const n=c.querySelector(".notas");if(p.notas){ if(/^https?:\/\//.test(p.notas)){const a=document.createElement("a");a.href=p.notas;a.target="_blank";a.rel="noopener";a.textContent=p.notas;a.style.color="var(--accent)";n.appendChild(a)}else n.textContent=p.notas}else n.remove();
