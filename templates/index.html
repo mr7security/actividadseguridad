@@ -140,6 +140,16 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
 .log-row{display:grid;grid-template-columns:130px 1fr auto;gap:6px;align-items:center}
 .hito-row{grid-template-columns:1fr 1fr}}
+/* leyenda */
+.leyenda{display:flex;flex-direction:column;gap:3px;font-size:.74rem;color:var(--muted);padding:8px 12px;border:1px solid var(--line);border-radius:6px;background:var(--panel);max-width:560px}
+.leyenda .eyebrow{margin-bottom:2px}
+.leyenda i{display:inline-block;vertical-align:middle;margin-right:4px}
+.lg-bar{width:26px;height:8px;border-radius:3px;background:var(--info)}
+.lg-plan{background:transparent;border:1.5px dashed var(--muted)}
+.lg-dia{width:9px;height:9px;background:var(--info);border:1.2px solid var(--fg);transform:rotate(45deg);margin:0 6px 0 3px}
+.lg-pend{background:transparent;border-color:var(--muted)}
+.lg-num{width:16px;height:16px;border-radius:50%;background:var(--info);color:#fff;font-style:normal;font-size:.62rem;font-weight:600;text-align:center;line-height:16px}
+.lg-hoy{width:0;height:12px;border-left:2px dashed var(--accent)}
 /* mitre */
 .mitre{display:grid;grid-template-columns:repeat(auto-fit,minmax(82px,1fr));gap:6px}
 .tac{border:1px solid var(--line);border-radius:6px;padding:8px 6px;display:flex;flex-direction:column;gap:4px;min-width:0;background:var(--panel2)}
@@ -200,7 +210,12 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   <div class="kpi"><span class="eyebrow">Internos / tercerizados</span><span class="v mono" id="k-fin">—</span><span class="s" id="k-fin-s">en curso</span></div>
 </div>
 <section class="block">
-  <div class="sec-head"><div><div class="eyebrow">Línea temporal</div><h2>Proyectos e hitos en el año</h2></div><span class="note">Barra = inicio → fin (punteada si sigue abierto, relleno = avance) · ◆ hito cumplido · ◇ pendiente · ⓷ varios hitos · clic en una fila para ir a su tarjeta</span></div>
+  <div class="sec-head"><div><div class="eyebrow">Línea temporal</div><h2>Proyectos e hitos en el año</h2></div><div class="leyenda" aria-label="Leyenda">
+      <span class="eyebrow">Leyenda</span>
+      <span><i class="lg-bar"></i> Barra: inicio → fin · relleno = avance · punteada = abierto</span>
+      <span><i class="lg-bar" style="background:var(--ok)"></i> Finalizado &nbsp; <i class="lg-bar" style="background:var(--warn)"></i> En pausa &nbsp; <i class="lg-bar lg-plan"></i> Planificado</span>
+      <span><i class="lg-dia"></i> Hito cumplido &nbsp; <i class="lg-dia lg-pend"></i> Pendiente &nbsp; <i class="lg-num">3</i> Varios hitos &nbsp; <i class="lg-hoy"></i> Hoy · clic en una fila abre su tarjeta</span>
+    </div></div>
   <div class="panel gantt" id="gantt"></div>
 </section>
 <section class="block">
