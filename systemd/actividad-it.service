@@ -1,0 +1,14 @@
+[Unit]
+Description=Dashboard Actividad Seguridad IT (proyectos e incidentes)
+After=network-online.target
+Wants=network-online.target
+
+[Service]
+User=mr7
+WorkingDirectory=/home/mr7/actividad-it
+ExecStart=/home/mr7/actividad-it/.venv/bin/python /home/mr7/actividad-it/app.py
+Restart=on-failure
+RestartSec=5
+
+[Install]
+WantedBy=multi-user.target

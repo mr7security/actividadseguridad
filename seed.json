@@ -1,0 +1,184 @@
+{
+  "config": {
+    "departamento": "Departamento de IT · Seguridad de la Información",
+    "titulo": "Actividad del área — Miguel Rebolledo",
+    "tipos": [
+      "Phishing",
+      "BEC / Fraude",
+      "Malware",
+      "Acceso no autorizado",
+      "Fuga de datos",
+      "Vulnerabilidad",
+      "Disponibilidad",
+      "Correo (SPF/DKIM/DMARC)",
+      "Otro"
+    ]
+  },
+  "proyectos": [
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 100,
+      "descripcion": "Matriz artículo × departamento del Reglamento UE 2024/1689 (y Omnibus 2026/1744) para Grupo STN Cerámica, con presentación a Gerencia.",
+      "estado": "Finalizado",
+      "fin": "2026-09-14",
+      "inicio": "2026-09-01",
+      "nombre": "Mapeo de cumplimiento del AI Act",
+      "notas": "Entregables: Excel de mapeo y PPTX para Gerencia.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-ai-act"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 70,
+      "descripcion": "Campañas internas (guías de phishing y smishing, micro-contenidos animados, personaje Pepe, avisos de incidentes reales).",
+      "estado": "En curso",
+      "fin": "2026-12-31",
+      "inicio": "2026-03-01",
+      "nombre": "Programa de concienciación en ciberseguridad",
+      "notas": "Programa continuo durante el año. Fecha de inicio aproximada: ajustar.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-concienciacion"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 15,
+      "descripcion": "Plano de la sala con temperatura, humedad e inundación por armario, vídeo de cámaras y estado de la cerradura, pensado para una pantalla en el CPD.",
+      "estado": "En curso",
+      "fin": "",
+      "inicio": "2026-10-01",
+      "nombre": "Dashboard del CPD para TV",
+      "notas": "Boceto visual hecho. Pendiente: protocolo de cámaras, mapa sonda→rack, API de la cerradura.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-cpd-tv"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 50,
+      "descripcion": "Eliminación de cuentas compartidas de ChatGPT y Claude y asignación de cuentas nominales; evaluación del salto de ChatGPT Business a Enterprise.",
+      "estado": "En curso",
+      "fin": "",
+      "inicio": "2026-10-01",
+      "nombre": "Paso de cuentas de IA compartidas a nominales",
+      "notas": "Presupuesto Enterprise recibido (38–48 USD/usuario/mes), sin aprobar.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-cuentas-nominales"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 100,
+      "descripcion": "Dashboard Flask con login que lee el ERP (réplica de solo lectura) y envía por correo los reportes Previsión de Carga y Ventas (Alb) con horarios, destinatarios y pausa configurables.",
+      "estado": "Finalizado",
+      "fin": "2026-10-28",
+      "inicio": "2026-10-23",
+      "nombre": "Reportes automáticos del ERP (Previsión de Carga y Ventas)",
+      "notas": "En producción en el servidor de dashboards. ~1 semana de desarrollo.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-reportes-erp"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 100,
+      "descripcion": "Panel web de temperatura y humedad de las sedes de SGP (sondas HW-group STE2/Poseidon2 y Delta EnviroStation). Histórico diario y servicio en el servidor Ubuntu.",
+      "estado": "Finalizado",
+      "fin": "2026-08-15",
+      "inicio": "2026-06-01",
+      "nombre": "Dashboard de monitorización ambiental",
+      "notas": "En producción. Fechas aproximadas: ajustar.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-sensores"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "avance": 20,
+      "descripcion": "Visibilidad de puestos contratados, cuentas activas, coste y uso por departamento; detección de IA no autorizada vía Sophos.",
+      "estado": "En curso",
+      "fin": "",
+      "inicio": "2026-10-02",
+      "nombre": "Dashboard de uso de IA (ChatGPT, Claude, Copilot)",
+      "notas": "Boceto con datos simulados. Pendiente: datos reales de puestos y costes.",
+      "presupuesto": null,
+      "recursos": "Recursos propios",
+      "id": "p-uso-ia"
+    }
+  ],
+  "incidentes": [
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "Informe forense completo y fichas rápidas para Marketing, Comercial, Administración Financiera e IT.",
+      "estado": "Resuelto",
+      "fecha": "2026-07-15",
+      "ref": "",
+      "severidad": "Alta",
+      "tipo": "BEC / Fraude",
+      "titulo": "Intento de fraude BEC suplantando a Deschacht Plastics Belgium",
+      "id": "i-bec-deschacht"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "Analizado en contexto M365/Defender; campaña referenciada por INCIBE/OCU.",
+      "estado": "Resuelto",
+      "fecha": "2026-06-20",
+      "ref": "",
+      "severidad": "Media",
+      "tipo": "Phishing",
+      "titulo": "Phishing suplantando a Iberdrola (karecovering.com, campaña de troyano bancario)",
+      "id": "i-iberdrola"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "Informe ejecutivo con indicador de riesgo y comunicación formal a Dirección.",
+      "estado": "Resuelto",
+      "fecha": "2026-05-15",
+      "ref": "",
+      "severidad": "Alta",
+      "tipo": "Acceso no autorizado",
+      "titulo": "Investigación de seguridad de una cuenta M365/Entra ID (vitacer.es)",
+      "id": "i-jmmarco"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "CodeTwo/Mailchimp fuera del registro SPF; corregido y comunicado internamente.",
+      "estado": "Resuelto",
+      "fecha": "2026-04-15",
+      "ref": "",
+      "severidad": "Baja",
+      "tipo": "Correo (SPF/DKIM/DMARC)",
+      "titulo": "Newsletter corporativa marcada como phishing por fallo SPF/DKIM/DMARC",
+      "id": "i-mailchimp-spf"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "Informe forense y aviso interno (Clarys & Willich / Turpaz Industries).",
+      "estado": "Resuelto",
+      "fecha": "2026-08-10",
+      "ref": "INF-SEC-2026-P07",
+      "severidad": "Alta",
+      "tipo": "Phishing",
+      "titulo": "Phishing vía SharePoint legítimo desde tenant de tercero comprometido",
+      "id": "i-p07-sharepoint"
+    },
+    {
+      "actualizado": "2026-10-30T21:30:00.000Z",
+      "aprox": true,
+      "descripcion": "Informe INF-SEC-2026-P08.",
+      "estado": "Resuelto",
+      "fecha": "2026-09-20",
+      "ref": "INF-SEC-2026-P08",
+      "severidad": "Media",
+      "tipo": "Acceso no autorizado",
+      "titulo": "Software BOINC no autorizado en equipo corporativo",
+      "id": "i-p08-boinc"
+    }
+  ]
+}

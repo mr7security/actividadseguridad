@@ -1,0 +1,371 @@
+<!doctype html><html lang="es"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1,viewport-fit=cover"><title>Actividad Seguridad IT</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=swap">
+<style>
+html{color-scheme:dark}
+/* Layout: operations board — summary strip, then two work areas (proyectos / incidentes), admin drawer only for the owner */
+:root{
+  --bg:#121A2C; --panel:#1A2439; --panel2:#1E2A44; --line:#2B3853;
+  --fg:#E8ECF4; --muted:#9AA6BF; --accent:#C49A2A; --accent-soft:rgba(196,154,42,.16);
+  --ok:#3FB37F; --warn:#E0A23A; --bad:#E0564F; --info:#4C8DE0;
+  --font-sans:"IBM Plex Sans",system-ui,-apple-system,"Segoe UI",sans-serif;
+  --font-mono:"IBM Plex Mono",ui-monospace,SFMono-Regular,Menlo,monospace;
+  color-scheme:dark;
+}
+@media (prefers-color-scheme: light){
+  :root:not([data-theme="dark"]){
+    --bg:#F3F5F9; --panel:#FFFFFF; --panel2:#EEF1F7; --line:#D6DCE8;
+    --fg:#1A2235; --muted:#5B6782; --accent:#9A7415; --accent-soft:rgba(154,116,21,.12);
+    --ok:#1F8F5F; --warn:#B57B12; --bad:#C23B35; --info:#2D6BC4; color-scheme:light;
+  }
+}
+:root[data-theme="light"]{
+  --bg:#F3F5F9; --panel:#FFFFFF; --panel2:#EEF1F7; --line:#D6DCE8;
+  --fg:#1A2235; --muted:#5B6782; --accent:#9A7415; --accent-soft:rgba(154,116,21,.12);
+  --ok:#1F8F5F; --warn:#B57B12; --bad:#C23B35; --info:#2D6BC4; color-scheme:light;
+}
+*{box-sizing:border-box}
+body{background:var(--bg);color:var(--fg);font-family:var(--font-sans);font-size:14px;line-height:1.45;
+  padding-left:max(16px,env(safe-area-inset-left,0px));padding-right:max(16px,env(safe-area-inset-right,0px));padding-block:0 32px}
+.wrap{max-width:1180px;margin:0 auto}
+h1,h2,h3{margin:0;text-wrap:balance}
+h1{font-size:1.35rem;font-weight:600;letter-spacing:-.01em}
+h2{font-size:1rem;font-weight:600;letter-spacing:.01em}
+.eyebrow{font-family:var(--font-mono);font-size:.68rem;letter-spacing:.09em;text-transform:uppercase;color:var(--muted)}
+.mono{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+header.top{display:flex;flex-wrap:wrap;gap:12px 20px;align-items:flex-end;justify-content:space-between;padding:22px 0 16px;border-bottom:1px solid var(--line)}
+.brand{display:flex;gap:14px;align-items:center}
+.mark{width:40px;height:40px;border-radius:8px;background:var(--panel2);border:1px solid var(--line);display:grid;place-items:center;font-family:var(--font-mono);font-weight:600;color:var(--accent);font-size:.8rem;letter-spacing:.05em}
+.controls{display:flex;gap:10px;align-items:center;flex-wrap:wrap}
+select,input,textarea,button{font:inherit;color:var(--fg)}
+select,input,textarea{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 9px;min-width:0;width:100%}
+textarea{min-height:64px;resize:vertical}
+input:focus-visible,select:focus-visible,textarea:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:1px}
+button{background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:7px 12px;cursor:pointer}
+button.primary{background:var(--accent);border-color:var(--accent);color:#141414;font-weight:600}
+button.ghost{background:transparent}
+button.danger{color:var(--bad);border-color:var(--bad)}
+button.small{padding:4px 9px;font-size:.78rem}
+.sel-year{width:auto}
+.role{font-family:var(--font-mono);font-size:.7rem;color:var(--muted);padding:5px 9px;border:1px dashed var(--line);border-radius:6px}
+.role.owner{color:var(--accent);border-color:var(--accent)}
+.kpis{display:grid;grid-template-columns:repeat(auto-fit,minmax(170px,1fr));gap:12px;margin-top:18px}
+.kpi{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:6px}
+.kpi .v{font-family:var(--font-mono);font-size:1.7rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .s{font-size:.78rem;color:var(--muted)}
+section.block{margin-top:26px}
+.sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
+.sec-head .eyebrow{margin-bottom:3px}
+.grid-proj{display:grid;grid-template-columns:repeat(auto-fill,minmax(300px,1fr));gap:12px}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;display:flex;flex-direction:column;gap:10px;min-width:0}
+.card .ttl{display:flex;justify-content:space-between;gap:10px;align-items:flex-start}
+.card h3{font-size:.98rem;font-weight:600}
+.card p{margin:0;color:var(--muted);font-size:.85rem}
+.pill{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;border:1px solid var(--line);white-space:nowrap;color:var(--muted)}
+.pill.curso{color:var(--info);border-color:var(--info)}
+.pill.finalizado{color:var(--ok);border-color:var(--ok)}
+.pill.pausa{color:var(--warn);border-color:var(--warn)}
+.pill.planificado{color:var(--muted)}
+.bar{height:8px;border-radius:999px;background:var(--panel2);overflow:hidden;border:1px solid var(--line)}
+.bar i{display:block;height:100%;background:var(--accent)}
+.meta{display:grid;grid-template-columns:1fr 1fr;gap:6px 14px;font-size:.8rem}
+.meta div{display:flex;flex-direction:column;gap:1px;min-width:0}
+.meta .l{font-family:var(--font-mono);font-size:.64rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted)}
+.meta .d{font-variant-numeric:tabular-nums;overflow-wrap:anywhere}
+.row-actions{display:flex;gap:6px;justify-content:flex-end}
+.two{display:grid;grid-template-columns:3fr 2fr;gap:12px}
+@media (max-width:760px){.two{grid-template-columns:1fr}}
+.panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
+.panel h3{font-size:.85rem;font-weight:600;margin-bottom:10px;color:var(--muted)}
+svg text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.tipos{display:flex;flex-direction:column;gap:8px}
+.tipo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.82rem}
+.tipo .bar{grid-column:1/-1;height:6px}
+.tipo .n{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
+.tablewrap{overflow-x:auto;margin-top:12px}
+table{width:100%;border-collapse:collapse;font-size:.83rem}
+th,td{text-align:left;padding:8px 10px;border-bottom:1px solid var(--line);vertical-align:top}
+th{font-family:var(--font-mono);font-size:.66rem;letter-spacing:.07em;text-transform:uppercase;color:var(--muted);font-weight:500}
+td.mono{white-space:nowrap}
+.filters{display:flex;gap:8px;flex-wrap:wrap}
+.filters select{width:auto}
+.empty{color:var(--muted);font-size:.85rem;padding:18px;border:1px dashed var(--line);border-radius:8px;text-align:center}
+.note{font-size:.78rem;color:var(--muted)}
+.tag-est{font-family:var(--font-mono);font-size:.62rem;color:var(--warn);letter-spacing:.05em}
+/* admin */
+.admin{margin-top:26px;border:1px solid var(--accent);border-radius:8px;background:var(--panel)}
+.admin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
+.admin-body{padding:16px;display:grid;gap:18px}
+.tabs{display:flex;gap:6px;flex-wrap:wrap}
+.tabs button[aria-selected="true"]{border-color:var(--accent);color:var(--accent)}
+form.f{display:grid;grid-template-columns:repeat(auto-fit,minmax(200px,1fr));gap:10px}
+form.f label{display:flex;flex-direction:column;gap:4px;font-size:.75rem;color:var(--muted);min-width:0}
+form.f .full{grid-column:1/-1}
+form.f .acts{grid-column:1/-1;display:flex;gap:8px;justify-content:flex-end;flex-wrap:wrap;align-items:center}
+.chips{display:flex;gap:6px;flex-wrap:wrap}
+.chip{display:inline-flex;gap:6px;align-items:center;padding:4px 8px;border:1px solid var(--line);border-radius:999px;font-size:.78rem}
+.chip button{padding:0 4px;border:0;background:transparent;color:var(--muted)}
+.toast{position:fixed;left:50%;bottom:calc(18px + env(safe-area-inset-bottom,0px));transform:translateX(-50%);background:var(--panel2);border:1px solid var(--accent);color:var(--fg);padding:9px 14px;border-radius:8px;font-size:.85rem;z-index:20;max-width:90vw}
+footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display:flex;justify-content:space-between;gap:10px;flex-wrap:wrap;font-size:.72rem;color:var(--muted);font-family:var(--font-mono)}
+@media (prefers-reduced-motion:no-preference){.bar i{transition:width .4s ease}}
+</style>
+</head><body>
+<div class="wrap">
+<header class="top">
+  <div class="brand">
+    <div class="mark">SGP</div>
+    <div>
+      <div class="eyebrow" id="hdr-dept">Departamento de IT · Seguridad de la Información</div>
+      <h1 id="hdr-title">Actividad del área</h1>
+    </div>
+  </div>
+  <div class="controls">
+    <select id="sel-year" class="sel-year" aria-label="Año"></select>
+    <span class="role" id="role-badge">Solo lectura</span>
+    <button id="btn-admin" class="primary" hidden>Administrar</button>
+    <a id="lnk-login" class="role" href="/login" style="text-decoration:none">Entrar</a>
+    <a id="lnk-logout" class="role" href="/logout" style="text-decoration:none" hidden>Salir</a>
+  </div>
+</header>
+
+<div class="kpis">
+  <div class="kpi"><span class="eyebrow">Proyectos en curso</span><span class="v mono" id="k-proy">—</span><span class="s" id="k-proy-s">de los registrados</span></div>
+  <div class="kpi"><span class="eyebrow">Avance medio</span><span class="v mono" id="k-avance">—</span><span class="s">proyectos en curso</span></div>
+  <div class="kpi"><span class="eyebrow">Presupuesto aprobado</span><span class="v mono" id="k-pres">—</span><span class="s" id="k-pres-s">sin presupuesto asignado</span></div>
+  <div class="kpi"><span class="eyebrow">Incidentes resueltos</span><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span></div>
+</div>
+
+<section class="block">
+  <div class="sec-head"><div><div class="eyebrow">Proyectos</div><h2>Cartera en ejecución</h2></div><span class="note" id="proy-note"></span></div>
+  <div class="grid-proj" id="proy-grid"><div class="empty">Cargando proyectos…</div></div>
+</section>
+
+<section class="block">
+  <div class="sec-head"><div><div class="eyebrow">Incidentes</div><h2>Resueltos por mes y por tipo</h2></div><span class="note" id="inc-note"></span></div>
+  <div class="two">
+    <div class="panel"><h3>Por mes</h3><div id="chart-mes"></div></div>
+    <div class="panel"><h3>Por tipo</h3><div class="tipos" id="chart-tipo"></div></div>
+  </div>
+  <div class="panel" style="margin-top:12px">
+    <div class="sec-head" style="margin-bottom:6px"><h3 style="margin:0">Detalle</h3>
+      <div class="filters">
+        <select id="f-mes" aria-label="Filtrar por mes"><option value="">Todos los meses</option></select>
+        <select id="f-tipo" aria-label="Filtrar por tipo"><option value="">Todos los tipos</option></select>
+      </div>
+    </div>
+    <div class="tablewrap"><table id="tbl-inc"><thead><tr><th>Fecha</th><th>Tipo</th><th>Incidente</th><th>Severidad</th><th>Ref.</th><th id="th-act" hidden></th></tr></thead><tbody></tbody></table></div>
+    <div class="empty" id="inc-empty" hidden>Sin incidentes para este filtro.</div>
+  </div>
+</section>
+
+<section class="admin" id="admin" hidden>
+  <div class="admin-head">
+    <div><div class="eyebrow">Administración</div><strong>Solo visible para ti</strong></div>
+    <div class="tabs" role="tablist">
+      <button role="tab" aria-selected="true" data-tab="proy">Proyectos</button>
+      <button role="tab" aria-selected="false" data-tab="inc">Incidentes</button>
+      <button role="tab" aria-selected="false" data-tab="cfg">Ajustes</button>
+    </div>
+  </div>
+  <div class="admin-body">
+    <form class="f" id="form-proy" data-tab="proy">
+      <input type="hidden" id="p-id">
+      <label class="full">Nombre del proyecto<input id="p-nombre" required></label>
+      <label class="full">Descripción<textarea id="p-desc"></textarea></label>
+      <label>Estado<select id="p-estado"><option>En curso</option><option>Planificado</option><option>En pausa</option><option>Finalizado</option></select></label>
+      <label>Avance (%)<input id="p-avance" type="number" min="0" max="100" step="5" value="0"></label>
+      <label>Inicio<input id="p-inicio" type="date"></label>
+      <label>Fin (real o previsto)<input id="p-fin" type="date"></label>
+      <label>Presupuesto aprobado (€)<input id="p-pres" type="number" min="0" step="100" placeholder="Vacío = sin presupuesto"></label>
+      <label>Recursos<input id="p-rec" placeholder="Recursos propios"></label>
+      <label class="full">Notas / enlace<input id="p-notas"></label>
+      <div class="acts"><span class="note" id="p-status"></span><button type="button" class="ghost" id="p-cancel">Limpiar</button><button type="submit" class="primary">Guardar proyecto</button></div>
+    </form>
+
+    <form class="f" id="form-inc" data-tab="inc" hidden>
+      <input type="hidden" id="i-id">
+      <label>Fecha de resolución<input id="i-fecha" type="date" required></label>
+      <label>Tipo<select id="i-tipo"></select></label>
+      <label>Severidad<select id="i-sev"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></label>
+      <label>Referencia (p. ej. INF-SEC-2026-P07)<input id="i-ref"></label>
+      <label class="full">Incidente<input id="i-titulo" required placeholder="Qué pasó, en una línea"></label>
+      <label class="full">Notas<textarea id="i-desc"></textarea></label>
+      <div class="acts"><span class="note" id="i-status"></span><button type="button" class="ghost" id="i-cancel">Limpiar</button><button type="submit" class="primary">Guardar incidente</button></div>
+    </form>
+
+    <form class="f" id="form-cfg" data-tab="cfg" hidden>
+      <label class="full">Línea superior (departamento / área)<input id="c-dept"></label>
+      <label class="full">Título<input id="c-title"></label>
+      <div class="full">
+        <div class="eyebrow" style="margin-bottom:6px">Tipos de incidente</div>
+        <div class="chips" id="c-tipos"></div>
+        <div style="display:flex;gap:8px;margin-top:8px"><input id="c-newtipo" placeholder="Nuevo tipo"><button type="button" id="c-addtipo">Añadir</button></div>
+      </div>
+      <div class="acts"><span class="note" id="c-status"></span><button type="submit" class="primary">Guardar ajustes</button></div>
+    </form>
+  </div>
+</section>
+
+<footer><span>SGP — Departamento de IT</span><span id="foot-upd">—</span></footer>
+</div>
+
+<script>
+(function(){
+const $=s=>document.querySelector(s);
+const MESES=["Ene","Feb","Mar","Abr","May","Jun","Jul","Ago","Sep","Oct","Nov","Dic"];
+const DEF_TIPOS=["Phishing","BEC / Fraude","Malware","Acceso no autorizado","Fuga de datos","Vulnerabilidad","Disponibilidad","Correo (SPF/DKIM/DMARC)","Otro"];
+let isOwner=false;
+let cfg={departamento:"Departamento de IT · Seguridad de la Información",titulo:"Actividad del área",tipos:DEF_TIPOS};
+let proyectos=[],incidentes=[];
+let year=new Date().getFullYear(),fMes="",fTipo="";
+const eur=n=>new Intl.NumberFormat("es-ES",{style:"currency",currency:"EUR",maximumFractionDigits:0}).format(n);
+const fmtD=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return d&&m?`${d}/${m}/${y}`:s};
+const esc=s=>String(s??"");
+function toast(t){let e=$(".toast");if(!e){e=document.createElement("div");e.className="toast";document.body.appendChild(e)}e.textContent=t;e.hidden=false;clearTimeout(e._t);e._t=setTimeout(()=>e.hidden=true,2600)}
+function estadoClass(e){return{"En curso":"curso","Finalizado":"finalizado","En pausa":"pausa","Planificado":"planificado"}[e]||""}
+
+function renderHeader(){
+  $("#hdr-dept").textContent=cfg.departamento||"";$("#hdr-title").textContent=cfg.titulo||"Actividad del área";
+  const ys=new Set([new Date().getFullYear()]);incidentes.forEach(i=>i.fecha&&ys.add(+i.fecha.slice(0,4)));proyectos.forEach(p=>p.inicio&&ys.add(+p.inicio.slice(0,4)));
+  const sel=$("#sel-year");const cur=sel.value||year;sel.innerHTML="";[...ys].sort((a,b)=>b-a).forEach(y=>{const o=document.createElement("option");o.value=y;o.textContent=y;sel.appendChild(o)});
+  sel.value=String([...ys].includes(+cur)?cur:[...ys][0]);year=+sel.value;
+  const tipos=cfg.tipos||DEF_TIPOS;
+  const ft=$("#f-tipo");const keep=ft.value;ft.innerHTML='<option value="">Todos los tipos</option>';tipos.forEach(t=>{const o=document.createElement("option");o.value=t;o.textContent=t;ft.appendChild(o)});ft.value=tipos.includes(keep)?keep:"";fTipo=ft.value;
+  const fm=$("#f-mes");if(fm.options.length===1)MESES.forEach((m,i)=>{const o=document.createElement("option");o.value=i+1;o.textContent=m;fm.appendChild(o)});
+  const it=$("#i-tipo");const k2=it.value;it.innerHTML="";tipos.forEach(t=>{const o=document.createElement("option");o.textContent=t;it.appendChild(o)});if(tipos.includes(k2))it.value=k2;
+}
+
+function renderKPIs(){
+  const enCurso=proyectos.filter(p=>p.estado==="En curso");
+  $("#k-proy").textContent=enCurso.length;$("#k-proy-s").textContent=`de ${proyectos.length} registrados`;
+  $("#k-avance").textContent=enCurso.length?Math.round(enCurso.reduce((a,p)=>a+(+p.avance||0),0)/enCurso.length)+" %":"—";
+  const conPres=proyectos.filter(p=>p.presupuesto!=null&&p.presupuesto!=="");
+  const total=conPres.reduce((a,p)=>a+(+p.presupuesto||0),0);
+  $("#k-pres").textContent=conPres.length?eur(total):"0 €";
+  $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
+  const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
+  $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`resueltos en ${year}`;
+}
+
+function renderProyectos(){
+  const g=$("#proy-grid");g.innerHTML="";
+  const order={"En curso":0,"En pausa":1,"Planificado":2,"Finalizado":3};
+  const list=[...proyectos].sort((a,b)=>(order[a.estado]??9)-(order[b.estado]??9)||(b.inicio||"").localeCompare(a.inicio||""));
+  $("#proy-note").textContent=list.length?`${list.length} proyecto${list.length>1?"s":""}`:"";
+  if(!list.length){g.innerHTML='<div class="empty">Todavía no hay proyectos. '+(isOwner?'Añade el primero desde Administrar.':'')+'</div>';return}
+  list.forEach(p=>{
+    const c=document.createElement("article");c.className="card";
+    const av=Math.max(0,Math.min(100,+p.avance||0));
+    const pres=(p.presupuesto!=null&&p.presupuesto!=="")?eur(+p.presupuesto):"Sin presupuesto";
+    c.innerHTML=`<div class="ttl"><h3></h3><span class="pill ${estadoClass(p.estado)}"></span></div>
+      <p class="desc"></p>
+      <div><div style="display:flex;justify-content:space-between;font-size:.75rem;margin-bottom:4px"><span class="eyebrow">Avance</span><span class="mono av"></span></div><div class="bar"><i style="width:${av}%"></i></div></div>
+      <div class="meta">
+        <div><span class="l">Inicio</span><span class="d ini"></span></div>
+        <div><span class="l">Fin</span><span class="d fin"></span></div>
+        <div><span class="l">Presupuesto</span><span class="d pre"></span></div>
+        <div><span class="l">Recursos</span><span class="d rec"></span></div>
+      </div>
+      <p class="notas" style="font-size:.78rem"></p>
+      <div class="row-actions" hidden><button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button></div>`;
+    c.querySelector("h3").textContent=p.nombre||"(sin nombre)";c.querySelector(".pill").textContent=p.estado||"—";
+    c.querySelector(".desc").textContent=p.descripcion||"";c.querySelector(".av").textContent=av+" %";
+    c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
+    c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.recursos||"Recursos propios";
+    const n=c.querySelector(".notas");if(p.notas){ if(/^https?:\/\//.test(p.notas)){const a=document.createElement("a");a.href=p.notas;a.target="_blank";a.rel="noopener";a.textContent=p.notas;a.style.color="var(--accent)";n.appendChild(a)}else n.textContent=p.notas}else n.remove();
+    if(isOwner){const ra=c.querySelector(".row-actions");ra.hidden=false;ra.querySelector('[data-act=edit]').onclick=()=>editProy(p);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/proyectos/"+p.id).then(()=>toast("Proyecto eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)))}
+    g.appendChild(c);
+  });
+}
+
+function confirmDel(host,fn){
+  if(host.dataset.confirm){delete host.dataset.confirm;fn();return}
+  host.dataset.confirm="1";const b=host.querySelector('[data-act=del]');const old=b.textContent;b.textContent="¿Seguro? Pulsa otra vez";setTimeout(()=>{if(host.dataset.confirm){delete host.dataset.confirm;b.textContent=old}},3500);
+}
+
+function renderIncidentes(){
+  const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
+  $("#inc-note").textContent=incY.length?`${incY.length} en ${year}`:"";
+  // por mes
+  const counts=Array(12).fill(0);incY.forEach(i=>{const m=+i.fecha.slice(5,7);if(m>=1&&m<=12)counts[m-1]++});
+  const W=560,H=190,padL=28,padB=24,padT=14;const max=Math.max(1,...counts);
+  const bw=(W-padL-10)/12;let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Incidentes resueltos por mes">`;
+  const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);s+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${padL-6}" y="${y+3}" text-anchor="end">${v}</text>`}
+  counts.forEach((c,i)=>{const h=(H-padT-padB)*c/max;const x=padL+i*bw+bw*.18;const y=H-padB-h;const now=new Date();const isCur=year===now.getFullYear()&&i===now.getMonth();
+    s+=`<rect x="${x}" y="${y}" width="${bw*.64}" height="${h}" rx="2" fill="${isCur?'var(--accent)':'var(--info)'}"><title>${MESES[i]} ${year}: ${c}</title></rect>`;
+    if(c)s+=`<text x="${x+bw*.32}" y="${y-4}" text-anchor="middle" style="fill:var(--fg)">${c}</text>`;
+    s+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle">${MESES[i]}</text>`});
+  s+="</svg>";$("#chart-mes").innerHTML=incY.length?s:'<div class="empty">Sin incidentes registrados en '+year+'.</div>';
+  // por tipo
+  const byT={};incY.forEach(i=>{byT[i.tipo||"Otro"]=(byT[i.tipo||"Otro"]||0)+1});
+  const arr=Object.entries(byT).sort((a,b)=>b[1]-a[1]);const mx=Math.max(1,...arr.map(a=>a[1]));
+  const ct=$("#chart-tipo");ct.innerHTML="";
+  if(!arr.length)ct.innerHTML='<div class="empty">—</div>';
+  arr.forEach(([t,n])=>{const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${n/mx*100}%;background:var(--info)"></i></div>`;d.children[0].textContent=t;d.children[1].textContent=n+" · "+Math.round(n/incY.length*100)+" %";d.onclick=()=>{$("#f-tipo").value=t;fTipo=t;renderTabla()};d.style.cursor="pointer";ct.appendChild(d)});
+  renderTabla();
+}
+function renderTabla(){
+  const tb=$("#tbl-inc tbody");tb.innerHTML="";$("#th-act").hidden=!isOwner;
+  const rows=incidentes.filter(i=>(i.fecha||"").startsWith(year)&&(!fMes||+i.fecha.slice(5,7)===+fMes)&&(!fTipo||i.tipo===fTipo)).sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
+  $("#inc-empty").hidden=!!rows.length;
+  rows.forEach(i=>{const tr=document.createElement("tr");
+    tr.innerHTML=`<td class="mono"></td><td></td><td></td><td></td><td class="mono"></td><td class="acts" ${isOwner?"":"hidden"}></td>`;
+    tr.children[0].textContent=fmtD(i.fecha)+(i.aprox?" ~":"");tr.children[1].textContent=i.tipo||"—";
+    tr.children[2].textContent=i.titulo||"";if(i.descripcion){const sm=document.createElement("div");sm.className="note";sm.textContent=i.descripcion;tr.children[2].appendChild(sm)}
+    const sev=i.severidad||"Media";const sevVar={Baja:'--muted',Media:'--info',Alta:'--warn','Crítica':'--bad'}[sev]||'--muted';tr.children[3].innerHTML=`<span class="pill" style="color:var(${sevVar})">${esc(sev)}</span>`;
+    tr.children[4].textContent=i.ref||"";
+    if(isOwner){const ra=document.createElement("div");ra.className="row-actions";ra.innerHTML='<button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button>';ra.querySelector('[data-act=edit]').onclick=()=>editInc(i);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/incidentes/"+i.id).then(()=>toast("Incidente eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)));tr.children[5].appendChild(ra)}
+    tb.appendChild(tr)});
+}
+function renderAll(){renderHeader();renderKPIs();renderProyectos();renderIncidentes();}
+
+/* ---- admin ---- */
+function showTab(t){document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.tab===t));document.querySelectorAll('.admin-body form').forEach(f=>f.hidden=f.dataset.tab!==t)}
+document.querySelectorAll('.tabs [role=tab]').forEach(b=>b.onclick=()=>showTab(b.dataset.tab));
+$("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;$("#btn-admin").textContent=a.hidden?"Administrar":"Cerrar administración";if(!a.hidden)a.scrollIntoView({behavior:"smooth",block:"start"})};
+
+function editProy(p){showTab("proy");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
+  $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-avance").value=p.avance??0;
+  $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";
+  $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
+$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""};
+$("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
+  const id=$("#p-id").value||("p"+Date.now().toString(36));
+  const pres=$("#p-pres").value;
+  const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
+    inicio:$("#p-inicio").value,fin:$("#p-fin").value,presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
+  try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
+
+function editInc(i){showTab("inc");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
+  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
+  $("#i-status").textContent="Editando: "+(i.titulo||"");$("#admin").scrollIntoView({behavior:"smooth"})}
+$("#i-cancel").onclick=()=>{$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
+$("#form-inc").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
+  const id=$("#i-id").value||("i"+Date.now().toString(36));
+  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:"Resuelto",aprox:false,actualizado:new Date().toISOString()};
+  try{await api("PUT","/api/incidentes/"+id,body);toast("Incidente guardado");$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
+
+let cfgTipos=[];
+function renderCfgTipos(){const c=$("#c-tipos");c.innerHTML="";cfgTipos.forEach((t,i)=>{const s=document.createElement("span");s.className="chip";s.innerHTML=`<span></span><button type="button" aria-label="Quitar">×</button>`;s.children[0].textContent=t;s.children[1].onclick=()=>{cfgTipos.splice(i,1);renderCfgTipos()};c.appendChild(s)})}
+$("#c-addtipo").onclick=()=>{const v=$("#c-newtipo").value.trim();if(v&&!cfgTipos.includes(v)){cfgTipos.push(v);$("#c-newtipo").value="";renderCfgTipos()}};
+$("#form-cfg").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
+  try{await api("PUT","/api/config",{departamento:$("#c-dept").value.trim(),titulo:$("#c-title").value.trim(),tipos:cfgTipos.slice(),actualizado:new Date().toISOString()});toast("Ajustes guardados")}catch(err){toast("No se pudo guardar: "+err.code)}};
+
+$("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes()};
+$("#f-mes").onchange=e=>{fMes=e.target.value;renderTabla()};
+$("#f-tipo").onchange=e=>{fTipo=e.target.value;renderTabla()};
+
+/* ---- boot ---- */
+isOwner=__IS_ADMIN__;
+async function api(method,url,body){const r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});if(!r.ok){const e=new Error("http");e.code=r.status===401?"sin sesión":"HTTP "+r.status;throw e}return r.json()}
+async function load(){try{const d=await api("GET","/api/data");cfg={...cfg,...(d.config||{})};proyectos=d.proyectos||[];incidentes=d.incidentes||[];
+  cfgTipos=(cfg.tipos||DEF_TIPOS).slice();$("#c-dept").value=cfg.departamento||"";$("#c-title").value=cfg.titulo||"";renderCfgTipos();renderAll();
+  const all=[...proyectos,...incidentes].map(x=>x.actualizado).filter(Boolean).sort();if(all.length){const dt=new Date(all[all.length-1]);$("#foot-upd").textContent="Última actualización "+dt.toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"})}}
+  catch(e){$("#proy-grid").innerHTML='<div class="empty">No se pudieron cargar los datos ('+e.code+').</div>'}}
+const badge=$("#role-badge");badge.textContent=isOwner?"Administrador · puede editar":"Solo lectura";badge.classList.toggle("owner",isOwner);
+$("#btn-admin").hidden=!isOwner;$("#lnk-login").hidden=isOwner;$("#lnk-logout").hidden=!isOwner;
+renderAll();load();
+// recargar tras cada guardado/borrado
+const _t=toast;toast=function(m){_t(m);if(/guardad|eliminad/.test(m))load()};
+})();
+</script>
+</body></html>
