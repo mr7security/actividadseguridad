@@ -417,7 +417,7 @@ function renderKPIs(){
   const conPres=proyectos.filter(p=>presDe(p)!=null);
   const rate=+cfg.usd_eur||0.92;let totalEur=0,usd=0;conPres.forEach(p=>{const v=presDe(p);if((p.moneda||"EUR")==="USD"){usd+=v;totalEur+=v*rate}else totalEur+=v});
   $("#k-pres").textContent=conPres.length?eur(totalEur):"0 €";
-  $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`+(usd?` · incluye ${eur(usd,"USD")} a ${rate.toLocaleString("es-ES")} €/$`:""):"todos con recursos propios";
+  $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
   const enc=proyectos.filter(p=>p.estado==="En curso");$("#k-fin").textContent=enc.filter(p=>p.modalidad!=="Tercerizado").length+" / "+enc.filter(p=>p.modalidad==="Tercerizado").length;$("#k-fin-s").textContent=`en curso · ${proyectos.filter(p=>p.modalidad==="Tercerizado").length} tercerizados en total`;
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
   $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`en ${year} · ${incY.filter(i=>i.estado!=="Abierto").length} resueltos`;
