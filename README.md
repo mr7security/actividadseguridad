@@ -27,4 +27,5 @@ Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl rest
 - `cargar_puestos_ia.py` — carga única de partidas y puestos de ChatGPT en el proyecto de cuentas nominales.
 - `cargar_endpoint_central.py` — alta única del proyecto Endpoint Central (del plan de implementación v1.4).
 - `cargar_endpoint_central_ampliaciones.py` — carga única de las 4 ampliaciones de licencia (cotizaciones 720tec) en ese proyecto.
+- `cargar_endpoint_central_inicial.py` — carga única de la licencia inicial (cot. 15374) en ese proyecto.
 - `cargar_hitos.py` — carga única de hitos en los proyectos existentes de una base ya creada (`.venv/bin/python cargar_hitos.py`).

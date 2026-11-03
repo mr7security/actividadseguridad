@@ -508,8 +508,20 @@
       "inicio": "2026-04-03",
       "fin": "2026-10-10",
       "moneda": "EUR",
-      "presupuesto": 9638.74,
+      "presupuesto": 12712.94,
       "partidas": [
+        {
+          "concepto": "Cot. 15374 (16/02/2026) — licencia inicial: 50 servidores + 2 usuarios + ML Pack",
+          "unidades": 1,
+          "precio": 2654.2,
+          "periodo": "año, hasta 20/05/2027"
+        },
+        {
+          "concepto": "Cot. 15374 (16/02/2026) — jornada de formación del producto",
+          "unidades": 1,
+          "precio": 420.0,
+          "periodo": "único"
+        },
         {
           "concepto": "Cot. 15919 (13/08/2026) — +50 servidores, +2 usuarios",
           "unidades": 1,
@@ -536,7 +548,7 @@
         }
       ],
       "recursos": "720tec + Sistemas + Seguridad",
-      "notas": "Licencia actual (Security Edition, hasta 20/05/2027): 100 servidores, 400 equipos, 9 técnicos. Partidas = ampliaciones contratadas a 720tec (importes sin IVA; con IVA 11.662,87 €). La licencia inicial (50 servidores + 50 equipos + 4 técnicos) no tiene cotización en el dashboard. Las cotizaciones suman 10 usuarios (4+2+3+1) frente a los 9 indicados: revisar.",
+      "notas": "Licencia actual (Security Edition, hasta 20/05/2027): 100 servidores, 400 equipos, 9 técnicos. Partidas = ampliaciones contratadas a 720tec (importes sin IVA; con IVA 11.662,87 €). Las cotizaciones suman 10 usuarios (4+2+3+1) frente a los 9 indicados: revisar. Coste total del proyecto con la licencia inicial: 12.712,94 € sin IVA (15.382,65 € con IVA).",
       "hitos": [
         {
           "fecha": "2026-04-24",
@@ -607,6 +619,12 @@
         {
           "fecha": "2026-10-21",
           "nombre": "Ampliación +200 equipos (cot. 16346)",
+          "hecho": true,
+          "aprox": false
+        },
+        {
+          "fecha": "2026-02-16",
+          "nombre": "Cotización inicial 720tec: Control de servidores on-premise, Fase 1 (cot. 15374)",
           "hecho": true,
           "aprox": false
         }
