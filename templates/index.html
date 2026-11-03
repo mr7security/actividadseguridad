@@ -60,7 +60,7 @@ button.small{padding:4px 9px;font-size:.78rem}
 .mini .lg span{flex:0 1 auto;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .mini .lg strong{color:var(--fg);font-weight:500;font-family:var(--font-mono)}
 .mini .lg b{display:inline-block;width:8px;height:8px;border-radius:2px;margin-right:4px;vertical-align:-1px}
-.kpi .v{text-align:center;font-family:var(--font-mono);font-size:2rem;font-weight:500;line-height:1;font-variant-numeric:tabular-nums}
+.kpi .v{text-align:center;font-family:var(--font-mono);font-size:2rem;font-weight:500;line-height:1;min-height:2rem;font-variant-numeric:tabular-nums}
 .kpi .s{font-size:.78rem;color:var(--muted);text-align:center}
 section.block{margin-top:26px}
 .sec-head{display:flex;align-items:baseline;justify-content:space-between;gap:12px;flex-wrap:wrap;margin-bottom:12px}
@@ -93,12 +93,13 @@ body.editing #th-act,body.editing td.acts{display:table-cell}
 .two{display:grid;grid-template-columns:3fr 2fr;gap:12px}
 @media (max-width:760px){.two{grid-template-columns:1fr}}
 .panel{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px 16px;min-width:0}
-.panel h3{font-size:.85rem;font-weight:600;margin-bottom:10px;color:var(--muted)}
-svg text{font-family:var(--font-mono);font-size:10px;fill:var(--muted)}
+.panel h3{font-size:.8rem;font-weight:600;margin-bottom:10px;color:var(--muted);text-transform:uppercase;letter-spacing:.06em;font-family:var(--font-mono)}
+.panel h3 .note{text-transform:none;letter-spacing:0;font-family:var(--font-sans);font-weight:400}
+svg text{font-family:var(--font-mono);font-size:11px;fill:var(--muted)}
 .mbar{cursor:pointer}.mbar:hover{opacity:.85}
 .chips .chip{cursor:pointer;color:var(--accent);border-color:var(--accent)}
 .tipos{display:flex;flex-direction:column;gap:8px}
-.tipo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.82rem}
+.tipo{display:grid;grid-template-columns:minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.8rem}
 .tipo .bar{grid-column:1/-1;height:6px}
 .tipo .n{font-family:var(--font-mono);font-variant-numeric:tabular-nums}
 .tablewrap{overflow-x:auto;margin-top:12px}
@@ -173,7 +174,7 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .tac{border:1px solid var(--line);border-radius:6px;padding:8px 4px 6px;display:flex;flex-direction:column;gap:3px;min-width:0;background:var(--panel2);cursor:pointer;text-align:center;transition:border-color .15s,transform .15s}
 .tac:hover{border-color:var(--accent)}.tac.sel{outline:2px solid var(--accent);outline-offset:-1px}
 .tac .n{text-align:center}.tac .t{font-size:.58rem;line-height:1.15;hyphens:auto;overflow-wrap:anywhere}
-.tac .n{font-family:var(--font-mono);font-size:1.15rem;font-variant-numeric:tabular-nums;line-height:1}
+.tac .n{font-family:var(--font-mono);font-size:1.05rem;font-variant-numeric:tabular-nums;line-height:1}
 .tac .t{font-size:.62rem;line-height:1.2;color:var(--muted);overflow-wrap:anywhere}
 .tac.l1{background:color-mix(in srgb,var(--info) 18%,var(--panel))}.tac.l2{background:color-mix(in srgb,var(--info) 38%,var(--panel))}.tac.l3{background:color-mix(in srgb,var(--info) 60%,var(--panel));color:#fff}.tac.l3 .t{color:#e8ecf4}
 .tech.sel{outline:2px solid var(--accent);outline-offset:2px;border-radius:4px}.tech{cursor:pointer;display:grid;grid-template-columns:auto minmax(0,1fr) auto;gap:4px 10px;align-items:center;font-size:.8rem}
@@ -255,7 +256,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 <div class="view" id="view-inc">
 <div class="kpis">
   <div class="kpi k1"><div class="kh"><span class="eyebrow">Incidentes</span><span class="ico">&#9888;</span></div><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span><div class="mini" id="k-inc-bar"></div></div>
-  <div class="kpi k2"><div class="kh"><span class="eyebrow">Tipo más frecuente</span><span class="ico">&#9776;</span></div><span class="v mono" id="k-inc-tipo" style="font-size:1.15rem">—</span><span class="s" id="k-inc-tipo-s"></span><div class="mini" id="k-inc-tipo-bar"></div></div>
+  <div class="kpi k2"><div class="kh"><span class="eyebrow">Tipo más frecuente</span><span class="ico">&#9776;</span></div><span class="v mono" id="k-inc-tipo" style="font-size:1.35rem;line-height:1.2;min-height:2rem;display:flex;align-items:center;justify-content:center">—</span><span class="s" id="k-inc-tipo-s"></span><div class="mini" id="k-inc-tipo-bar"></div></div>
   <div class="kpi k3" style="--kc:var(--bad)"><div class="kh"><span class="eyebrow">Alta / crítica</span><span class="ico">&#9650;</span></div><div class="ring-wrap"><svg class="ring" viewBox="0 0 44 44" aria-hidden="true"><circle cx="22" cy="22" r="18" fill="none" stroke="var(--line)" stroke-width="5"/><circle id="k-inc-ring" cx="22" cy="22" r="18" fill="none" stroke="var(--bad)" stroke-width="5" stroke-linecap="round" stroke-dasharray="0 113.1" transform="rotate(-90 22 22)"/></svg><div><span class="v mono" id="k-inc-alta">—</span><span class="s" id="k-inc-alta-s">con severidad alta o crítica</span></div></div></div>
   <div class="kpi k4"><div class="kh"><span class="eyebrow">Desde CAUs</span><span class="ico">&#9741;</span></div><span class="v mono" id="k-inc-ref">—</span><span class="s" id="k-inc-ref-s">clasificados automáticamente</span><div class="mini" id="k-inc-ref-bar"></div></div>
 </div>
@@ -524,7 +525,7 @@ function renderGantt(){
   g.onmouseleave=()=>tip.hidden=true;
   g.querySelectorAll(".grow").forEach(el=>{const go=()=>irAProyecto(el.dataset.pid);el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
 }
-let _rz;window.addEventListener("resize",()=>{clearTimeout(_rz);_rz=setTimeout(renderGantt,150)});
+let _rz;window.addEventListener("resize",()=>{clearTimeout(_rz);_rz=setTimeout(()=>{renderGantt();renderIncidentes();renderCaus()},150)});
 function irAProyecto(pid){const p=proyectos.find(x=>x.id===pid);if(!p)return;showPtab(p.modalidad==="Tercerizado"?"ext":"int");
   const c=document.getElementById("proy-"+pid);if(!c)return;c.scrollIntoView({behavior:"smooth",block:"center"});c.classList.add("flash");setTimeout(()=>c.classList.remove("flash"),1600)}
 let ptab="int";
@@ -604,15 +605,15 @@ function renderIncidentes(){
   $("#inc-note").textContent=incY.length?`${incY.length} en ${year}`:"";
   // por mes
   const counts=Array(12).fill(0);incY.forEach(i=>{const m=+i.fecha.slice(5,7);if(m>=1&&m<=12)counts[m-1]++});
-  const W=560,H=190,padL=28,padB=24,padT=14;const max=Math.max(1,...counts);
-  const bw=(W-padL-10)/12;let s=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Incidentes resueltos por mes">`;
-  const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);s+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${padL-6}" y="${y+3}" text-anchor="end">${v}</text>`}
-  counts.forEach((c,i)=>{const h=(H-padT-padB)*c/max;const x=padL+i*bw+bw*.18;const y=H-padB-h;const sel=fMes&&+fMes===i+1;const dim=fMes&&!sel;
+  const host=$("#chart-mes");const W=Math.max(320,host.clientWidth||560),H=210,padL=34,padB=26,padT=18;const max=Math.max(1,...counts);
+  const bw=(W-padL-12)/12;let s=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Incidentes resueltos por mes">`;
+  const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);s+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)" stroke-width="1"/><text x="${padL-8}" y="${y+3}" text-anchor="end">${v}</text>`}
+  counts.forEach((c,i)=>{const h=(H-padT-padB)*c/max;const x=padL+i*bw+bw*.2;const y=H-padB-h;const sel=fMes&&+fMes===i+1;const dim=fMes&&!sel;
     s+=`<g class="mbar" data-m="${i+1}"><rect x="${padL+i*bw}" y="${padT}" width="${bw}" height="${H-padT-padB}" fill="${sel?'var(--accent)':'transparent'}" opacity="${sel?.12:0}"/>`;
-    s+=`<rect x="${x}" y="${Math.min(y,H-padB-2)}" width="${bw*.64}" height="${Math.max(h,c?2:0)}" rx="3" fill="${sel?'var(--accent)':'var(--info)'}" opacity="${dim?.4:1}"><title>${MESES[i]} ${year}: ${c} · clic para filtrar</title></rect>`;
-    if(c)s+=`<text x="${x+bw*.32}" y="${y-4}" text-anchor="middle" style="fill:var(--fg);opacity:${dim?.5:1}">${c}</text>`;
-    s+=`<text x="${x+bw*.32}" y="${H-8}" text-anchor="middle" style="${sel?'fill:var(--accent);font-weight:600':''}">${MESES[i]}</text></g>`});
-  s+="</svg>";$("#chart-mes").innerHTML=incY.length?s:'<div class="empty">Sin incidentes registrados en '+year+'.</div>';
+    s+=`<rect x="${x}" y="${Math.min(y,H-padB-2)}" width="${bw*.6}" height="${Math.max(h,c?2:0)}" rx="3" fill="${sel?'var(--accent)':'var(--info)'}" opacity="${dim?.4:1}"><title>${MESES[i]} ${year}: ${c} · clic para filtrar</title></rect>`;
+    if(c)s+=`<text x="${x+bw*.3}" y="${y-5}" text-anchor="middle" style="fill:var(--fg);opacity:${dim?.5:1}">${c}</text>`;
+    s+=`<text x="${x+bw*.3}" y="${H-9}" text-anchor="middle" style="${sel?'fill:var(--accent);font-weight:600':''}">${MESES[i]}</text></g>`});
+  s+="</svg>";host.innerHTML=incY.length?s:'<div class="empty">Sin incidentes registrados en '+year+'.</div>';
   $("#chart-mes").querySelectorAll(".mbar").forEach(el=>el.onclick=()=>{const m=el.dataset.m;fMes=(fMes===m)?"":m;$("#f-mes").value=fMes;renderIncidentes()});
   // por tipo
   const byT={};incY.forEach(i=>{byT[i.tipo||"Otro"]=(byT[i.tipo||"Otro"]||0)+1});
@@ -661,12 +662,15 @@ function renderCaus(){
   const m=Array.from({length:12},()=>({CERRADA:0,ABIERTA:0,RECHAZADA:0,OTRO:0}));
   cY.forEach(c=>{const i=+c.creacion.slice(5,7)-1;if(i>=0&&i<12)m[i][C.includes(c.estado)?c.estado:"OTRO"]++});
   const tot=m.map(x=>x.CERRADA+x.ABIERTA+x.RECHAZADA+x.OTRO);const max=Math.max(1,...tot);
-  const W=560,H=190,padL=28,padB=24,padT=14,bw=(W-padL-10)/12;
-  let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="CAUs por mes">`;
-  const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);sv+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${padL-6}" y="${y+3}" text-anchor="end">${v}</text>`}
-  m.forEach((x,i)=>{let y=H-padB;const bx=padL+i*bw+bw*.18;C.forEach(k=>{const h=(H-padT-padB)*x[k]/max;if(h>0){y-=h;sv+=`<rect x="${bx}" y="${y}" width="${bw*.64}" height="${h}" fill="${COL[k]}"><title>${MESES[i]} ${year} · ${k.toLowerCase()}: ${x[k]}</title></rect>`}});
-    if(tot[i])sv+=`<text x="${bx+bw*.32}" y="${y-4}" text-anchor="middle" style="fill:var(--fg)">${tot[i]}</text>`;sv+=`<text x="${bx+bw*.32}" y="${H-8}" text-anchor="middle">${MESES[i]}</text>`});
-  sv+="</svg>";$("#chart-cau-mes").innerHTML=cY.length?sv:'<div class="empty">Sin CAUs en '+year+'.</div>';
+  const host=$("#chart-cau-mes");const W=Math.max(320,host.clientWidth||560),H=210,padL=34,padB=26,padT=18,bw=(W-padL-12)/12;
+  let sv=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="CAUs por mes">`;
+  const ticks=max<=4?max:4;for(let t=0;t<=ticks;t++){const v=Math.round(max*t/ticks);const y=padT+(H-padT-padB)*(1-t/ticks);sv+=`<line x1="${padL}" x2="${W-6}" y1="${y}" y2="${y}" stroke="var(--line)"/><text x="${padL-8}" y="${y+3}" text-anchor="end">${v}</text>`}
+  m.forEach((x,i)=>{let y=H-padB;const bx=padL+i*bw+bw*.2;const sel=fcMes&&+fcMes===i+1;const dim=fcMes&&!sel;
+    sv+=`<g class="mbar" data-m="${i+1}"><rect x="${padL+i*bw}" y="${padT}" width="${bw}" height="${H-padT-padB}" fill="${sel?'var(--accent)':'transparent'}" opacity="${sel?.12:0}"/>`;
+    C.forEach(k=>{const h=(H-padT-padB)*x[k]/max;if(h>0){y-=h;sv+=`<rect x="${bx}" y="${y}" width="${bw*.6}" height="${h}" fill="${COL[k]}" opacity="${dim?.4:1}"><title>${MESES[i]} ${year} · ${k.toLowerCase()}: ${x[k]} · clic para filtrar</title></rect>`}});
+    if(tot[i])sv+=`<text x="${bx+bw*.3}" y="${y-5}" text-anchor="middle" style="fill:var(--fg);opacity:${dim?.5:1}">${tot[i]}</text>`;sv+=`<text x="${bx+bw*.3}" y="${H-9}" text-anchor="middle" style="${sel?'fill:var(--accent);font-weight:600':''}">${MESES[i]}</text></g>`});
+  sv+="</svg>";host.innerHTML=cY.length?sv:'<div class="empty">Sin CAUs en '+year+'.</div>';
+  host.querySelectorAll(".mbar").forEach(el=>el.onclick=()=>{const mm=el.dataset.m;fcMes=(fcMes===mm)?"":mm;$("#f-cau-mes").value=fcMes;renderCaus()});
   const ct=$("#chart-cau-prio");ct.innerHTML="";
   const byP={};cY.forEach(c=>{const k=c.prioridad||"—";byP[k]=byP[k]||{n:0,ab:0};byP[k].n++;if(c.estado==="ABIERTA")byP[k].ab++});
   const arr=Object.entries(byP).sort((a,b)=>b[1].n-a[1].n);const mx=Math.max(1,...arr.map(a=>a[1].n));
@@ -686,7 +690,7 @@ function renderTablaCau(){
 }
 function renderAll(){renderHeader();renderKPIs();renderProyectos();renderIncidentes();renderCaus();}
 document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
-function showView(v){document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));document.querySelectorAll('.view').forEach(e=>e.classList.toggle("on",e.id==="view-"+v));try{localStorage.setItem("vista",v)}catch(e){}}
+function showView(v){document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));document.querySelectorAll('.view').forEach(e=>e.classList.toggle("on",e.id==="view-"+v));try{localStorage.setItem("vista",v)}catch(e){}if(v==="inc")renderIncidentes();if(v==="cau")renderCaus();if(v==="proy")renderGantt()}
 try{const v=localStorage.getItem("vista");if(v&&$("#view-"+v))showView(v)}catch(e){}
 
 /* ---- admin ---- */
@@ -747,7 +751,7 @@ $("#form-cfg").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
 $("#sel-year").onchange=e=>{year=+e.target.value;renderKPIs();renderIncidentes();renderCaus();renderGantt()};
 $("#f-mes").onchange=e=>{fMes=e.target.value;renderIncidentes()};
 $("#f-tipo").onchange=e=>{fTipo=e.target.value;renderIncidentes()};
-$("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderTablaCau()};
+$("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderCaus()};
 $("#f-cau-est").onchange=e=>{fcEst=e.target.value;renderTablaCau()};
 $("#f-cau-q").oninput=e=>{fcQ=e.target.value;renderTablaCau()};
 $("#form-cau").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;const f=$("#cau-file").files[0];if(!f)return;
