@@ -436,12 +436,12 @@ function renderGantt(){
   const all=proyectos.filter(p=>p.inicio||p.fin).map(mk).filter(r=>r.b>=y0&&r.a<y1).sort((x,y)=>x.a-y.a);
   if(!all.length){g.innerHTML='<div class="empty">Sin proyectos con fechas en '+year+'.</div>';return}
   const grupos=[["Tercerizados",all.filter(r=>r.p.modalidad==="Tercerizado")],["Internos",all.filter(r=>r.p.modalidad!=="Tercerizado")]].filter(x=>x[1].length);
-  const W=Math.max(640,g.clientWidth-2),L=Math.min(300,Math.max(200,Math.round(W*.2))),R=48,top=30,rowH=36,hdrH=26;
+  const W=Math.max(640,g.clientWidth-24),L=Math.min(380,Math.max(200,Math.round(W*.24))),R=52,top=30,rowH=36,hdrH=26;
   const rows=[];grupos.forEach(([nm,list])=>{rows.push({hdr:nm});list.forEach(r=>rows.push(r))});
   let H=top+8;rows.forEach(r=>H+=r.hdr?hdrH:rowH);H+=8;
   const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
   const X=t=>String(t??"").replace(/&/g,"&amp;").replace(/</g,"&lt;").replace(/"/g,"&quot;");
-  const maxCh=Math.floor((L-16)/7);const short=(n,m)=>{n=n||"";return n.length>m?n.slice(0,m-1)+"…":n};
+  const maxCh=Math.floor((L-16)/6.6);const short=(n,m)=>{n=n||"";return n.length>m?n.slice(0,m-1)+"…":n};
   let sv=`<svg viewBox="0 0 ${W} ${H}" width="${W}" height="${H}" role="img" aria-label="Línea temporal de proyectos">`;
   // bandas de mes alternas + etiquetas
   MESES.forEach((m,i)=>{const x1=sx(new Date(year,i,1)),x2=sx(new Date(year,i+1,1));if(i%2)sv+=`<rect x="${x1}" y="${top-4}" width="${x2-x1}" height="${H-top}" fill="var(--fg)" opacity=".035"/>`;sv+=`<text x="${(x1+x2)/2}" y="${top-12}" text-anchor="middle" style="font-size:11px">${m}</text>`});
