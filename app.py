@@ -14,6 +14,8 @@ from datetime import datetime, timezone
 from pathlib import Path
 
 from dotenv import load_dotenv
+
+from clasificador import clasificar, severidad
 from flask import Flask, Response, abort, jsonify, redirect, render_template_string, request, session, url_for
 
 MAX_CSV_BYTES = 10 * 1024 * 1024
@@ -268,21 +270,36 @@ def api_caus_import():
     except ValueError as e:
         return jsonify(error=str(e)), 400
     existing = {t["id"] for t in get_all("caus")}
-    nuevos = actualizados = 0
+    inc_existing = {i["id"] for i in get_all("incidentes")}
+    nuevos = actualizados = incidentes_nuevos = 0
     now = datetime.now(timezone.utc).isoformat()
     with db() as con:
         for t in tickets:
             tid = t.pop("id")
             t["actualizado"] = now
+            tipo = clasificar(t.get("asunto", ""))
+            t["tipo_incidente"] = tipo
             con.execute("INSERT OR REPLACE INTO docs VALUES ('caus',?,?)", (tid, json.dumps(t, ensure_ascii=False)))
             if tid in existing:
                 actualizados += 1
             else:
                 nuevos += 1
+            # Incidente de seguridad derivado del CAU (solo se crea la primera vez; luego manda lo editado a mano)
+            iid = "cau-" + tid
+            if tipo and iid not in inc_existing and t.get("creacion"):
+                inc = {
+                    "fecha": t["creacion"][:10], "tipo": tipo, "severidad": severidad(t.get("asunto", ""), tipo),
+                    "ref": "CAU " + tid, "titulo": t.get("asunto", ""),
+                    "descripcion": "Solicitante: " + t.get("solicitante", "") + ". Clasificado automáticamente por el asunto del CAU.",
+                    "estado": "Resuelto" if t.get("estado") == "CERRADA" else "Abierto",
+                    "origen": "cau", "cau_id": tid, "auto": True, "aprox": False, "actualizado": now,
+                }
+                con.execute("INSERT INTO docs VALUES ('incidentes',?,?)", (iid, json.dumps(inc, ensure_ascii=False)))
+                incidentes_nuevos += 1
     cfg = get_config()
     cfg["caus_import"] = now
     put_doc("config", "general", cfg)
-    return jsonify(ok=True, importados=len(tickets), nuevos=nuevos, actualizados=actualizados)
+    return jsonify(ok=True, importados=len(tickets), nuevos=nuevos, actualizados=actualizados, incidentes=incidentes_nuevos)
 
 
 @app.route("/api/caus", methods=["DELETE"])

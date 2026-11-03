@@ -99,6 +99,8 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .legend{display:flex;gap:14px;font-size:.75rem;color:var(--muted);margin-bottom:6px}.legend i{display:inline-block;width:10px;height:10px;border-radius:2px;margin-right:5px;vertical-align:-1px}
 .pill.abierta{color:var(--warn);border-color:var(--warn)}.pill.cerrada{color:var(--ok);border-color:var(--ok)}.pill.rechazada{color:var(--bad);border-color:var(--bad)}
 .search{width:auto;min-width:180px}
+.pill.auto{color:var(--accent);border-color:var(--accent)}
+.pill.abierto{color:var(--warn);border-color:var(--warn)}
 /* admin */
 .admin{margin-top:26px;border:1px solid var(--accent);border-radius:8px;background:var(--panel)}
 .admin-head{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 16px;border-bottom:1px solid var(--line);flex-wrap:wrap}
@@ -156,10 +158,10 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 
 <div class="view" id="view-inc">
 <div class="kpis">
-  <div class="kpi"><span class="eyebrow">Incidentes resueltos</span><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span></div>
+  <div class="kpi"><span class="eyebrow">Incidentes</span><span class="v mono" id="k-inc">—</span><span class="s" id="k-inc-s">en el año</span></div>
   <div class="kpi"><span class="eyebrow">Tipo más frecuente</span><span class="v mono" id="k-inc-tipo" style="font-size:1.1rem">—</span><span class="s" id="k-inc-tipo-s"></span></div>
   <div class="kpi"><span class="eyebrow">Alta / crítica</span><span class="v mono" id="k-inc-alta">—</span><span class="s">con severidad alta o crítica</span></div>
-  <div class="kpi"><span class="eyebrow">Con informe</span><span class="v mono" id="k-inc-ref">—</span><span class="s">con referencia INF-SEC</span></div>
+  <div class="kpi"><span class="eyebrow">Desde CAUs</span><span class="v mono" id="k-inc-ref">—</span><span class="s" id="k-inc-ref-s">clasificados automáticamente</span></div>
 </div>
 <section class="block">
   <div class="sec-head"><div><div class="eyebrow">Incidentes</div><h2>Resueltos por mes y por tipo</h2></div><span class="note" id="inc-note"></span></div>
@@ -237,6 +239,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Fecha de resolución<input id="i-fecha" type="date" required></label>
       <label>Tipo<select id="i-tipo"></select></label>
       <label>Severidad<select id="i-sev"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></label>
+      <label>Estado<select id="i-estado"><option>Resuelto</option><option>Abierto</option></select></label>
       <label>Referencia (p. ej. INF-SEC-2026-P07)<input id="i-ref"></label>
       <label class="full">Incidente<input id="i-titulo" required placeholder="Qué pasó, en una línea"></label>
       <label class="full">Notas<textarea id="i-desc"></textarea></label>
@@ -244,7 +247,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
     </form>
 
     <form class="f" id="form-cau" data-tab="cau" hidden>
-      <div class="full note">Exporta desde ServiceDesk la lista de solicitudes de tu grupo en CSV (con las columnas <span class="mono">ID de la solicitud, Asunto, Solicitante, Estado, Fecha de creación…</span>) y cárgala aquí. Los tickets se identifican por su ID: si vuelves a importar, se actualizan los existentes y se añaden los nuevos.</div>
+      <div class="full note">Exporta desde ServiceDesk la lista de solicitudes de tu grupo en CSV (con las columnas <span class="mono">ID de la solicitud, Asunto, Solicitante, Estado, Fecha de creación…</span>) y cárgala aquí. Los tickets se identifican por su ID: si vuelves a importar, se actualizan los existentes y se añaden los nuevos. Los asuntos que suenan a seguridad (phishing, estafa, virus, suplantación, cuarentena, contraseñas vulneradas, DMARC, vulnerabilidades…) pasan automáticamente a la pestaña Incidentes con la etiqueta <span class="pill auto">auto</span>; revísalos y edítalos o bórralos.</div>
       <label class="full">Fichero CSV<input id="cau-file" type="file" accept=".csv,text/csv" required></label>
       <div class="acts"><span class="note" id="cau-status"></span><button type="button" class="danger" id="cau-clear">Vaciar CAUs</button><button type="submit" class="primary">Importar CSV</button></div>
     </form>
@@ -301,11 +304,11 @@ function renderKPIs(){
   $("#k-pres-s").textContent=conPres.length?`${conPres.length} proyecto${conPres.length>1?"s":""} con presupuesto`:"todos con recursos propios";
   $("#k-fin").textContent=proyectos.filter(p=>p.estado==="Finalizado").length;
   const incY=incidentes.filter(i=>(i.fecha||"").startsWith(year));
-  $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`resueltos en ${year}`;
+  $("#k-inc").textContent=incY.length;$("#k-inc-s").textContent=`en ${year} · ${incY.filter(i=>i.estado!=="Abierto").length} resueltos`;
   const bt={};incY.forEach(i=>{bt[i.tipo||"Otro"]=(bt[i.tipo||"Otro"]||0)+1});const top=Object.entries(bt).sort((a,b)=>b[1]-a[1])[0];
   $("#k-inc-tipo").textContent=top?top[0]:"—";$("#k-inc-tipo-s").textContent=top?`${top[1]} de ${incY.length}`:"";
   $("#k-inc-alta").textContent=incY.filter(i=>/Alta|Crítica/.test(i.severidad||"")).length;
-  $("#k-inc-ref").textContent=incY.filter(i=>i.ref).length;
+  $("#k-inc-ref").textContent=incY.filter(i=>i.origen==="cau").length;$("#k-inc-ref-s").textContent=`${incY.filter(i=>i.auto).length} pendientes de revisar`;
   // CAUs
   const cY=caus.filter(c=>(c.creacion||"").startsWith(year));
   $("#k-cau-tot").textContent=cY.length;$("#k-cau-tot-s").textContent=`recibidos en ${year}`;
@@ -381,6 +384,8 @@ function renderTabla(){
     tr.children[2].textContent=i.titulo||"";if(i.descripcion){const sm=document.createElement("div");sm.className="note";sm.textContent=i.descripcion;tr.children[2].appendChild(sm)}
     const sev=i.severidad||"Media";const sevVar={Baja:'--muted',Media:'--info',Alta:'--warn','Crítica':'--bad'}[sev]||'--muted';tr.children[3].innerHTML=`<span class="pill" style="color:var(${sevVar})">${esc(sev)}</span>`;
     tr.children[4].textContent=i.ref||"";
+    if(i.estado==="Abierto"){const sp=document.createElement("span");sp.className="pill abierto";sp.textContent="abierto";sp.style.marginLeft="6px";tr.children[2].insertBefore(sp,tr.children[2].firstChild.nextSibling)}
+    if(i.auto){const sp=document.createElement("span");sp.className="pill auto";sp.textContent="auto";sp.title="Clasificado automáticamente desde el CAU; edítalo para confirmarlo";tr.children[4].appendChild(document.createTextNode(" "));tr.children[4].appendChild(sp)}
     if(isOwner){const ra=document.createElement("div");ra.className="row-actions";ra.innerHTML='<button class="small" data-act="edit">Editar</button><button class="small danger" data-act="del">Eliminar</button>';ra.querySelector('[data-act=edit]').onclick=()=>editInc(i);ra.querySelector('[data-act=del]').onclick=()=>confirmDel(ra,()=>api("DELETE","/api/incidentes/"+i.id).then(()=>toast("Incidente eliminado")).catch(e=>toast("No se pudo eliminar: "+e.code)));tr.children[5].appendChild(ra)}
     tb.appendChild(tr)});
 }
@@ -411,7 +416,7 @@ function renderTablaCau(){
   const rows=caus.filter(c=>(c.creacion||"").startsWith(year)&&(!fcMes||+c.creacion.slice(5,7)===+fcMes)&&(!fcEst||c.estado===fcEst)&&(!q||(c.asunto||"").toLowerCase().includes(q)||(c.solicitante||"").toLowerCase().includes(q))).sort((a,b)=>(b.creacion||"").localeCompare(a.creacion||""));
   $("#cau-empty").hidden=!!rows.length;
   rows.forEach(c=>{const tr=document.createElement("tr");tr.innerHTML=`<td class="mono"></td><td class="mono"></td><td></td><td></td><td></td><td></td><td class="mono"></td>`;
-    tr.children[0].textContent=c.id;tr.children[1].textContent=fmtD((c.creacion||"").slice(0,10));tr.children[2].textContent=c.asunto||"";tr.children[3].textContent=c.solicitante||"";tr.children[4].textContent=c.prioridad||"";
+    tr.children[0].textContent=c.id;tr.children[1].textContent=fmtD((c.creacion||"").slice(0,10));tr.children[2].textContent=c.asunto||"";if(c.tipo_incidente){const sp=document.createElement("span");sp.className="pill auto";sp.textContent=c.tipo_incidente;sp.style.marginLeft="6px";tr.children[2].appendChild(sp)}tr.children[3].textContent=c.solicitante||"";tr.children[4].textContent=c.prioridad||"";
     const sp=document.createElement("span");sp.className="pill "+(c.estado||"").toLowerCase();sp.textContent=c.estado||"";tr.children[5].appendChild(sp);tr.children[6].textContent=fmtD((c.vencimiento||"").slice(0,10));tb.appendChild(tr)});
 }
 function renderAll(){renderHeader();renderKPIs();renderProyectos();renderIncidentes();renderCaus();}
@@ -436,14 +441,16 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
     inicio:$("#p-inicio").value,fin:$("#p-fin").value,presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 
-function editInc(i){showTab("inc");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
-  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
+let incEditing=null;
+function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;$("#btn-admin").textContent="Cerrar administración";
+  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
   $("#i-status").textContent="Editando: "+(i.titulo||"");$("#admin").scrollIntoView({behavior:"smooth"})}
-$("#i-cancel").onclick=()=>{$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
+$("#i-cancel").onclick=()=>{incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
 $("#form-inc").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#i-id").value||("i"+Date.now().toString(36));
-  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:"Resuelto",aprox:false,actualizado:new Date().toISOString()};
-  try{await api("PUT","/api/incidentes/"+id,body);toast("Incidente guardado");$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
+  const prev=(incEditing&&incEditing.id===id)?incEditing:{};
+  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:$("#i-estado").value,aprox:false,origen:prev.origen||"manual",cau_id:prev.cau_id||null,auto:false,actualizado:new Date().toISOString()};
+  try{await api("PUT","/api/incidentes/"+id,body);toast("Incidente guardado");incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let cfgTipos=[];
 function renderCfgTipos(){const c=$("#c-tipos");c.innerHTML="";cfgTipos.forEach((t,i)=>{const s=document.createElement("span");s.className="chip";s.innerHTML=`<span></span><button type="button" aria-label="Quitar">×</button>`;s.children[0].textContent=t;s.children[1].onclick=()=>{cfgTipos.splice(i,1);renderCfgTipos()};c.appendChild(s)})}
@@ -460,7 +467,7 @@ $("#f-cau-q").oninput=e=>{fcQ=e.target.value;renderTablaCau()};
 $("#form-cau").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;const f=$("#cau-file").files[0];if(!f)return;
   $("#cau-status").textContent="Importando…";const fd=new FormData();fd.append("file",f);
   try{const r=await fetch("/api/caus/import",{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
-    $("#cau-status").textContent=`${j.importados} tickets leídos (${j.nuevos} nuevos, ${j.actualizados} actualizados)`;$("#form-cau").reset();toast("CAUs importados")}
+    $("#cau-status").textContent=`${j.importados} tickets leídos (${j.nuevos} nuevos, ${j.actualizados} actualizados) · ${j.incidentes} incidentes de seguridad nuevos`;$("#form-cau").reset();toast("CAUs importados")}
   catch(err){$("#cau-status").textContent="Error: "+err.message}};
 $("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dataset.c="1";b.textContent="¿Seguro? Pulsa otra vez";setTimeout(()=>{delete b.dataset.c;b.textContent="Vaciar CAUs"},3500);return}
   delete b.dataset.c;b.textContent="Vaciar CAUs";try{await api("DELETE","/api/caus");toast("CAUs eliminados")}catch(err){toast("No se pudo: "+err.code)}};
