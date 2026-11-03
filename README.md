@@ -17,7 +17,7 @@ sudo cp systemd/actividad-it.service /etc/systemd/system/
 sudo systemctl daemon-reload && sudo systemctl enable --now actividad-it
 ```
 
-Abre `http://<servidor>:8080`. Actualizaciones: `git pull && sudo systemctl restart actividad-it`.
+Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl restart actividad-it`.
 
 ## Ficheros
 - `app.py` — Flask: página, login, API REST (`/api/data`, `/api/proyectos/<id>`, `/api/incidentes/<id>`, `/api/config`, `/api/export`).

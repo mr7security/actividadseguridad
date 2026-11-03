@@ -17,7 +17,7 @@ from flask import Flask, Response, abort, jsonify, redirect, render_template_str
 BASE = Path(__file__).resolve().parent
 load_dotenv(BASE / ".env")
 
-APP_PORT = int(os.getenv("APP_PORT", "8080"))
+APP_PORT = int(os.getenv("APP_PORT", "8090"))
 APP_PASSWORD = os.getenv("APP_PASSWORD", "")
 APP_SECRET = os.getenv("APP_SECRET") or secrets.token_hex(32)
 DB_PATH = BASE / os.getenv("DB_FILE", "actividad.db")
