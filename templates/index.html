@@ -116,6 +116,8 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .gantt .lbl{font-family:var(--font-sans);font-size:11px;fill:var(--fg)}
 .gantt .grow{cursor:pointer;outline:none}.gantt .grow:hover>rect:first-child,.gantt .grow:focus-visible>rect:first-child{fill:var(--accent-soft)}
 .card.flash{box-shadow:0 0 0 2px var(--accent)}
+.gantt .hito-m{cursor:help}.gantt .hito-m:hover{stroke:var(--accent);stroke-width:2}
+.gtip{position:absolute;z-index:30;background:var(--panel2);color:var(--fg);border:1px solid var(--accent);border-radius:6px;padding:6px 9px;font-size:.78rem;max-width:320px;pointer-events:none;box-shadow:0 4px 14px rgba(0,0,0,.25)}
 @media (prefers-reduced-motion:no-preference){.card{transition:box-shadow .4s}}
 .hitos{display:flex;flex-direction:column;gap:4px;font-size:.78rem}
 .hito{display:grid;grid-template-columns:auto auto 1fr;gap:8px;align-items:baseline}
@@ -401,8 +403,7 @@ function renderGantt(){
   if(!list.length){g.innerHTML='<div class="empty">Sin proyectos con fechas en '+year+'.</div>';return}
   const wrap=n=>{n=n||"";if(n.length<=34)return[n];const cut=n.lastIndexOf(" ",34);const a=cut>12?cut:34;const b=n.slice(a).trim();return[n.slice(0,a).trim(),b.length>36?b.slice(0,35)+"…":b]};
   const rows=list.map(r=>({...r,lines:wrap(r.p.nombre)}));
-  const anyH=rows.some(r=>(r.p.hitos||[]).some(h=>h.fecha));
-  const W=960,L=270,R=16,top=22;const rowH=anyH?48:(rows.some(r=>r.lines.length>1)?34:26);const H=top+rows.length*rowH+10;const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
+  const W=960,L=270,R=16,top=22;const rowH=rows.some(r=>r.lines.length>1)?34:28;const H=top+rows.length*rowH+10;const sx=d=>L+(Math.min(Math.max(d,y0),y1)-y0)/(y1-y0)*(W-L-R);
   let sv=`<svg viewBox="0 0 ${W} ${H}" width="100%" role="img" aria-label="Línea temporal de proyectos">`;
   MESES.forEach((m,i)=>{const x=sx(new Date(year,i,1));sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--line)"/><text x="${x+3}" y="${top-9}">${m}</text>`});
   if(today>=y0&&today<y1){const x=sx(today);sv+=`<line x1="${x}" x2="${x}" y1="${top-6}" y2="${H-6}" stroke="var(--accent)" stroke-dasharray="3 3"/>`}
@@ -414,16 +415,17 @@ function renderGantt(){
     sv+=`<rect x="${x1}" y="${cy-7}" width="${x2-x1}" height="14" rx="3" fill="${col}" ${r.open?'opacity=".55" stroke="'+col+'" stroke-dasharray="4 3"':''}><title>${X(r.p.nombre)}: ${fmtD(r.p.inicio)} → ${r.p.fin?fmtD(r.p.fin):"en curso"} · ${r.p.avance||0} % · clic para ver la tarjeta</title></rect>`;
     if(r.p.estado!=="Finalizado"&&r.p.avance)sv+=`<rect x="${x1}" y="${cy-7}" width="${(x2-x1)*Math.min(100,+r.p.avance)/100}" height="14" rx="3" fill="${col}"/>`;
     const hs=(r.p.hitos||[]).filter(h=>h.fecha).map(h=>({h,x:sx(new Date(h.fecha)),d:new Date(h.fecha)})).filter(o=>o.d>=y0&&o.d<y1).sort((a,b)=>a.x-b.x);
-    const short=n=>{n=n||"";return n.length>28?n.slice(0,27)+"…":n};
-    let lastAbove=-1e9,lastBelow=-1e9;
-    hs.forEach(o=>{const lbl=short(o.h.nombre);const w=lbl.length*5.2+8;
-      let above=false;if(o.x-lastBelow<w){if(o.x-lastAbove>=w)above=true;else{above=(o.x-lastAbove)>(o.x-lastBelow)}}
-      if(above)lastAbove=o.x+w;else lastBelow=o.x+w;
-      const ly=above?cy-12:cy+17;
-      sv+=`<path d="M${o.x} ${cy-6} l4.5 6 l-4.5 6 l-4.5 -6 z" fill="${o.h.hecho?'var(--fg)':'var(--bg)'}" stroke="var(--fg)" stroke-width="1.1"><title>${X(o.h.nombre)} · ${fmtD(o.h.fecha)}${o.h.hecho?"":" (pendiente)"}</title></path>`;
-      sv+=`<text x="${o.x+6}" y="${ly}" style="font-size:9px;fill:var(--${o.h.hecho?'fg':'muted'})">${X(lbl)}<title>${X(o.h.nombre)} · ${fmtD(o.h.fecha)}${o.h.hecho?"":" (pendiente)"}</title></text>`});
+    // rombos pequeños; si dos caen a menos de 9px se desplazan un poco para que se distingan
+    let lastX=-1e9;
+    hs.forEach(o=>{let x=o.x;if(x-lastX<9)x=lastX+9;lastX=x;
+      const txt=`${o.h.nombre} · ${fmtD(o.h.fecha)}${o.h.aprox?" (aprox.)":""}${o.h.hecho?"":" · pendiente"}`;
+      sv+=`<path class="hito-m" d="M${x} ${cy-6} l4.5 6 l-4.5 6 l-4.5 -6 z" fill="${o.h.hecho?'var(--fg)':'var(--bg)'}" stroke="var(--fg)" stroke-width="1.1" data-tip="${X(txt)}"/>`});
     sv+=`</g>`});
   sv+="</svg>";g.innerHTML=sv;
+  let tip=$("#gantt-tip");if(!tip){tip=document.createElement("div");tip.id="gantt-tip";tip.className="gtip";tip.hidden=true;document.body.appendChild(tip)}
+  g.querySelectorAll(".hito-m").forEach(el=>{const show=e=>{tip.textContent=el.dataset.tip;tip.hidden=false;const r=el.getBoundingClientRect();tip.style.left=Math.min(window.innerWidth-tip.offsetWidth-8,Math.max(8,r.left+r.width/2-tip.offsetWidth/2))+"px";tip.style.top=(r.top-tip.offsetHeight-8+window.scrollY)+"px"};
+    el.onmouseenter=show;el.onmouseleave=()=>tip.hidden=true;el.onclick=e=>{e.stopPropagation();show(e)}});
+  g.onmouseleave=()=>tip.hidden=true;
   g.querySelectorAll(".grow").forEach(el=>{const go=()=>irAProyecto(el.dataset.pid);el.onclick=go;el.onkeydown=e=>{if(e.key==="Enter"||e.key===" "){e.preventDefault();go()}}});
 }
 function irAProyecto(pid){const p=proyectos.find(x=>x.id===pid);if(!p)return;showPtab(p.modalidad==="Tercerizado"?"ext":"int");
