@@ -29,4 +29,5 @@ Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl rest
 - `cargar_endpoint_central_ampliaciones.py` — carga única de las 4 ampliaciones de licencia (cotizaciones 720tec) en ese proyecto.
 - `cargar_endpoint_central_inicial.py` — carga única de la licencia inicial (cot. 15374) en ese proyecto.
 - `cargar_azure_prodware.py` — alta única del proyecto Consultoría Azure / unificación de tenants (Prodware).
+- `agregar_incidente.py` — alta rápida de un incidente desde la terminal (ver cabecera del fichero para los parámetros).
 - `cargar_hitos.py` — carga única de hitos en los proyectos existentes de una base ya creada (`.venv/bin/python cargar_hitos.py`).
