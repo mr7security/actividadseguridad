@@ -11,7 +11,8 @@
       "Vulnerabilidad",
       "Disponibilidad",
       "Correo (SPF/DKIM/DMARC)",
-      "Otro"
+      "Otro",
+      "Incumplimiento de política"
     ]
   },
   "proyectos": [
