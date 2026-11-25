@@ -18,11 +18,11 @@ MESES = ["ene", "feb", "mar", "abr", "may", "jun", "jul", "ago", "sep", "oct", "
 LOGO = Path(__file__).resolve().parent / "assets" / "sgp.png"
 
 ss = getSampleStyleSheet()
-H1 = ParagraphStyle("h1", parent=ss["Title"], fontName="Helvetica-Bold", fontSize=18, textColor=NAVY, alignment=0, spaceAfter=2)
-H2 = ParagraphStyle("h2", parent=ss["Heading2"], fontName="Helvetica-Bold", fontSize=12.5, textColor=NAVY, spaceBefore=6, spaceAfter=4)
-H3 = ParagraphStyle("h3", parent=ss["Heading3"], fontName="Helvetica-Bold", fontSize=9, textColor=GREY, spaceBefore=6, spaceAfter=2)
+H1 = ParagraphStyle("h1", parent=ss["Title"], fontName="Helvetica-Bold", fontSize=16, textColor=NAVY, alignment=0, spaceAfter=0, spaceBefore=0)
+H2 = ParagraphStyle("h2", parent=ss["Heading2"], fontName="Helvetica-Bold", fontSize=11.5, textColor=NAVY, spaceBefore=4, spaceAfter=2)
+H3 = ParagraphStyle("h3", parent=ss["Heading3"], fontName="Helvetica-Bold", fontSize=8.5, textColor=GREY, spaceBefore=4, spaceAfter=1)
 EYE = ParagraphStyle("eye", fontName="Helvetica", fontSize=7.5, textColor=GREY, leading=9)
-BODY = ParagraphStyle("body", fontName="Helvetica", fontSize=9, leading=12, textColor=colors.HexColor("#1A2235"))
+BODY = ParagraphStyle("body", fontName="Helvetica", fontSize=8.8, leading=11, textColor=colors.HexColor("#1A2235"))
 SMALL = ParagraphStyle("small", parent=BODY, fontSize=8, leading=10, textColor=GREY)
 CELL = ParagraphStyle("cell", parent=BODY, fontSize=8.2, leading=10)
 CELLR = ParagraphStyle("cellr", parent=CELL, alignment=TA_RIGHT)
@@ -78,10 +78,10 @@ def kpi_table(items):
     for lbl, val, sub in items:
         cells.append([Paragraph(lbl.upper(), EYE), Paragraph(f"<font size=15><b>{val}</b></font>", BODY), Paragraph(sub, SMALL)])
     data = [[c[0] for c in cells], [c[1] for c in cells], [c[2] for c in cells]]
-    t = Table(data, colWidths=[(A4[0] - 30 * mm) / len(items)] * len(items))
+    t = Table(data, colWidths=[(A4[0] - 28 * mm) / len(items)] * len(items))
     t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PANEL), ("BOX", (0, 0), (-1, -1), 0.5, LINE),
                            ("LINEAFTER", (0, 0), (-2, -1), 0.5, LINE), ("LEFTPADDING", (0, 0), (-1, -1), 8),
-                           ("TOPPADDING", (0, 0), (-1, 0), 6), ("BOTTOMPADDING", (0, -1), (-1, -1), 6)]))
+                           ("TOPPADDING", (0, 0), (-1, 0), 4), ("BOTTOMPADDING", (0, -1), (-1, -1), 4), ("TOPPADDING", (0, 1), (-1, -1), 1), ("BOTTOMPADDING", (0, 0), (-1, -2), 1)]))
     return t
 
 
@@ -98,8 +98,8 @@ def gantt(proyectos, year, width):
         rows.append((p, a, b))
     if not rows:
         return None
-    L, R, rowH, top = 62 * mm, 12 * mm, 6.2 * mm, 8 * mm
-    H = top + rowH * len(rows) + 3 * mm
+    L, R, rowH, top = 62 * mm, 12 * mm, 5.4 * mm, 7 * mm
+    H = top + rowH * len(rows) + 2 * mm
     d = Drawing(width, H)
     y0 = date(year, 1, 1).toordinal(); span = date(year + 1, 1, 1).toordinal() - y0
 
@@ -139,7 +139,7 @@ def proyecto_block(p, width):
     head = Table([[Paragraph(f"<b>{p.get('nombre','')}</b>", ParagraphStyle("pn", parent=BODY, fontSize=11.5, leading=14, textColor=NAVY)),
                    Paragraph(f"<font color='{estado_color(est).hexval()}'><b>{est.upper()}</b></font>", ParagraphStyle("pe", parent=CELLR, fontSize=8))]],
                  colWidths=[width - 35 * mm, 35 * mm])
-    head.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, 0), 0.8, GOLD), ("BOTTOMPADDING", (0, 0), (-1, -1), 4), ("LEFTPADDING", (0, 0), (0, 0), 0)]))
+    head.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, 0), 0.8, GOLD), ("BOTTOMPADDING", (0, 0), (-1, -1), 2), ("TOPPADDING", (0, 0), (-1, -1), 0), ("LEFTPADDING", (0, 0), (0, 0), 0)]))
     out.append(head)
     if p.get("descripcion"):
         out.append(Paragraph(p["descripcion"], BODY))
@@ -150,8 +150,8 @@ def proyecto_block(p, width):
              Paragraph(eur(pv) if pv is not None else "Sin presupuesto", CELL),
              Paragraph((("Proveedor: " + p["proveedor"]) if p.get("modalidad") == "Tercerizado" and p.get("proveedor") else (p.get("recursos") or "Recursos propios")), CELL)]]
     t = Table(meta, colWidths=[44 * mm, 22 * mm, 20 * mm, 20 * mm, 26 * mm, width - 132 * mm])
-    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PANEL), ("LEFTPADDING", (0, 0), (-1, -1), 5), ("TOPPADDING", (0, 0), (-1, 0), 4), ("BOTTOMPADDING", (0, 1), (-1, 1), 5), ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
-    out.append(Spacer(1, 3)); out.append(t)
+    t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PANEL), ("LEFTPADDING", (0, 0), (-1, -1), 5), ("TOPPADDING", (0, 0), (-1, 0), 3), ("BOTTOMPADDING", (0, 0), (-1, 0), 0), ("TOPPADDING", (0, 1), (-1, 1), 1), ("BOTTOMPADDING", (0, 1), (-1, 1), 3), ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
+    out.append(Spacer(1, 2)); out.append(t)
     acts = [a for a in (p.get("actuaciones") or []) if a.get("nombre")]
     if acts:
         out.append(Paragraph("Actuaciones", H3))
@@ -177,35 +177,35 @@ def proyecto_block(p, width):
         out.append(Paragraph(f"<font color='{WARN.hexval()}'><b>En pausa desde {fmt_d(last.get('fecha'))}:</b> {last.get('texto','')}</font>", BODY))
     if log:
         out.append(Paragraph("Registro de seguimiento", H3))
-        rows = [[Paragraph(fmt_d(e.get("fecha")), SMALL), Paragraph(e.get("texto", ""), CELL)] for e in log[:6]]
+        rows = [[Paragraph(fmt_d(e.get("fecha")), SMALL), Paragraph(e.get("texto", ""), CELL)] for e in log[:4]]
         tl = Table(rows, colWidths=[22 * mm, width - 22 * mm]); tl.setStyle(TableStyle([("LEFTPADDING", (0, 0), (0, -1), 0), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
         out.append(tl)
     if p.get("notas"):
         out.append(Paragraph(f"<i>{p['notas']}</i>", SMALL))
-    out.append(Spacer(1, 10))
+    out.append(Spacer(1, 6))
     return out
 
 
 def build_pdf(proyectos, area, titulo, year=None, responsable=""):
     year = year or date.today().year
     buf = io.BytesIO()
-    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm, topMargin=16 * mm, bottomMargin=16 * mm,
+    doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=14 * mm, rightMargin=14 * mm, topMargin=11 * mm, bottomMargin=14 * mm,
                             title=f"Informe de proyectos — {AREAS.get(area, area)}", author=responsable or "Departamento de IT · SGP")
-    W = A4[0] - 30 * mm
+    W = A4[0] - 28 * mm
     area_nombre = AREAS.get(area, area)
     hoy = date.today().strftime("%d/%m/%Y")
 
     def on_page(canvas, doc_):
         canvas.saveState(); canvas.setFont("Helvetica", 7.5); canvas.setFillColor(GREY)
-        canvas.drawString(15 * mm, 9 * mm, f"SGP — Departamento de IT · {area_nombre}" + (f" · {responsable}" if responsable else "") + f" · {hoy}")
-        canvas.drawRightString(A4[0] - 15 * mm, 9 * mm, f"Página {doc_.page}")
-        canvas.setStrokeColor(LINE); canvas.line(15 * mm, 12 * mm, A4[0] - 15 * mm, 12 * mm); canvas.restoreState()
+        canvas.drawString(14 * mm, 8 * mm, f"SGP — Departamento de IT · {area_nombre}" + (f" · {responsable}" if responsable else "") + f" · {hoy}")
+        canvas.drawRightString(A4[0] - 14 * mm, 8 * mm, f"Página {doc_.page}")
+        canvas.setStrokeColor(LINE); canvas.line(14 * mm, 10.5 * mm, A4[0] - 14 * mm, 10.5 * mm); canvas.restoreState()
 
     story = []
     logo = Image(str(LOGO), width=30 * mm, height=30 * mm * 0.53) if LOGO.exists() else Spacer(1, 1)
     hdr = Table([[logo, [Paragraph("DEPARTAMENTO DE IT · " + area_nombre.upper(), EYE), Paragraph(titulo or "Informe de proyectos", H1), Paragraph((f"Responsable: {responsable} · " if responsable else "") + f"Estado a {hoy}", SMALL)]]], colWidths=[36 * mm, W - 36 * mm])
     hdr.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (0, 0), 0), ("LINEBELOW", (0, 0), (-1, 0), 1, NAVY), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
-    story += [hdr, Spacer(1, 8)]
+    story += [hdr, Spacer(1, 5)]
 
     en_curso = [p for p in proyectos if p.get("estado") == "En curso"]
     tot = sum(v for v in (pres(p) for p in proyectos) if v is not None)
@@ -214,7 +214,7 @@ def build_pdf(proyectos, area, titulo, year=None, responsable=""):
     story += [kpi_table([("Proyectos en curso", str(len(en_curso)), f"de {len(proyectos)} registrados"),
                          ("Avance medio", f"{avg} %", "proyectos en curso"),
                          ("Presupuesto", eur(tot) if tot else "0 €", f"{len([p for p in proyectos if pres(p) is not None])} proyectos con presupuesto"),
-                         ("Internos / tercerizados", f"{len(proyectos) - n_ext} / {n_ext}", "en total")]), Spacer(1, 10)]
+                         ("Internos / tercerizados", f"{len(proyectos) - n_ext} / {n_ext}", "en total")]), Spacer(1, 6)]
 
     order = {"En curso": 0, "En pausa": 1, "Planificado": 2, "Finalizado": 3}
     ordenados = sorted(proyectos, key=lambda p: (order.get(p.get("estado"), 9), -(avance(p))))
@@ -227,18 +227,20 @@ def build_pdf(proyectos, area, titulo, year=None, responsable=""):
                      Paragraph(f"{avance(p)} %", CELLR), Paragraph(fmt_d(p.get("inicio")), CELL), Paragraph(fmt_d(p.get("fin")), CELL), Paragraph(eur(pv) if pv is not None else "—", CELLR)])
     tr = Table(rows, colWidths=[W - 124 * mm, 22 * mm, 20 * mm, 16 * mm, 20 * mm, 20 * mm, 26 * mm], repeatRows=1)
     tr.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, 0), PANEL), ("LINEBELOW", (0, 0), (-1, 0), 0.8, NAVY), ("LINEBELOW", (0, 1), (-1, -1), 0.3, LINE), ("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (0, -1), 2)]))
-    story += [tr, Spacer(1, 10)]
+    story += [tr, Spacer(1, 4)]
 
     g = gantt(ordenados, year, W)
     if g:
-        story += [Paragraph(f"Línea temporal {year}", H2), g, Paragraph("Barra: inicio → fin (relleno = avance) · cuadrado relleno = hito cumplido, vacío = pendiente · línea punteada = hoy", SMALL), Spacer(1, 6)]
+        story += [Paragraph(f"Línea temporal {year}", H2), g, Paragraph("Barra: inicio → fin (relleno = avance) · cuadrado relleno = hito cumplido, vacío = pendiente · línea punteada = hoy", SMALL), Spacer(1, 3)]
 
     for titulo_g, lista in (("Proyectos tercerizados", [p for p in ordenados if p.get("modalidad") == "Tercerizado"]),
                             ("Proyectos internos", [p for p in ordenados if p.get("modalidad") != "Tercerizado"])):
         if not lista:
             continue
-        story += [PageBreak(), Paragraph(titulo_g, H2)]
+        story += [Spacer(1, 4), Paragraph(titulo_g, H2)]
         for p in lista:
-            story.append(KeepTogether(proyecto_block(p, W)))
+            blk = proyecto_block(p, W)
+            story.append(KeepTogether(blk[:4]))  # título + descripción + datos juntos; el resto puede partirse
+            story += blk[4:]
     doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
     return buf.getvalue()
