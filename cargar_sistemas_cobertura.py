@@ -10,11 +10,11 @@ PID = "p-sis-cobertura"
 PROYECTO = {
     "area": "sis", "nombre": "Estudios de cobertura",
     "descripcion": "Estudios de cobertura de red inalámbrica en las sedes: realización de los estudios, revisión de los informes y ejecución de las mejoras.",
-    "modalidad": "Interno", "proveedor": "", "estado": "En curso", "avance": 77,
+    "modalidad": "Interno", "proveedor": "", "estado": "En curso", "avance": 50,
     "inicio": "2026-10-01", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura",
     "actuaciones": [
         {"nombre": "Estudios", "avance": 100},
-        {"nombre": "Revisar informes", "avance": 100},
+        {"nombre": "Revisar informes", "avance": 14},
         {"nombre": "Mejoras CL5", "avance": 30},
     ],
     "hitos": [], "log": [{"fecha": "2026-11-25", "texto": "Estudios e informes revisados al 100 %; mejoras en CL5 al 30 % aprox.", "estado": "En curso"}],

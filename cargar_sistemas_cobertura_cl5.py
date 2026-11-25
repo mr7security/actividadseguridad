@@ -10,7 +10,7 @@ DB_PATH = BASE / os.getenv("DB_FILE", "actividad.db")
 PID, OLD = "p-sis-cobertura", "p-sis-mejoras-cl5"
 A = lambda n, v=0, sub=False: {"nombre": n, "avance": v, "sub": sub}
 ACTUACIONES = [
-    A("Estudios", 100), A("Revisar informes", 100), A("Mejoras CL5", 35),
+    A("Estudios", 100), A("Revisar informes", 14), A("Mejoras CL5", 35),
     A("Ajuste de potencias de los puntos de acceso", 100, True), A("Aumento de la velocidad mínima en ambas bandas", 100, True),
     A("Solicitud a Multicode para añadir los nuevos canales a las carretillas", 100, True), A("Ampliación de canales de 5 GHz", 50, True),
     A("Habilitar nuevos canales en terminales", 50, True), A("Habilitarlos en el controlador Wi-Fi y eliminar la configuración manual", 50, True),
@@ -33,7 +33,7 @@ def main():
     if con.execute("SELECT 1 FROM docs WHERE coll='proyectos' AND id=?", (OLD,)).fetchone():
         con.execute("DELETE FROM docs WHERE coll='proyectos' AND id=?", (OLD,)); print("Eliminado el proyecto independiente Mejoras Wi-Fi CL5."); ch = True
     if ch:
-        p["avance"] = 78; p["actualizado"] = now
+        p["avance"] = 50; p["actualizado"] = now
         p.setdefault("log", []).append({"fecha": "2026-11-25", "texto": "Las 13 mejoras de CL5 pasan a ser sub-puntos de la actuación 'Mejoras CL5'. Inicio del proyecto: octubre de 2026.", "estado": p.get("estado", "En curso")})
         con.execute("UPDATE docs SET body=? WHERE coll='proyectos' AND id=?", (json.dumps(p, ensure_ascii=False), PID)); con.commit(); print("Estudios de cobertura actualizado.")
     else:
