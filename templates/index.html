@@ -263,7 +263,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <button role="tab" aria-selected="true" data-ptab="int">Internos <span class="mono" id="cnt-int"></span></button>
       <button role="tab" aria-selected="false" data-ptab="ext">Tercerizados <span class="mono" id="cnt-ext"></span></button>
     </div>
-    <span class="note" id="proy-note"></span>
+    <span style="display:flex;gap:10px;align-items:center"><span class="note" id="proy-note"></span><a id="btn-pdf" class="small" href="/api/proyectos.pdf?area=seg" style="display:inline-block;background:var(--panel2);border:1px solid var(--line);border-radius:6px;padding:5px 10px;font-size:.78rem;color:var(--fg);text-decoration:none">&#8681; Informe PDF</a></span>
   </div>
   <div class="grid-proj" id="proy-grid"><div class="empty">Cargando proyectos…</div></div>
   <div class="grid-proj" id="proy-grid-ext" hidden><div class="empty">Cargando proyectos…</div></div>
@@ -754,7 +754,7 @@ function renderAll(){renderHeader();renderKPIs();renderProyectos();renderInciden
 document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 function showArea(a){area=a;try{localStorage.setItem("area",a)}catch(e){}document.querySelectorAll('nav.areas [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.area===a));scope();
   fMes=fTipo=fTac=fTech=fcMes=fcEst=fcPrio=fcSol="";$("#f-mes").value="";$("#f-tipo").value="";$("#f-cau-mes").value="";$("#f-cau-est").value="";
-  $("#p-area").value=a;$("#i-area").value=a;
+  $("#p-area").value=a;$("#i-area").value=a;$("#btn-pdf").href="/api/proyectos.pdf?area="+a;
   const tabInc=document.querySelector('nav.views [data-view="inc"]');tabInc.hidden=(a==="sis");document.querySelector('#admin .tabs [data-tab="inc"]').hidden=(a==="sis");
   if(a==="sis"&&document.querySelector('#view-inc').classList.contains("on"))showView("proy");
   renderAll()}
@@ -849,7 +849,7 @@ async function load(){try{const d=await api("GET","/api/data");cfg={...cfg,...(d
   catch(e){$("#proy-grid").innerHTML='<div class="empty">No se pudieron cargar los datos ('+e.code+').</div>'}}
 const badge=$("#role-badge");badge.textContent=isOwner?"Administrador · puede editar":"Solo lectura";badge.classList.toggle("owner",isOwner);
 $("#btn-admin").hidden=!isOwner;$("#lnk-login").hidden=isOwner;$("#lnk-logout").hidden=!isOwner;
-$("#p-area").value=area;$("#i-area").value=area;renderAll();load();
+$("#p-area").value=area;$("#i-area").value=area;$("#btn-pdf").href="/api/proyectos.pdf?area="+area;renderAll();load();
 // recargar tras cada guardado/borrado
 const _t=toast;toast=function(m){_t(m);if(/guardad|eliminad|importad/.test(m))load()};
 })();

@@ -21,6 +21,7 @@ Abre `http://<servidor>:8090`. Actualizaciones: `git pull && sudo systemctl rest
 
 ## Ficheros
 - `app.py` — Flask: página, login, API REST (`/api/data`, `/api/proyectos/<id>`, `/api/incidentes/<id>`, `/api/caus/import` (CSV de ServiceDesk), `/api/config`, `/api/export`).
+- `informe_pdf.py` — informe PDF de proyectos por área (`/api/proyectos.pdf?area=seg|sis`), botón "Informe PDF" en la pestaña Proyectos.
 - `clasificador.py` — reglas por palabras clave que convierten asuntos de CAU en incidentes de seguridad (editar aquí para afinar).
 - `templates/index.html` — el dashboard (HTML/CSS/JS, sin dependencias externas salvo fuentes de Google).
 - `seed.json` — datos iniciales (solo se usan si la base está vacía).

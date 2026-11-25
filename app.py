@@ -322,6 +322,20 @@ def api_caus_clear():
     return jsonify(ok=True)
 
 
+@app.route("/api/proyectos.pdf")
+def api_proyectos_pdf():
+    """Informe PDF de los proyectos del área (lectura libre, como el dashboard)."""
+    from informe_pdf import build_pdf
+    area = request.args.get("area", "seg")
+    if area not in ("seg", "sis"):
+        abort(400)
+    proyectos = [p for p in get_all("proyectos") if (p.get("area") or "seg") == area]
+    cfg = get_config()
+    pdf = build_pdf(proyectos, area, cfg.get("titulo") or "Informe de proyectos")
+    nombre = f"Proyectos_{'Seguridad' if area == 'seg' else 'Sistemas'}_{datetime.now().strftime('%Y%m%d')}.pdf"
+    return Response(pdf, mimetype="application/pdf", headers={"Content-Disposition": f"attachment; filename={nombre}"})
+
+
 @app.route("/api/export")
 def api_export():
     """Copia de seguridad completa en JSON (solo administrador)."""
