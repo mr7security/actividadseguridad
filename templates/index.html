@@ -519,8 +519,8 @@ function renderKPIs(){
 
 function renderGantt(){
   const g=$("#gantt");const y0=new Date(year,0,1),y1=new Date(year+1,0,1);const today=new Date();
-  const mk=p=>{const a=p.inicio?new Date(p.inicio):null;let b=p.fin?new Date(p.fin):null;const open=!b;if(!b)b=p.estado==="Finalizado"?a:(today>y1?y1:today);return{p,a:a||b,b,open}};
-  const all=proyectos.filter(p=>p.inicio||p.fin).map(mk).filter(r=>r.b>=y0&&r.a<y1).sort((x,y)=>x.a-y.a);
+  const mk=p=>{const sinFechas=!p.inicio&&!p.fin;const a=p.inicio?new Date(p.inicio):(sinFechas?y0:null);let b=p.fin?new Date(p.fin):null;const open=!b;if(!b)b=p.estado==="Finalizado"?a:(today>y1?y1:today);return{p,a:a||b,b,open,sinFechas}};
+  const all=proyectos.filter(p=>p.inicio||p.fin||p.estado!=="Finalizado").map(mk).filter(r=>r.b>=y0&&r.a<y1).sort((x,y)=>x.a-y.a);
   if(!all.length){g.innerHTML='<div class="empty">Sin proyectos con fechas en '+year+'.</div>';return}
   const grupos=[["Tercerizados",all.filter(r=>r.p.modalidad==="Tercerizado")],["Internos",all.filter(r=>r.p.modalidad!=="Tercerizado")]].filter(x=>x[1].length);
   const W=Math.max(640,g.clientWidth-24),L=Math.min(380,Math.max(200,Math.round(W*.24))),R=52,top=30,rowH=36,hdrH=26;
@@ -547,8 +547,8 @@ function renderGantt(){
     else{sv+=`<rect x="${x1}" y="${by}" width="${x2-x1}" height="${bh}" rx="4" fill="${col}" opacity="${r.open?.35:.55}"${r.open?` stroke="${col}" stroke-dasharray="4 3"`:""}/>`;
       if(est!=="Finalizado"&&av)sv+=`<rect x="${x1}" y="${by}" width="${(x2-x1)*av/100}" height="${bh}" rx="4" fill="${col}"/>`;
       if(est==="Finalizado")sv+=`<rect x="${x1}" y="${by}" width="${x2-x1}" height="${bh}" rx="4" fill="${col}"/>`}
-    sv+=`<title>${X(p.nombre)}: ${fmtD(p.inicio)} → ${p.fin?fmtD(p.fin):"en curso"} · ${est} · ${av} %</title>`;
-    sv+=`<text x="${x2+6}" y="${cy+4}" style="font-size:11px;fill:var(--fg)">${est==="Finalizado"?"✓":av+" %"}</text>`;
+    sv+=`<title>${X(p.nombre)}: ${r.sinFechas?"sin fechas (desde inicio de año)":fmtD(p.inicio)+" → "+(p.fin?fmtD(p.fin):"en curso")} · ${est} · ${av} %</title>`;
+    sv+=`<text x="${x2+6}" y="${cy+4}" style="font-size:11px;fill:var(--fg)">${est==="Finalizado"?"✓":av+" %"}${r.sinFechas?' <tspan style="fill:var(--muted);font-size:9px">sin fechas</tspan>':""}</text>`;
     // hitos agrupados
     const hs=(p.hitos||[]).filter(h=>h.fecha).map(h=>({h,x:sx(new Date(h.fecha)),d:new Date(h.fecha)})).filter(o=>o.d>=y0&&o.d<y1).sort((a,b)=>a.x-b.x);
     const cl=[];hs.forEach(o=>{const last=cl[cl.length-1];if(last&&o.x-last.x0<14){last.items.push(o);last.x=(last.x0+o.x)/2}else cl.push({x0:o.x,x:o.x,items:[o]})});

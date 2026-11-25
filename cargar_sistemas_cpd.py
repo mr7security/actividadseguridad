@@ -11,7 +11,7 @@ PROYECTO = {
     "area": "sis", "nombre": "CPD Sede STN",
     "descripcion": "Adecuación del centro de proceso de datos de la sede STN: obra física, cuadros eléctricos e iluminación, grupo electrógeno, control de accesos y conexión de red.",
     "modalidad": "Interno", "proveedor": "", "estado": "En curso", "avance": 47,
-    "inicio": "", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura",
+    "inicio": "2026-01-01", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura",
     "actuaciones": [
         {"nombre": "Adecuación física", "avance": 100},
         {"nombre": "Cuadros e iluminación", "avance": 50},

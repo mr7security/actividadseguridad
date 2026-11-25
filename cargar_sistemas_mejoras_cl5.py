@@ -12,7 +12,7 @@ PROYECTO = {
     "area": "sis", "nombre": "Mejoras Wi-Fi CL5",
     "descripcion": "Plan de mejoras de la red inalámbrica del Centro Logístico 5 derivado del estudio de cobertura: potencias y velocidades mínimas de los AP, ampliación de canales de 5 GHz en controlador, terminales y carretillas (Multicode), limpieza de SSID de logística, recolocación y sustitución de AP, y revisión de equipos Cisco y Moxa.",
     "modalidad": "Interno", "proveedor": "", "estado": "En curso", "avance": 35,
-    "inicio": "", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura · Multicode (carretillas)",
+    "inicio": "2026-01-01", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura · Multicode (carretillas)",
     "actuaciones": [
         A("Ajuste de potencias de los puntos de acceso", 100),
         A("Aumento de la velocidad mínima en ambas bandas", 100),

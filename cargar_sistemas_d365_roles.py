@@ -11,7 +11,7 @@ PROYECTO = {
     "area": "sis", "nombre": "Roles Dynamics 365 F&O",
     "descripcion": "Definición y asignación de roles y perfiles de seguridad en Dynamics 365 Finance & Operations por área funcional, a partir del inventario de perfiles.",
     "modalidad": "Interno", "proveedor": "", "estado": "En curso", "avance": 56,
-    "inicio": "", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura",
+    "inicio": "2026-01-01", "fin": "", "moneda": "EUR", "presupuesto": None, "partidas": [], "recursos": "Sistemas e Infraestructura",
     "actuaciones": [
         {"nombre": "Inventario de perfiles", "avance": 100},
         {"nombre": "Logística", "avance": 100},
