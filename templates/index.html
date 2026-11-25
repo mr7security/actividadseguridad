@@ -148,6 +148,7 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
 .card>.pausa-msg,.card>.log,.card>.partidas,.card>.actu{grid-column:1}
 .actu{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
+.subdet{margin:-2px 0 2px 14px;display:flex;flex-direction:column;gap:4px}.subdet summary{cursor:pointer;font-size:.72rem;color:var(--accent)}.subdet .tipo{font-size:.74rem;padding-left:4px}.subdet .bar{height:4px}
 .partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
 .part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
@@ -159,6 +160,7 @@ nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:v
 .log .more{color:var(--accent);cursor:pointer;background:none;border:0;padding:0;font-size:.74rem;text-align:left}
 .card>.pausa-msg,.card>.log,.card>.partidas,.card>.actu{grid-column:1}
 .actu{display:flex;flex-direction:column;gap:6px;padding:8px 10px;border:1px solid var(--line);border-radius:6px;background:var(--panel2)}
+.subdet{margin:-2px 0 2px 14px;display:flex;flex-direction:column;gap:4px}.subdet summary{cursor:pointer;font-size:.72rem;color:var(--accent)}.subdet .tipo{font-size:.74rem;padding-left:4px}.subdet .bar{height:4px}
 .partidas{font-size:.78rem;display:flex;flex-direction:column;gap:3px}.partidas .e{display:grid;grid-template-columns:1fr auto;gap:10px}.partidas summary{cursor:pointer;color:var(--accent)}.partidas details{margin-top:4px}.partidas table{font-size:.75rem}
 .part-row{display:grid;grid-template-columns:2fr 70px 100px 90px auto;gap:6px;align-items:center}
 @media (max-width:600px){.part-row{grid-template-columns:1fr 1fr}}
@@ -361,7 +363,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <label>Recursos<input id="p-rec" placeholder="Recursos propios"></label>
       <label class="full">Notas / enlace<input id="p-notas"></label>
       <div class="full">
-        <div class="eyebrow" style="margin-bottom:6px">Actuaciones (nombre · avance %) — si hay actuaciones, el avance del proyecto es su media</div>
+        <div class="eyebrow" style="margin-bottom:6px">Actuaciones (nombre · avance %) — el avance del proyecto es su media; marca "sub" para colgar un punto de la actuación anterior (su % será la media de los sub-puntos)</div>
         <div id="p-actu" style="display:grid;gap:6px"></div>
         <button type="button" class="small" id="p-addactu" style="margin-top:6px">+ Añadir actuación</button>
       </div>
@@ -464,7 +466,8 @@ function scope(){proyectos=proyectosAll.filter(x=>(x.area||"seg")===area);incide
 let year=new Date().getFullYear(),fMes="",fTipo="",fTac="",fTech="",fcMes="",fcEst="",fcQ="",fcPrio="",fcSol="";
 const eur=(n,cur)=>new Intl.NumberFormat("es-ES",{style:"currency",currency:cur||"EUR",maximumFractionDigits:0}).format(n);
 const conv=(v,from,to)=>{if(!v||from===to)return v;const r=+cfg.usd_eur||0.92;return from==="USD"&&to==="EUR"?v*r:from==="EUR"&&to==="USD"?v/r:v};
-const avDe=p=>{const a=(p.actuaciones||[]).filter(x=>x.nombre);if(a.length)return Math.round(a.reduce((t,x)=>t+(+x.avance||0),0)/a.length);return Math.max(0,Math.min(100,+p.avance||0))};
+const actTree=p=>{const out=[];(p.actuaciones||[]).filter(x=>x.nombre).forEach(x=>{if(x.sub&&out.length)out[out.length-1].subs.push({nombre:x.nombre,avance:+x.avance||0});else out.push({nombre:x.nombre,avance:+x.avance||0,subs:[]})});out.forEach(a=>{if(a.subs.length)a.avance=Math.round(a.subs.reduce((t,y)=>t+y.avance,0)/a.subs.length)});return out};
+const avDe=p=>{const a=actTree(p);if(a.length)return Math.round(a.reduce((t,x)=>t+x.avance,0)/a.length);return Math.max(0,Math.min(100,+p.avance||0))};
 const presDe=p=>{const pm=p.moneda||"EUR";const part=(p.partidas||[]).filter(x=>x.precio!=null);if(part.length)return part.reduce((a,x)=>a+conv((+x.unidades||0)*(+x.precio||0),x.moneda||pm,pm),0);return(p.presupuesto!=null&&p.presupuesto!=="")?+p.presupuesto:null};
 const fmtD=s=>{if(!s)return"—";const[y,m,d]=s.split("-");return d&&m?`${d}/${m}/${y}`:s};
 const esc=s=>String(s??"");
@@ -615,8 +618,9 @@ function renderGrupo(g,note,lista,nombre){
     c.querySelector(".ini").textContent=fmtD(p.inicio);c.querySelector(".fin").textContent=fmtD(p.fin);
     c.querySelector(".pre").textContent=pres;c.querySelector(".rec").textContent=p.modalidad==="Tercerizado"?(p.proveedor?"Proveedor: "+p.proveedor:"Proveedor externo"):(p.recursos||"Recursos propios");
     const log=[...(p.log||[])].sort((a,b)=>(b.fecha||"").localeCompare(a.fecha||""));
-    const ac=c.querySelector(".actu");const acts=(p.actuaciones||[]).filter(x=>x.nombre);
-    if(acts.length){ac.hidden=false;acts.forEach(x=>{const v=Math.max(0,Math.min(100,+x.avance||0));const d=document.createElement("div");d.className="tipo";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${v}%;background:${v>=100?'var(--ok)':'var(--info)'}"></i></div>`;d.children[0].textContent=x.nombre;d.children[1].textContent=v+" %";ac.appendChild(d)})}else ac.remove();
+    const ac=c.querySelector(".actu");const acts=actTree(p);
+    const row=(x,sub)=>{const v=Math.max(0,Math.min(100,x.avance));const d=document.createElement("div");d.className="tipo"+(sub?" subact":"");d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${v}%;background:${v>=100?'var(--ok)':'var(--info)'}"></i></div>`;d.children[0].textContent=(sub?"↳ ":"")+x.nombre;d.children[1].textContent=v+" %";ac.appendChild(d)};
+    if(acts.length){ac.hidden=false;acts.forEach(x=>{row(x,false);if(x.subs.length){const det=document.createElement("details");det.className="subdet";det.innerHTML="<summary></summary>";det.querySelector("summary").textContent=`${x.subs.length} puntos`;x.subs.forEach(y=>{const v=Math.max(0,Math.min(100,y.avance));const d=document.createElement("div");d.className="tipo subact";d.innerHTML=`<span></span><span class="n"></span><div class="bar"><i style="width:${v}%;background:${v>=100?'var(--ok)':'var(--info)'}"></i></div>`;d.children[0].textContent=y.nombre;d.children[1].textContent=v+" %";det.appendChild(d)});ac.appendChild(det)}})}else ac.remove();
     const pa=c.querySelector(".partidas");const part=(p.partidas||[]).filter(x=>x.concepto);
     if(part.length||(p.puestos||[]).length){pa.hidden=false;
       part.forEach(x=>{const cm=x.moneda||p.moneda||"EUR";const d=document.createElement("div");d.className="e";d.innerHTML=`<span></span><span class="mono"></span>`;d.children[0].textContent=`${x.concepto} · ${x.unidades||0} × ${eur(+x.precio||0,cm)}${x.periodo?"/"+x.periodo:""}`;d.children[1].textContent=eur((+x.unidades||0)*(+x.precio||0),cm);pa.appendChild(d)});
@@ -782,13 +786,18 @@ $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   if($("#p-estado").value==="En pausa"){const prev=proyectos.find(x=>x.id===id);const wasPaused=prev&&prev.estado==="En pausa";const hasReason=pLog.some(x=>x.estado==="En pausa"&&x.texto);if(!wasPaused&&!hasReason||!hasReason){$("#p-status").textContent="Indica el motivo de la pausa en el registro de seguimiento.";$("#p-lognew-t").focus();return}}
   const pres=$("#p-pres").value;
   const body={area:$("#p-area").value,nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
-    inicio:$("#p-inicio").value,fin:$("#p-fin").value,moneda:$("#p-moneda").value,partidas:pPart.filter(x=>x.concepto&&x.precio!=="").map(x=>({concepto:x.concepto.trim(),unidades:+x.unidades||0,precio:+x.precio||0,moneda:x.moneda||$("#p-moneda").value,periodo:(x.periodo||"").trim()})),puestos:parsePuestos($("#p-puestos").value),actuaciones:pActu.filter(x=>x.nombre).map(x=>({nombre:x.nombre.trim(),avance:Math.max(0,Math.min(100,+x.avance||0))})),hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),log:pLog.filter(x=>x.fecha&&x.texto).map(x=>({fecha:x.fecha,texto:x.texto.trim(),estado:x.estado||""})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
+    inicio:$("#p-inicio").value,fin:$("#p-fin").value,moneda:$("#p-moneda").value,partidas:pPart.filter(x=>x.concepto&&x.precio!=="").map(x=>({concepto:x.concepto.trim(),unidades:+x.unidades||0,precio:+x.precio||0,moneda:x.moneda||$("#p-moneda").value,periodo:(x.periodo||"").trim()})),puestos:parsePuestos($("#p-puestos").value),actuaciones:pActu.filter(x=>x.nombre).map(x=>({nombre:x.nombre.trim(),avance:Math.max(0,Math.min(100,+x.avance||0)),sub:!!x.sub})),hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),log:pLog.filter(x=>x.fecha&&x.texto).map(x=>({fecha:x.fecha,texto:x.texto.trim(),estado:x.estado||""})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor();pActu=[];renderActuEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let pHitos=[],pLog=[],pPart=[],pActu=[];
-function renderActuEditor(){const c=$("#p-actu");c.innerHTML="";pActu.forEach((x,i)=>{const r=document.createElement("div");r.className="log-row";r.style.gridTemplateColumns="1fr 90px auto";r.innerHTML=`<input placeholder="Actuación" aria-label="Actuación"><input type="number" min="0" max="100" step="5" aria-label="Avance %"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
-  const [fn,fa,bt]=r.children;fn.value=x.nombre||"";fa.value=x.avance??0;fn.oninput=e=>x.nombre=e.target.value;fa.oninput=e=>{x.avance=e.target.value;actuAvg()};bt.onclick=()=>{pActu.splice(i,1);renderActuEditor()};c.appendChild(r)});actuAvg()}
-function actuAvg(){const a=pActu.filter(x=>x.nombre);if(a.length){$("#p-avance").value=Math.round(a.reduce((t,x)=>t+(+x.avance||0),0)/a.length);$("#p-avance").readOnly=true}else $("#p-avance").readOnly=false}
+function renderActuEditor(){const c=$("#p-actu");c.innerHTML="";pActu.forEach((x,i)=>{const r=document.createElement("div");r.className="log-row";r.style.gridTemplateColumns="auto 1fr 90px auto";if(x.sub)r.style.paddingLeft="22px";
+  r.innerHTML=`<label title="Sub-punto de la actuación anterior" style="display:flex;gap:4px;align-items:center;font-size:.72rem;color:var(--muted)"><input type="checkbox" style="width:auto">sub</label><input placeholder="Actuación" aria-label="Actuación"><input type="number" min="0" max="100" step="5" aria-label="Avance %"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
+  const [lb,fn,fa,bt]=r.children;const cb=lb.firstElementChild;cb.checked=!!x.sub;cb.disabled=(i===0);fn.value=x.nombre||"";fa.value=x.avance??0;
+  const parent=!x.sub&&pActu.slice(i+1).find((y,k)=>true)&&pActu[i+1]&&pActu[i+1].sub;if(parent){fa.readOnly=true;fa.title="Media de sus sub-puntos"}
+  cb.onchange=e=>{x.sub=e.target.checked;renderActuEditor()};fn.oninput=e=>x.nombre=e.target.value;fa.oninput=e=>{x.avance=e.target.value;actuAvg()};bt.onclick=()=>{pActu.splice(i,1);renderActuEditor()};c.appendChild(r)});actuAvg()}
+function actuAvg(){const tree=actTree({actuaciones:pActu});if(tree.length){$("#p-avance").value=Math.round(tree.reduce((t,x)=>t+x.avance,0)/tree.length);$("#p-avance").readOnly=true}else $("#p-avance").readOnly=false;
+  // refleja la media en los padres del editor
+  let k=0;pActu.forEach((x,i)=>{if(!x.sub){const node=tree[k++];if(node&&node.subs.length){x.avance=node.avance;const row=$("#p-actu").children[i];if(row)row.children[2].value=node.avance}}})}
 $("#p-addactu").onclick=()=>{pActu.push({nombre:"",avance:0});renderActuEditor()};
 function renderPartEditor(){const c=$("#p-partidas");c.innerHTML="";pPart.forEach((x,i)=>{const r=document.createElement("div");r.className="part-row";r.innerHTML=`<input placeholder="Concepto" aria-label="Concepto"><input type="number" min="0" placeholder="Uds." aria-label="Unidades"><input type="number" min="0" step="0.01" placeholder="Precio" aria-label="Precio unitario"><select aria-label="Moneda" hidden><option value="EUR">€</option></select><input placeholder="año / mes" aria-label="Periodo"><button type="button" class="small danger" aria-label="Quitar">×</button>`;
   const [fc,fu,fp,fm,fpe,bt]=r.children;fc.value=x.concepto||"";fu.value=x.unidades??"";fp.value=x.precio??"";fm.value=x.moneda||$("#p-moneda").value;fpe.value=x.periodo||"";

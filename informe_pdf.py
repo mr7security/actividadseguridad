@@ -45,10 +45,25 @@ def eur(v):
         return "—"
 
 
+def act_tree(p):
+    out = []
+    for x in (p.get("actuaciones") or []):
+        if not x.get("nombre"):
+            continue
+        if x.get("sub") and out:
+            out[-1]["subs"].append({"nombre": x["nombre"], "avance": float(x.get("avance") or 0)})
+        else:
+            out.append({"nombre": x["nombre"], "avance": float(x.get("avance") or 0), "subs": []})
+    for a in out:
+        if a["subs"]:
+            a["avance"] = round(sum(y["avance"] for y in a["subs"]) / len(a["subs"]))
+    return out
+
+
 def avance(p):
-    acts = [a for a in (p.get("actuaciones") or []) if a.get("nombre")]
+    acts = act_tree(p)
     if acts:
-        return round(sum(float(a.get("avance") or 0) for a in acts) / len(acts))
+        return round(sum(a["avance"] for a in acts) / len(acts))
     return max(0, min(100, int(float(p.get("avance") or 0))))
 
 
@@ -152,10 +167,19 @@ def proyecto_block(p, width):
     t = Table(meta, colWidths=[44 * mm, 22 * mm, 20 * mm, 20 * mm, 26 * mm, width - 132 * mm])
     t.setStyle(TableStyle([("BACKGROUND", (0, 0), (-1, -1), PANEL), ("LEFTPADDING", (0, 0), (-1, -1), 5), ("TOPPADDING", (0, 0), (-1, 0), 3), ("BOTTOMPADDING", (0, 0), (-1, 0), 0), ("TOPPADDING", (0, 1), (-1, 1), 1), ("BOTTOMPADDING", (0, 1), (-1, 1), 3), ("VALIGN", (0, 0), (-1, -1), "MIDDLE")]))
     out.append(Spacer(1, 2)); out.append(t)
-    acts = [a for a in (p.get("actuaciones") or []) if a.get("nombre")]
+    acts = act_tree(p)
     if acts:
-        rows = [[Paragraph(a["nombre"], CELL), bar(float(a.get("avance") or 0), 50 * mm, color=OK if float(a.get("avance") or 0) >= 100 else INFO), Paragraph(f"{int(float(a.get('avance') or 0))} %", CELLR)] for a in acts]
-        ta = Table(rows, colWidths=[width - 68 * mm, 52 * mm, 16 * mm]); ta.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LINEBELOW", (0, 0), (-1, -1), 0.3, LINE), ("LEFTPADDING", (0, 0), (0, -1), 0)]))
+        SUB = ParagraphStyle("sub", parent=CELL, fontSize=7.6, leading=9, textColor=GREY, leftIndent=10)
+        rows, subrows = [], []
+        for a in acts:
+            rows.append([Paragraph(f"<b>{a['nombre']}</b>" if a["subs"] else a["nombre"], CELL), bar(a["avance"], 50 * mm, color=OK if a["avance"] >= 100 else INFO), Paragraph(f"{int(a['avance'])} %", CELLR)])
+            for y in a["subs"]:
+                subrows.append(len(rows))
+                rows.append([Paragraph("↳ " + y["nombre"], SUB), bar(y["avance"], 40 * mm, h=2.2 * mm, color=OK if y["avance"] >= 100 else INFO), Paragraph(f"{int(y['avance'])} %", ParagraphStyle("subr", parent=SUB, alignment=TA_RIGHT, leftIndent=0))])
+        ta = Table(rows, colWidths=[width - 68 * mm, 52 * mm, 16 * mm]); st = [("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LINEBELOW", (0, 0), (-1, -1), 0.3, LINE), ("LEFTPADDING", (0, 0), (0, -1), 0)]
+        for i in subrows:
+            st += [("TOPPADDING", (0, i), (-1, i), 1), ("BOTTOMPADDING", (0, i), (-1, i), 1)]
+        ta.setStyle(TableStyle(st))
         out.append(KeepTogether([Paragraph("Actuaciones", H3), ta]))
     part = [x for x in (p.get("partidas") or []) if x.get("concepto")]
     if part:
