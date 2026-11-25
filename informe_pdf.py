@@ -186,24 +186,24 @@ def proyecto_block(p, width):
     return out
 
 
-def build_pdf(proyectos, area, titulo, year=None):
+def build_pdf(proyectos, area, titulo, year=None, responsable=""):
     year = year or date.today().year
     buf = io.BytesIO()
     doc = SimpleDocTemplate(buf, pagesize=A4, leftMargin=15 * mm, rightMargin=15 * mm, topMargin=16 * mm, bottomMargin=16 * mm,
-                            title=f"Informe de proyectos — {AREAS.get(area, area)}", author="Departamento de IT · SGP")
+                            title=f"Informe de proyectos — {AREAS.get(area, area)}", author=responsable or "Departamento de IT · SGP")
     W = A4[0] - 30 * mm
     area_nombre = AREAS.get(area, area)
     hoy = date.today().strftime("%d/%m/%Y")
 
     def on_page(canvas, doc_):
         canvas.saveState(); canvas.setFont("Helvetica", 7.5); canvas.setFillColor(GREY)
-        canvas.drawString(15 * mm, 9 * mm, f"SGP — Departamento de IT · {area_nombre} · Informe de proyectos · {hoy}")
+        canvas.drawString(15 * mm, 9 * mm, f"SGP — Departamento de IT · {area_nombre}" + (f" · {responsable}" if responsable else "") + f" · {hoy}")
         canvas.drawRightString(A4[0] - 15 * mm, 9 * mm, f"Página {doc_.page}")
         canvas.setStrokeColor(LINE); canvas.line(15 * mm, 12 * mm, A4[0] - 15 * mm, 12 * mm); canvas.restoreState()
 
     story = []
     logo = Image(str(LOGO), width=30 * mm, height=30 * mm * 0.53) if LOGO.exists() else Spacer(1, 1)
-    hdr = Table([[logo, [Paragraph("DEPARTAMENTO DE IT · " + area_nombre.upper(), EYE), Paragraph(titulo or "Informe de proyectos", H1), Paragraph(f"Estado a {hoy}", SMALL)]]], colWidths=[36 * mm, W - 36 * mm])
+    hdr = Table([[logo, [Paragraph("DEPARTAMENTO DE IT · " + area_nombre.upper(), EYE), Paragraph(titulo or "Informe de proyectos", H1), Paragraph((f"Responsable: {responsable} · " if responsable else "") + f"Estado a {hoy}", SMALL)]]], colWidths=[36 * mm, W - 36 * mm])
     hdr.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LEFTPADDING", (0, 0), (0, 0), 0), ("LINEBELOW", (0, 0), (-1, 0), 1, NAVY), ("BOTTOMPADDING", (0, 0), (-1, -1), 6)]))
     story += [hdr, Spacer(1, 8)]
 

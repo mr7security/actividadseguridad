@@ -197,7 +197,7 @@ def api_incidente(did):
 def api_config():
     require_admin()
     body = request.get_json(silent=True) or {}
-    cfg = {**get_config(), **{k: body[k] for k in ("departamento", "titulo", "tipos", "mitre", "usd_eur") if k in body}}
+    cfg = {**get_config(), **{k: body[k] for k in ("departamento", "titulo", "tipos", "mitre", "usd_eur", "responsables") if k in body}}
     cfg["actualizado"] = datetime.now(timezone.utc).isoformat()
     put_doc("config", "general", cfg)
     return jsonify(ok=True)
@@ -331,7 +331,9 @@ def api_proyectos_pdf():
         abort(400)
     proyectos = [p for p in get_all("proyectos") if (p.get("area") or "seg") == area]
     cfg = get_config()
-    pdf = build_pdf(proyectos, area, cfg.get("titulo") or "Informe de proyectos")
+    resp = (cfg.get("responsables") or {}).get(area) or {"seg": "Miguel Rebolledo", "sis": "María Dolores Pitarch"}[area]
+    titulo = (cfg.get("titulo") or "Actividad del área").split(" — ")[0]
+    pdf = build_pdf(proyectos, area, titulo, responsable=resp)
     nombre = f"Proyectos_{'Seguridad' if area == 'seg' else 'Sistemas'}_{datetime.now().strftime('%Y%m%d')}.pdf"
     return Response(pdf, mimetype="application/pdf", headers={"Content-Disposition": f"attachment; filename={nombre}"})
 
