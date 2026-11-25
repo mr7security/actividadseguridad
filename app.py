@@ -292,7 +292,7 @@ def api_caus_import():
                 nuevos += 1
             # Incidente de seguridad derivado del CAU (solo se crea la primera vez; luego manda lo editado a mano)
             iid = "cau-" + tid
-            if tipo and iid not in inc_existing and t.get("creacion"):
+            if tipo and t["area"] == "seg" and iid not in inc_existing and t.get("creacion"):
                 inc = {
                     "fecha": t["creacion"][:10], "tipo": tipo, "severidad": severidad(t.get("asunto", ""), tipo),
                     "ref": "CAU " + tid, "titulo": t.get("asunto", ""),

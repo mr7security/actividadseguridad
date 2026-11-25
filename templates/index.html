@@ -754,8 +754,12 @@ function renderAll(){renderHeader();renderKPIs();renderProyectos();renderInciden
 document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
 function showArea(a){area=a;try{localStorage.setItem("area",a)}catch(e){}document.querySelectorAll('nav.areas [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.area===a));scope();
   fMes=fTipo=fTac=fTech=fcMes=fcEst=fcPrio=fcSol="";$("#f-mes").value="";$("#f-tipo").value="";$("#f-cau-mes").value="";$("#f-cau-est").value="";
-  $("#p-area").value=a;$("#i-area").value=a;renderAll()}
+  $("#p-area").value=a;$("#i-area").value=a;
+  const tabInc=document.querySelector('nav.views [data-view="inc"]');tabInc.hidden=(a==="sis");document.querySelector('#admin .tabs [data-tab="inc"]').hidden=(a==="sis");
+  if(a==="sis"&&document.querySelector('#view-inc').classList.contains("on"))showView("proy");
+  renderAll()}
 document.querySelectorAll('nav.areas [role=tab]').forEach(b=>{b.onclick=()=>showArea(b.dataset.area);b.setAttribute("aria-selected",b.dataset.area===area)});
+if(area==="sis"){document.querySelector('nav.views [data-view="inc"]').hidden=true;document.querySelector('#admin .tabs [data-tab="inc"]').hidden=true;try{if(localStorage.getItem("vista")==="inc")localStorage.setItem("vista","proy")}catch(e){}}
 function showView(v){document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));document.querySelectorAll('.view').forEach(e=>e.classList.toggle("on",e.id==="view-"+v));try{localStorage.setItem("vista",v)}catch(e){}if(v==="inc")renderIncidentes();if(v==="cau")renderCaus();if(v==="proy")renderGantt()}
 try{const v=localStorage.getItem("vista");if(v&&$("#view-"+v))showView(v)}catch(e){}
 
