@@ -265,6 +265,11 @@ def api_caus_import():
     f = request.files.get("file")
     if not f:
         return jsonify(error="Falta el fichero"), 400
+    area_sel = request.form.get("area", "auto")
+    def area_de(t):
+        if area_sel in ("seg", "sis"):
+            return area_sel
+        return "seg" if "SEGURIDAD" in (t.get("grupo") or "").upper() else "sis"
     try:
         tickets = parse_servicedesk_csv(f.read())
     except ValueError as e:
@@ -279,6 +284,7 @@ def api_caus_import():
             t["actualizado"] = now
             tipo = clasificar(t.get("asunto", ""))
             t["tipo_incidente"] = tipo
+            t["area"] = area_de(t)
             con.execute("INSERT OR REPLACE INTO docs VALUES ('caus',?,?)", (tid, json.dumps(t, ensure_ascii=False)))
             if tid in existing:
                 actualizados += 1
@@ -292,7 +298,7 @@ def api_caus_import():
                     "ref": "CAU " + tid, "titulo": t.get("asunto", ""),
                     "descripcion": "Solicitante: " + t.get("solicitante", "") + ". Clasificado automáticamente por el asunto del CAU.",
                     "estado": "Resuelto" if t.get("estado") == "CERRADA" else "Abierto",
-                    "origen": "cau", "cau_id": tid, "auto": True, "aprox": False, "actualizado": now,
+                    "origen": "cau", "cau_id": tid, "auto": True, "aprox": False, "actualizado": now, "area": t["area"],
                 }
                 con.execute("INSERT INTO docs VALUES ('incidentes',?,?)", (iid, json.dumps(inc, ensure_ascii=False)))
                 incidentes_nuevos += 1
@@ -305,8 +311,14 @@ def api_caus_import():
 @app.route("/api/caus", methods=["DELETE"])
 def api_caus_clear():
     require_admin()
+    area = request.args.get("area")
     with db() as con:
-        con.execute("DELETE FROM docs WHERE coll='caus'")
+        if area in ("seg", "sis"):
+            for did, body in con.execute("SELECT id, body FROM docs WHERE coll='caus'").fetchall():
+                if (json.loads(body).get("area") or "seg") == area:
+                    con.execute("DELETE FROM docs WHERE coll='caus' AND id=?", (did,))
+        else:
+            con.execute("DELETE FROM docs WHERE coll='caus'")
     return jsonify(ok=True)
 
 

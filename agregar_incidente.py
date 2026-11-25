@@ -18,12 +18,12 @@ ap.add_argument("--fecha", required=True); ap.add_argument("--tipo", required=Tr
 ap.add_argument("--sev", default="Media", choices=["Baja", "Media", "Alta", "Crítica"])
 ap.add_argument("--estado", default="Resuelto", choices=["Resuelto", "Abierto"])
 ap.add_argument("--desc", default=""); ap.add_argument("--ref", default=""); ap.add_argument("--mitre", default="")
-ap.add_argument("--id", default=None)
+ap.add_argument("--id", default=None); ap.add_argument("--area", default="seg", choices=["seg", "sis"])
 a = ap.parse_args()
 
 iid = a.id or ("i" + datetime.now().strftime("%Y%m%d%H%M%S"))
 body = {"fecha": a.fecha, "tipo": a.tipo, "severidad": a.sev, "ref": a.ref, "titulo": a.titulo, "descripcion": a.desc,
-        "estado": a.estado, "origen": "manual", "cau_id": None, "auto": False, "aprox": False,
+        "estado": a.estado, "area": a.area, "origen": "manual", "cau_id": None, "auto": False, "aprox": False,
         "mitre": [t.strip().upper() for t in a.mitre.split(",") if t.strip()],
         "actualizado": datetime.now(timezone.utc).isoformat()}
 con = sqlite3.connect(DB_PATH)

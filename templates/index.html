@@ -112,8 +112,13 @@ td.mono{white-space:nowrap}
 .empty{color:var(--muted);font-size:.85rem;padding:18px;border:1px dashed var(--line);border-radius:8px;text-align:center}
 .note{font-size:.78rem;color:var(--muted)}
 .tag-est{font-family:var(--font-mono);font-size:.62rem;color:var(--warn);letter-spacing:.05em}
+/* áreas */
+nav.areas{display:flex;gap:8px;margin-top:14px}
+nav.areas button{background:var(--panel);border:1px solid var(--line);border-radius:8px 8px 0 0;padding:10px 18px;color:var(--muted);font-weight:600;font-size:.95rem}
+nav.areas button[aria-selected="true"]{color:var(--fg);background:var(--panel2);border-bottom-color:var(--panel2);border-top:3px solid var(--accent)}
+nav.views{background:var(--panel2);border-radius:0 8px 0 0;padding:0 8px}
 /* nav */
-nav.views{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:4px;overflow-x:auto}
+nav.views{display:flex;gap:4px;border-bottom:1px solid var(--line);margin-top:0;overflow-x:auto}
 nav.views button{background:transparent;border:0;border-bottom:2px solid transparent;border-radius:0;padding:12px 14px;color:var(--muted);font-weight:500;white-space:nowrap}
 nav.views button[aria-selected="true"]{color:var(--accent);border-bottom-color:var(--accent)}
 .view{display:none}.view.on{display:block}
@@ -224,6 +229,10 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
   </div>
 </header>
 
+<nav class="areas" role="tablist" aria-label="Áreas">
+  <button role="tab" aria-selected="true" data-area="seg">Seguridad de la Información</button>
+  <button role="tab" aria-selected="false" data-area="sis">Sistemas e Infraestructura</button>
+</nav>
 <nav class="views" role="tablist" aria-label="Secciones">
   <button role="tab" aria-selected="true" data-view="proy">Proyectos</button>
   <button role="tab" aria-selected="false" data-view="inc">Incidentes de seguridad</button>
@@ -338,6 +347,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
       <input type="hidden" id="p-id">
       <label class="full">Nombre del proyecto<input id="p-nombre" required></label>
       <label class="full">Descripción<textarea id="p-desc"></textarea></label>
+      <label>Área<select id="p-area"><option value="seg">Seguridad de la Información</option><option value="sis">Sistemas e Infraestructura</option></select></label>
       <label>Modalidad<select id="p-modal"><option>Interno</option><option>Tercerizado</option></select></label>
       <label>Proveedor (si es tercerizado)<input id="p-prov" placeholder="Empresa externa"></label>
       <label>Estado<select id="p-estado"><option>En curso</option><option>Planificado</option><option>En pausa</option><option>Finalizado</option></select></label>
@@ -373,6 +383,7 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
 
     <form class="f" id="form-inc" data-tab="inc" hidden>
       <input type="hidden" id="i-id">
+      <label>Área<select id="i-area"><option value="seg">Seguridad de la Información</option><option value="sis">Sistemas e Infraestructura</option></select></label>
       <label>Fecha de resolución<input id="i-fecha" type="date" required></label>
       <label>Tipo<select id="i-tipo"></select></label>
       <label>Severidad<select id="i-sev"><option>Baja</option><option selected>Media</option><option>Alta</option><option>Crítica</option></select></label>
@@ -387,7 +398,8 @@ footer{margin-top:28px;padding-top:12px;border-top:1px solid var(--line);display
     <form class="f" id="form-cau" data-tab="cau" hidden>
       <div class="full note">Exporta desde ServiceDesk la lista de solicitudes de tu grupo en CSV (con las columnas <span class="mono">ID de la solicitud, Asunto, Solicitante, Estado, Fecha de creación…</span>) y cárgala aquí. Los tickets se identifican por su ID: si vuelves a importar, se actualizan los existentes y se añaden los nuevos. Los asuntos que suenan a seguridad (phishing, estafa, virus, suplantación, cuarentena, contraseñas vulneradas, DMARC, vulnerabilidades…) pasan automáticamente a la pestaña Incidentes con la etiqueta <span class="pill auto">auto</span>; revísalos y edítalos o bórralos.</div>
       <label class="full">Fichero CSV<input id="cau-file" type="file" accept=".csv,text/csv" required></label>
-      <div class="acts"><span class="note" id="cau-status"></span><button type="button" class="danger" id="cau-clear">Vaciar CAUs</button><button type="submit" class="primary">Importar CSV</button></div>
+      <label>Asignar al área<select id="cau-area"><option value="auto">Según la columna Grupo del CSV</option><option value="seg">Seguridad de la Información</option><option value="sis">Sistemas e Infraestructura</option></select></label>
+      <div class="acts"><span class="note" id="cau-status"></span><button type="button" class="danger" id="cau-clear">Vaciar CAUs del área</button><button type="submit" class="primary">Importar CSV</button></div>
     </form>
 
     <form class="f" id="form-cfg" data-tab="cfg" hidden>
@@ -436,7 +448,9 @@ let isOwner=false;
 let cfg={departamento:"Departamento de IT · Seguridad de la Información",titulo:"Actividad del área",tipos:DEF_TIPOS,mitre:DEF_MITRE};
 const parseIds=s=>String(s||"").split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x));
 function mitreIds(i){if(i.mitre&&i.mitre.length)return i.mitre;const m=cfg.mitre||DEF_MITRE;return parseIds(m[i.tipo]??DEF_MITRE[i.tipo]??"")}
-let proyectos=[],incidentes=[],caus=[];
+let proyectosAll=[],incidentesAll=[],causAll=[];let proyectos=[],incidentes=[],caus=[];
+const AREAS={seg:"Seguridad de la Información",sis:"Sistemas e Infraestructura"};let area="seg";try{area=localStorage.getItem("area")||"seg"}catch(e){}
+function scope(){proyectos=proyectosAll.filter(x=>(x.area||"seg")===area);incidentes=incidentesAll.filter(x=>(x.area||"seg")===area);caus=causAll.filter(x=>(x.area||"seg")===area)}
 let year=new Date().getFullYear(),fMes="",fTipo="",fTac="",fTech="",fcMes="",fcEst="",fcQ="",fcPrio="",fcSol="";
 const eur=(n,cur)=>new Intl.NumberFormat("es-ES",{style:"currency",currency:cur||"EUR",maximumFractionDigits:0}).format(n);
 const conv=(v,from,to)=>{if(!v||from===to)return v;const r=+cfg.usd_eur||0.92;return from==="USD"&&to==="EUR"?v*r:from==="EUR"&&to==="USD"?v/r:v};
@@ -447,7 +461,7 @@ function toast(t){let e=$(".toast");if(!e){e=document.createElement("div");e.cla
 function estadoClass(e){return{"En curso":"curso","Finalizado":"finalizado","En pausa":"pausa","Planificado":"planificado"}[e]||""}
 
 function renderHeader(){
-  $("#hdr-dept").textContent=cfg.departamento||"";$("#hdr-title").textContent=cfg.titulo||"Actividad del área";
+  $("#hdr-dept").textContent=(cfg.departamento||"Departamento de IT")+" · "+AREAS[area];$("#hdr-title").textContent=cfg.titulo||"Actividad del área";
   const ys=new Set([new Date().getFullYear()]);incidentes.forEach(i=>i.fecha&&ys.add(+i.fecha.slice(0,4)));caus.forEach(c=>c.creacion&&ys.add(+c.creacion.slice(0,4)));proyectos.forEach(p=>p.inicio&&ys.add(+p.inicio.slice(0,4)));
   const sel=$("#sel-year");const cur=sel.value||year;sel.innerHTML="";[...ys].sort((a,b)=>b-a).forEach(y=>{const o=document.createElement("option");o.value=y;o.textContent=y;sel.appendChild(o)});
   sel.value=String([...ys].includes(+cur)?cur:[...ys][0]);year=+sel.value;
@@ -727,6 +741,10 @@ function renderTablaCau(){
 }
 function renderAll(){renderHeader();renderKPIs();renderProyectos();renderIncidentes();renderCaus();}
 document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.onclick=()=>showView(b.dataset.view));
+function showArea(a){area=a;try{localStorage.setItem("area",a)}catch(e){}document.querySelectorAll('nav.areas [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.area===a));scope();
+  fMes=fTipo=fTac=fTech=fcMes=fcEst=fcPrio=fcSol="";$("#f-mes").value="";$("#f-tipo").value="";$("#f-cau-mes").value="";$("#f-cau-est").value="";
+  $("#p-area").value=a;$("#i-area").value=a;renderAll()}
+document.querySelectorAll('nav.areas [role=tab]').forEach(b=>{b.onclick=()=>showArea(b.dataset.area);b.setAttribute("aria-selected",b.dataset.area===area)});
 function showView(v){document.querySelectorAll('nav.views [role=tab]').forEach(b=>b.setAttribute("aria-selected",b.dataset.view===v));document.querySelectorAll('.view').forEach(e=>e.classList.toggle("on",e.id==="view-"+v));try{localStorage.setItem("vista",v)}catch(e){}if(v==="inc")renderIncidentes();if(v==="cau")renderCaus();if(v==="proy")renderGantt()}
 try{const v=localStorage.getItem("vista");if(v&&$("#view-"+v))showView(v)}catch(e){}
 
@@ -736,16 +754,16 @@ document.querySelectorAll('#admin .tabs [role=tab]').forEach(b=>b.onclick=()=>sh
 $("#btn-admin").onclick=()=>{const a=$("#admin");a.hidden=!a.hidden;document.body.classList.toggle("editing",!a.hidden);$("#btn-admin").textContent=a.hidden?"Administrar":"Cerrar administración";if(!a.hidden)a.scrollIntoView({behavior:"smooth",block:"start"})};
 
 function editProy(p){showTab("proy");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
-  $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
+  $("#p-id").value=p.id;$("#p-nombre").value=p.nombre||"";$("#p-desc").value=p.descripcion||"";$("#p-estado").value=p.estado||"En curso";$("#p-area").value=p.area||"seg";$("#p-modal").value=p.modalidad||"Interno";$("#p-prov").value=p.proveedor||"";$("#p-avance").value=p.avance??0;
   $("#p-inicio").value=p.inicio||"";$("#p-fin").value=p.fin||"";$("#p-pres").value=p.presupuesto??"";$("#p-rec").value=p.recursos||"";$("#p-notas").value=p.notas||"";pHitos=(p.hitos||[]).map(h=>({...h}));renderHitosEditor();pLog=(p.log||[]).map(e=>({...e}));renderLogEditor();$("#p-moneda").value=p.moneda||"EUR";pPart=(p.partidas||[]).map(x=>({...x}));renderPartEditor();$("#p-puestos").value=(p.puestos||[]).map(u=>[u.email,u.tipo,u.fecha].join("; ")).join("\n");
   $("#p-status").textContent="Editando: "+(p.nombre||"");$("#admin").scrollIntoView({behavior:"smooth"})}
-$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()};
+$("#p-cancel").onclick=()=>{$("#form-proy").reset();$("#p-area").value=area;$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()};
 $("#form-proy").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#p-id").value||("p"+Date.now().toString(36));
   const pend=$("#p-lognew-t").value.trim();if(pend){pLog.push({fecha:$("#p-lognew-f").value||new Date().toISOString().slice(0,10),texto:pend,estado:$("#p-estado").value});$("#p-lognew-t").value="";$("#p-lognew-f").value="";renderLogEditor()}
   if($("#p-estado").value==="En pausa"){const prev=proyectos.find(x=>x.id===id);const wasPaused=prev&&prev.estado==="En pausa";const hasReason=pLog.some(x=>x.estado==="En pausa"&&x.texto);if(!wasPaused&&!hasReason||!hasReason){$("#p-status").textContent="Indica el motivo de la pausa en el registro de seguimiento.";$("#p-lognew-t").focus();return}}
   const pres=$("#p-pres").value;
-  const body={nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
+  const body={area:$("#p-area").value,nombre:$("#p-nombre").value.trim(),descripcion:$("#p-desc").value.trim(),modalidad:$("#p-modal").value,proveedor:$("#p-prov").value.trim(),estado:$("#p-estado").value,avance:+$("#p-avance").value||0,
     inicio:$("#p-inicio").value,fin:$("#p-fin").value,moneda:$("#p-moneda").value,partidas:pPart.filter(x=>x.concepto&&x.precio!=="").map(x=>({concepto:x.concepto.trim(),unidades:+x.unidades||0,precio:+x.precio||0,moneda:x.moneda||$("#p-moneda").value,periodo:(x.periodo||"").trim()})),puestos:parsePuestos($("#p-puestos").value),hitos:pHitos.filter(h=>h.fecha&&h.nombre).map(h=>({fecha:h.fecha,nombre:h.nombre.trim(),hecho:!!h.hecho,aprox:!!h.aprox})),log:pLog.filter(x=>x.fecha&&x.texto).map(x=>({fecha:x.fecha,texto:x.texto.trim(),estado:x.estado||""})),presupuesto:pres===""?null:+pres,recursos:$("#p-rec").value.trim(),notas:$("#p-notas").value.trim(),actualizado:new Date().toISOString()};
   try{await api("PUT","/api/proyectos/"+id,body);toast("Proyecto guardado");$("#form-proy").reset();$("#p-id").value="";$("#p-status").textContent="";pHitos=[];renderHitosEditor();pLog=[];renderLogEditor();pPart=[];renderPartEditor()}catch(err){toast("No se pudo guardar: "+err.code)}};
 
@@ -768,13 +786,13 @@ function renderHitosEditor(){const c=$("#p-hitos");c.innerHTML="";pHitos.forEach
 $("#p-addhito").onclick=()=>{pHitos.push({fecha:"",nombre:"",hecho:false});renderHitosEditor()};
 let incEditing=null;
 function editInc(i){incEditing=i;showTab("inc");$("#admin").hidden=false;document.body.classList.add("editing");$("#btn-admin").textContent="Cerrar administración";
-  $("#i-id").value=i.id;$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-mitre").value=(i.mitre||[]).join(", ");$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
+  $("#i-id").value=i.id;$("#i-area").value=i.area||"seg";$("#i-fecha").value=i.fecha||"";$("#i-tipo").value=i.tipo||"";$("#i-sev").value=i.severidad||"Media";$("#i-estado").value=i.estado||"Resuelto";$("#i-mitre").value=(i.mitre||[]).join(", ");$("#i-ref").value=i.ref||"";$("#i-titulo").value=i.titulo||"";$("#i-desc").value=i.descripcion||"";
   $("#i-status").textContent="Editando: "+(i.titulo||"");$("#admin").scrollIntoView({behavior:"smooth"})}
-$("#i-cancel").onclick=()=>{incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""};
+$("#i-cancel").onclick=()=>{incEditing=null;$("#form-inc").reset();$("#i-area").value=area;$("#i-id").value="";$("#i-status").textContent=""};
 $("#form-inc").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;
   const id=$("#i-id").value||("i"+Date.now().toString(36));
   const prev=(incEditing&&incEditing.id===id)?incEditing:{};
-  const body={fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:$("#i-estado").value,mitre:$("#i-mitre").value.split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x)),aprox:false,origen:prev.origen||"manual",cau_id:prev.cau_id||null,auto:false,actualizado:new Date().toISOString()};
+  const body={area:$("#i-area").value,fecha:$("#i-fecha").value,tipo:$("#i-tipo").value,severidad:$("#i-sev").value,ref:$("#i-ref").value.trim(),titulo:$("#i-titulo").value.trim(),descripcion:$("#i-desc").value.trim(),estado:$("#i-estado").value,mitre:$("#i-mitre").value.split(",").map(x=>x.trim().toUpperCase()).filter(x=>/^T\d{4}(\.\d{3})?$/.test(x)),aprox:false,origen:prev.origen||"manual",cau_id:prev.cau_id||null,auto:false,actualizado:new Date().toISOString()};
   try{await api("PUT","/api/incidentes/"+id,body);toast("Incidente guardado");incEditing=null;$("#form-inc").reset();$("#i-id").value="";$("#i-status").textContent=""}catch(err){toast("No se pudo guardar: "+err.code)}};
 
 let cfgTipos=[];
@@ -792,12 +810,12 @@ $("#f-cau-mes").onchange=e=>{fcMes=e.target.value;renderCaus()};
 $("#f-cau-est").onchange=e=>{fcEst=e.target.value;renderCaus()};
 $("#f-cau-q").oninput=e=>{fcQ=e.target.value;renderTablaCau()};
 $("#form-cau").onsubmit=async e=>{e.preventDefault();if(!isOwner)return;const f=$("#cau-file").files[0];if(!f)return;
-  $("#cau-status").textContent="Importando…";const fd=new FormData();fd.append("file",f);
+  $("#cau-status").textContent="Importando…";const fd=new FormData();fd.append("file",f);fd.append("area",$("#cau-area").value);
   try{const r=await fetch("/api/caus/import",{method:"POST",body:fd});const j=await r.json();if(!r.ok)throw new Error(j.error||("HTTP "+r.status));
     $("#cau-status").textContent=`${j.importados} tickets leídos (${j.nuevos} nuevos, ${j.actualizados} actualizados) · ${j.incidentes} incidentes de seguridad nuevos`;$("#form-cau").reset();toast("CAUs importados")}
   catch(err){$("#cau-status").textContent="Error: "+err.message}};
-$("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dataset.c="1";b.textContent="¿Seguro? Pulsa otra vez";setTimeout(()=>{delete b.dataset.c;b.textContent="Vaciar CAUs"},3500);return}
-  delete b.dataset.c;b.textContent="Vaciar CAUs";try{await api("DELETE","/api/caus");toast("CAUs eliminados")}catch(err){toast("No se pudo: "+err.code)}};
+$("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dataset.c="1";b.textContent="¿Seguro? Pulsa otra vez";setTimeout(()=>{delete b.dataset.c;b.textContent="Vaciar CAUs del área"},3500);return}
+  delete b.dataset.c;b.textContent="Vaciar CAUs del área";try{await api("DELETE","/api/caus?area="+area);toast("CAUs eliminados")}catch(err){toast("No se pudo: "+err.code)}};
 
 /* tema */
 (function(){const root=document.documentElement;let t="dark";try{t=localStorage.getItem("tema")||"dark"}catch(e){}
@@ -806,13 +824,13 @@ $("#cau-clear").onclick=async()=>{const b=$("#cau-clear");if(!b.dataset.c){b.dat
 /* ---- boot ---- */
 isOwner=__IS_ADMIN__;
 async function api(method,url,body){const r=await fetch(url,{method,headers:{"Content-Type":"application/json"},body:body?JSON.stringify(body):undefined});if(!r.ok){const e=new Error("http");e.code=r.status===401?"sin sesión":"HTTP "+r.status;throw e}return r.json()}
-async function load(){try{const d=await api("GET","/api/data");cfg={...cfg,...(d.config||{})};proyectos=d.proyectos||[];incidentes=d.incidentes||[];caus=d.caus||[];
+async function load(){try{const d=await api("GET","/api/data");cfg={...cfg,...(d.config||{})};proyectosAll=d.proyectos||[];incidentesAll=d.incidentes||[];causAll=d.caus||[];scope();
   cfgTipos=(cfg.tipos||DEF_TIPOS).slice();$("#c-dept").value=cfg.departamento||"";$("#c-title").value=cfg.titulo||"";$("#c-rate").value=cfg.usd_eur||"";renderCfgTipos();renderCfgMitre();renderAll();
   const all=[...proyectos,...incidentes].map(x=>x.actualizado).filter(Boolean).sort();if(all.length){const dt=new Date(all[all.length-1]);$("#foot-upd").textContent="Última actualización "+dt.toLocaleDateString("es-ES",{day:"2-digit",month:"2-digit",year:"numeric"})}}
   catch(e){$("#proy-grid").innerHTML='<div class="empty">No se pudieron cargar los datos ('+e.code+').</div>'}}
 const badge=$("#role-badge");badge.textContent=isOwner?"Administrador · puede editar":"Solo lectura";badge.classList.toggle("owner",isOwner);
 $("#btn-admin").hidden=!isOwner;$("#lnk-login").hidden=isOwner;$("#lnk-logout").hidden=!isOwner;
-renderAll();load();
+$("#p-area").value=area;$("#i-area").value=area;renderAll();load();
 // recargar tras cada guardado/borrado
 const _t=toast;toast=function(m){_t(m);if(/guardad|eliminad|importad/.test(m))load()};
 })();
