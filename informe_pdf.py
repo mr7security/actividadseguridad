@@ -8,7 +8,7 @@ from reportlab.lib.enums import TA_RIGHT
 from reportlab.lib.pagesizes import A4
 from reportlab.lib.styles import ParagraphStyle, getSampleStyleSheet
 from reportlab.lib.units import mm
-from reportlab.platypus import (Image, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle)
+from reportlab.platypus import (CondPageBreak, Image, KeepTogether, PageBreak, Paragraph, SimpleDocTemplate, Spacer, Table, TableStyle)
 
 NAVY = colors.HexColor("#1E2A44"); GOLD = colors.HexColor("#C49A2A"); GREY = colors.HexColor("#5B6782")
 LINE = colors.HexColor("#D6DCE8"); PANEL = colors.HexColor("#F3F5F9"); INFO = colors.HexColor("#2D6BC4")
@@ -154,32 +154,28 @@ def proyecto_block(p, width):
     out.append(Spacer(1, 2)); out.append(t)
     acts = [a for a in (p.get("actuaciones") or []) if a.get("nombre")]
     if acts:
-        out.append(Paragraph("Actuaciones", H3))
         rows = [[Paragraph(a["nombre"], CELL), bar(float(a.get("avance") or 0), 50 * mm, color=OK if float(a.get("avance") or 0) >= 100 else INFO), Paragraph(f"{int(float(a.get('avance') or 0))} %", CELLR)] for a in acts]
         ta = Table(rows, colWidths=[width - 68 * mm, 52 * mm, 16 * mm]); ta.setStyle(TableStyle([("VALIGN", (0, 0), (-1, -1), "MIDDLE"), ("LINEBELOW", (0, 0), (-1, -1), 0.3, LINE), ("LEFTPADDING", (0, 0), (0, -1), 0)]))
-        out.append(ta)
+        out.append(KeepTogether([Paragraph("Actuaciones", H3), ta]))
     part = [x for x in (p.get("partidas") or []) if x.get("concepto")]
     if part:
-        out.append(Paragraph("Partidas de coste (sin impuestos)", H3))
         rows = [[Paragraph(x["concepto"], CELL), Paragraph(f"{x.get('unidades',0)} × {eur(x.get('precio'))}" + (f" / {x['periodo']}" if x.get("periodo") else ""), CELLR), Paragraph(eur(float(x.get("unidades") or 0) * float(x.get("precio") or 0)), CELLR)] for x in part]
         rows.append([Paragraph("<b>Total</b>", CELL), "", Paragraph(f"<b>{eur(pv)}</b>", CELLR)])
         tp = Table(rows, colWidths=[width - 80 * mm, 48 * mm, 32 * mm]); tp.setStyle(TableStyle([("LINEBELOW", (0, 0), (-1, -2), 0.3, LINE), ("LINEABOVE", (0, -1), (-1, -1), 0.8, NAVY), ("LEFTPADDING", (0, 0), (0, -1), 0)]))
-        out.append(tp)
+        out.append(KeepTogether([Paragraph("Partidas de coste (sin impuestos)", H3), tp]))
     hitos = sorted([h for h in (p.get("hitos") or []) if h.get("fecha")], key=lambda h: h["fecha"])
     if hitos:
-        out.append(Paragraph("Hitos", H3))
         rows = [[Paragraph(("<font name='ZapfDingbats'>4</font>" if h.get("hecho") else "<font name='ZapfDingbats'>m</font>"), ParagraphStyle("hk", parent=CELL, textColor=OK if h.get("hecho") else GREY)), Paragraph(fmt_d(h["fecha"]) + (" ~" if h.get("aprox") else ""), CELL), Paragraph(h.get("nombre", ""), CELL)] for h in hitos]
         th = Table(rows, colWidths=[6 * mm, 22 * mm, width - 28 * mm]); th.setStyle(TableStyle([("LEFTPADDING", (0, 0), (0, -1), 0), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
-        out.append(th)
+        out.append(KeepTogether([Paragraph("Hitos", H3), th]))
     log = sorted([e for e in (p.get("log") or []) if e.get("texto")], key=lambda e: e.get("fecha", ""), reverse=True)
     if p.get("estado") == "En pausa" and log:
         last = next((e for e in log if e.get("estado") == "En pausa"), log[0])
         out.append(Paragraph(f"<font color='{WARN.hexval()}'><b>En pausa desde {fmt_d(last.get('fecha'))}:</b> {last.get('texto','')}</font>", BODY))
     if log:
-        out.append(Paragraph("Registro de seguimiento", H3))
         rows = [[Paragraph(fmt_d(e.get("fecha")), SMALL), Paragraph(e.get("texto", ""), CELL)] for e in log[:4]]
         tl = Table(rows, colWidths=[22 * mm, width - 22 * mm]); tl.setStyle(TableStyle([("LEFTPADDING", (0, 0), (0, -1), 0), ("VALIGN", (0, 0), (-1, -1), "TOP"), ("BOTTOMPADDING", (0, 0), (-1, -1), 1)]))
-        out.append(tl)
+        out.append(KeepTogether([Paragraph("Registro de seguimiento", H3), tl]))
     if p.get("notas"):
         out.append(Paragraph(f"<i>{p['notas']}</i>", SMALL))
     out.append(Spacer(1, 6))
@@ -240,7 +236,19 @@ def build_pdf(proyectos, area, titulo, year=None, responsable=""):
         story += [Spacer(1, 4), Paragraph(titulo_g, H2)]
         for p in lista:
             blk = proyecto_block(p, W)
-            story.append(KeepTogether(blk[:4]))  # título + descripción + datos juntos; el resto puede partirse
+            # Altura de la ficha: si no cabe en lo que queda de página, pasa entera a la siguiente;
+            # si es más alta que una página, se parte solo entre secciones (cada una va en KeepTogether).
+            avail_h = A4[1] - 25 * mm
+            def alto(f):
+                if isinstance(f, KeepTogether):
+                    return sum(alto(x) for x in f._content)
+                try:
+                    return f.wrap(W, avail_h)[1] + getattr(f, "spaceBefore", 0) + getattr(f, "spaceAfter", 0)
+                except Exception:
+                    return 0
+            h = sum(alto(f) for f in blk)
+            story.append(CondPageBreak(min(h, avail_h * 0.95)))
+            story.append(KeepTogether(blk[:4]))
             story += blk[4:]
     doc.build(story, onFirstPage=on_page, onLaterPages=on_page)
     return buf.getvalue()
